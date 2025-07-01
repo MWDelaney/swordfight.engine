@@ -50,10 +50,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/mwdelaney/swordfight-engine.git"
+    "url": "https://github.com/MWDelaney/swordfight-engine.git"
   },
   "bugs": {
-    "url": "https://github.com/mwdelaney/swordfight-engine/issues"
+    "url": "https://github.com/MWDelaney/swordfight-engine/issues"
   },
-  "homepage": "https://github.com/mwdelaney/swordfight-engine#readme"
+  "homepage": "https://github.com/MWDelaney/swordfight-engine#readme"
 }
