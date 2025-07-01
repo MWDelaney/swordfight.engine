@@ -32,7 +32,7 @@ import { Round } from './classes/Round.js';
 import { Multiplayer } from './classes/Multiplayer.js';
 import { ComputerOpponent } from './classes/Opponent.js';
 import { Moves } from './classes/Moves.js';
-import { characterManager } from './classes/CharacterManager.js';
+import { CharacterManager, characterManager } from './classes/CharacterManager.js';
 
 export default class Game {
   /**
@@ -572,3 +572,6 @@ export default class Game {
     this.opponentsRound++;
   }
 }
+
+// Attach CharacterManager as a static property
+Game.CharacterManager = CharacterManager;

@@ -69,6 +69,18 @@ const game = new Game('my-game-id', {
   myCharacterSlug: 'human-fighter'
 });
 
+// Use CharacterManager for character selection
+const characterManager = new Game.CharacterManager();
+await characterManager.loadCharacters();
+
+// Get all available characters for selection screen
+const characters = characterManager.getAllCharacters();
+console.log('Available characters:', characters);
+
+// Get character options for UI
+const characterOptions = characterManager.getCharacterOptions();
+// Returns: [{ slug: 'human-fighter', name: 'Human Fighter', description: '...' }, ...]
+
 // Listen for game events
 document.addEventListener('round', (event) => {
   const { myRoundData, opponentsRoundData } = event.detail;
@@ -93,9 +105,10 @@ document.dispatchEvent(moveEvent);
 ### Character Selection
 
 ```javascript
-import { characterManager } from './classes/CharacterManager.js';
+import Game from 'swordfight-engine';
 
-// Get available characters
+// Get available characters using the CharacterManager attached to Game
+const characterManager = new Game.CharacterManager();
 const characters = await characterManager.loadCharacters();
 
 // Create a character instance

@@ -124,3 +124,8 @@ export class CharacterManager {
 
 // Export singleton instance
 export const characterManager = new CharacterManager();
+
+// Auto-load characters when the module is imported
+characterManager.loadCharacters().catch(error => {
+  console.error('Failed to auto-load characters:', error);
+});
