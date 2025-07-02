@@ -32,68 +32,38 @@ import { Round } from './classes/Round.js';
 import { Multiplayer } from './classes/Multiplayer.js';
 import { ComputerOpponent } from './classes/Opponent.js';
 import { Moves } from './classes/Moves.js';
-import { CharacterManager, characterManager } from './classes/CharacterManager.js';
+import myCharacterData from './characters/humanFighter.json';
+import opponentsCharacterData from './characters/evilHumanFighter.json';
 
-export default class Game {
+export class Game {
   /**
    * Create a game.
    * @param {string} gameId - The ID of the game.
-   * @param {Object} options - Game options
-   * @param {string} options.myCharacterSlug - Slug for player's character
    */
-  constructor(gameId, options = {}) {
+  constructor(gameId) {
     this.gameId = gameId;
     this.rounds = [];
     this.roundNumber = 0;
     this.opponentsRound = 0;
-
-    // Set default character slug if not provided
-    const myCharacterSlug = options.myCharacterSlug || 'human-fighter';
-
-    // Create player character instance
-    this.myCharacter = characterManager.createCharacterInstance(myCharacterSlug);
-
-    // Validate player character was loaded successfully
-    if (!this.myCharacter) {
-      console.error(`Failed to load player character: ${myCharacterSlug}`);
-      throw new Error(`Invalid player character: ${myCharacterSlug}`);
-    }
-
-    // Opponent character will be determined by the multiplayer system
-    // For now, use a default until the opponent system sets it
-    this.opponentsCharacter = characterManager.createCharacterInstance('evil-human-fighter');
-
-    if (!this.opponentsCharacter) {
-      console.error('Failed to load default opponent character');
-      throw new Error('Invalid opponent character');
-    }
-
+    this.myCharacter = myCharacterData;
+    this.opponentsCharacter = opponentsCharacterData;
     this.myMove = this.getInitialMove(this.myCharacter);
     this.opponentsMove = this.getInitialMove(this.opponentsCharacter);
     this.Moves = [];
 
     if(gameId === 'computer') {
       this.opponentsCharacter.isComputer = true;
-      // Change the game ID to a random string to avoid conflicts with multiplayer
-      this.gameId = Math.random().toString(36).substring(2, 15);
     }
 
     // Record the starting health
     this.myCharacter.startingHealth = this.myCharacter.health;
     this.opponentsCharacter.startingHealth = this.opponentsCharacter.health;
 
-    // Load the opponent - use ComputerOpponent if this is a computer game or if multiplayer isn't available
+    // Load the opponent
     if(this.opponentsCharacter.isComputer) {
       this.Multiplayer = new ComputerOpponent(this);
     } else {
-      try {
-        this.Multiplayer = new Multiplayer(this);
-      } catch {
-        // If multiplayer fails to initialize (e.g., in CLI environment), fallback to computer opponent
-        console.log('Multiplayer unavailable, using computer opponent');
-        this.opponentsCharacter.isComputer = true;
-        this.Multiplayer = new ComputerOpponent(this);
-      }
+      this.Multiplayer = new Multiplayer(this);
     }
 
     // Load the game from localstorage
@@ -127,21 +97,21 @@ export default class Game {
    */
   setUp() {
     try {
+      // If this is the first round, set myMove and opponentsMove to the initial moves
       this.logGameState();
+
+      // If this is the first round, get the opponent's name
+      this.getOpponentsName();
 
       // Validate the round numbers
       if (!this.validateRoundNumbers()) {return;}
       this.logFightBanner();
 
-      // If this is the first round,
       if (this.roundNumber === 0) {
-        // set myMove and opponentsMove to the initial moves
         this.rounds[0] = { 'myMove': this.myMove, 'opponentsMove': this.opponentsMove };
-
-        // get the opponent's name and character
-        this.getOpponentsName();
-        this.getOpponentsCharacter();
       }
+
+      this.getOpponentsMove();
 
       // If both myMove and opponentsMove are set in the current round, continue
       if (this.rounds[this.roundNumber] && this.rounds[this.roundNumber]['myMove'] && this.rounds[this.roundNumber]['opponentsMove']) {
@@ -150,29 +120,14 @@ export default class Game {
         this.myMove = this.rounds[this.roundNumber]['myMove'];
         this.opponentsMove = this.rounds[this.roundNumber]['opponentsMove'];
 
-        // Validate moves before proceeding
-        if (!this.myMove) {
-          console.error('Game.setUp: myMove is undefined for round', this.roundNumber);
-          return;
-        }
-        if (!this.opponentsMove) {
-          console.error('Game.setUp: opponentsMove is undefined for round', this.roundNumber);
-          return;
-        }
-
         // If logging is enabled, log that both players have moved
         if (window.logging) {
           console.log('Both players have moved');
         }
 
-        try {
-          // Create a new round object for each player
-          this.myRoundData = new Round(this, this.myMove, this.opponentsMove, this.myCharacter, this.opponentsCharacter);
-          this.opponentsRoundData = new Round(this, this.opponentsMove, this.myMove, this.opponentsCharacter, this.myCharacter);
-        } catch (error) {
-          console.error('Error in setup:', error);
-          return;
-        }
+        // Create a new round object for each player
+        this.myRoundData = new Round(this, this.myMove, this.opponentsMove, this.myCharacter, this.opponentsCharacter);
+        this.opponentsRoundData = new Round(this, this.opponentsMove, this.myMove, this.opponentsCharacter, this.myCharacter);
 
         // Take damage
         this.takeDamage(this.myCharacter, this.opponentsRoundData);
@@ -184,9 +139,7 @@ export default class Game {
         // Emit a round custom event with round data to the front end
         const roundEvent = new CustomEvent('round', { detail: { myRoundData: this.myRoundData, opponentsRoundData: this.opponentsRoundData } });
         document.dispatchEvent(roundEvent);
-        if (window.logging) {
-          console.log('Round event dispatched');
-        }
+        console.log('Round event dispatched');
 
 
         // If logging is enabled, endlog the current round
@@ -217,18 +170,14 @@ export default class Game {
         this.saveGame();
 
         // If myMove is set in the current round, but opponentsMove is not, wait for the opponent's move
-      } else if (this.rounds[this.roundNumber] && this.rounds[this.roundNumber]['myMove'] && !this.rounds[this.roundNumber]['opponentsMove']) {
+      } else if (this.rounds[this.roundNumber]['myMove'] && !this.rounds[this.roundNumber]['opponentsMove']) {
         const moveEvent = new CustomEvent('move', { detail: this.rounds[this.roundNumber]['myMove'] });
         document.dispatchEvent(moveEvent);
-        this.getOpponentsMove();
 
         if (window.logging) {
           console.log('Waiting for opponent\'s move');
         }
       } else {
-        // Always listen for opponent's move, even when waiting for player's move
-        this.getOpponentsMove();
-
         if (window.logging) {
           console.log('Waiting for your move');
         }
@@ -351,54 +300,6 @@ export default class Game {
   }
 
   /**
-   * Get opponent's character.
-   */
-  getOpponentsCharacter() {
-    try {
-      // Request the opponent's character slug from the multiplayer service
-      this.Multiplayer.getCharacter((data) => {
-        // Validate the received data
-        if (!data || !data.characterSlug) {
-          throw new Error('Invalid character slug data received');
-        }
-
-        // Log the received character slug if logging is enabled
-        if (window.logging) {
-          console.log('Received opponent character slug: ', data.characterSlug);
-        }
-
-        // Load the character from the character manager using the received slug
-        const newOpponentCharacter = characterManager.createCharacterInstance(data.characterSlug);
-
-        if (!newOpponentCharacter) {
-          console.error(`Failed to load opponent character with slug: ${data.characterSlug}`);
-          return;
-        }
-
-        // Keep the isComputer flag if it was set
-        const wasComputer = this.opponentsCharacter.isComputer;
-        this.opponentsCharacter = newOpponentCharacter;
-        if (wasComputer) {
-          this.opponentsCharacter.isComputer = wasComputer;
-        }
-
-        // Set starting health for the new character
-        this.opponentsCharacter.startingHealth = this.opponentsCharacter.health;
-
-        // Recalculate initial move for the new character
-        this.opponentsMove = this.getInitialMove(this.opponentsCharacter);
-
-        // Dispatch a custom event to notify that the opponent's character has been received
-        const characterEvent = new CustomEvent('opponentCharacter', { detail: this.opponentsCharacter });
-        document.dispatchEvent(characterEvent);
-      });
-    } catch (error) {
-      // Log any errors that occur during the process
-      console.error('Error in getOpponentsCharacter:', error);
-    }
-  }
-
-  /**
    * Get opponent's name.
    */
   getOpponentsName() {
@@ -432,7 +333,7 @@ export default class Game {
    * takeDamage
    */
   takeDamage(character, roundData) {
-    // Apply damage if this is a fresh round (not just loaded from storage)
+    // If we just loaded this game, don't take damage this round (we're just resetting the game)
     if (!this.loaded) {
       if (roundData.score !== '' && roundData.totalScore > 0) {
         character.health -= roundData.totalScore;
@@ -461,7 +362,6 @@ export default class Game {
   logRoundDetails(roundData, opponentsRoundData) {
     // Log the character's details
     console.group(`%c${roundData.myCharacter.name}`, `font-weight: bold; color: blue;`);
-    console.log(`%c👤 Character: %c${roundData.myCharacter.description}`, `font-weight: bold`, `color: blue;`);
     console.log(`%c❤️ Health: %c${roundData.myCharacter.health}`, `font-weight: bold`, `color: red;`);
     console.log(`%c🗡️ Weapon: %c${roundData.myCharacter.weapon ? 'Yes' : 'No'}`, `font-weight: bold`, `color: black;`);
     console.log(`%c🛡️ Shield: %c${roundData.myCharacter.shield ? 'Yes' : 'No'}`, `font-weight: bold`, `color: black;`);
@@ -575,6 +475,3 @@ export default class Game {
     this.opponentsRound++;
   }
 }
-
-// Attach CharacterManager as a static property
-Game.CharacterManager = CharacterManager;

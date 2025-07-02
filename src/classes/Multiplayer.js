@@ -1,6 +1,5 @@
-
 // Import trystero from the trystero package
-import { joinRoom } from 'trystero/torrent';
+import { joinRoom } from 'trystero';
 
 export class Multiplayer {
   constructor(game) {
@@ -14,7 +13,7 @@ export class Multiplayer {
     console.log('Room ID: ', roomId);
 
     // Set up multiplayer
-    const room = joinRoom({ appId: 'swordfight.me', rtcPolyfill: RTCPeerConnection }, roomId);
+    const room = joinRoom({ appId: 'swordfight.me' }, roomId);
 
     // If the room already has 2 peers, log an error and return
     if (room.getPeers().length >= 2) {
@@ -51,12 +50,6 @@ export class Multiplayer {
           console.log('Sent name: ', game.myCharacter.name);
         }
 
-        // Send the player's character slug to the opponent
-        this.sendCharacter({ characterSlug: game.myCharacter.slug });
-        if (window.logging) {
-          console.log('Sent character slug: ', game.myCharacter.slug);
-        }
-
         // Bubble the start event
         const startEvent = new CustomEvent('start', { detail: { game: game } });
         document.dispatchEvent(startEvent);
@@ -68,8 +61,5 @@ export class Multiplayer {
 
     // Create the sendName and getName actions
     [this.sendName, this.getName] = room.makeAction('name');
-
-    // Create the sendCharacter and getCharacter actions
-    [this.sendCharacter, this.getCharacter] = room.makeAction('character');
   }
 }

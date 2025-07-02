@@ -7,7 +7,7 @@ export class Moves {
     this.character = character;
     this.result = result;
     this.moves = this.character.moves;
-    this.filteredMoves = this.getFilteredMoves();
+    this.filteredMoves = this.filteredMoves();
   }
 
   /**
@@ -22,9 +22,9 @@ export class Moves {
 
 
   /**
-   * getFilteredMoves
+   * filteredMoves
    */
-  getFilteredMoves() {
+  filteredMoves() {
     // Filter the moves to only include the moves that are available to the character
     return this.moves.filter(move => {
 
@@ -49,17 +49,17 @@ export class Moves {
       }
 
       // If the move's range is not the same as the result's range, filter it out
-      if(this.result.range && move.range !== this.result.range) {
+      if(move.range !== this.result.range) {
         return false;
       }
 
       // If the move's type is in the result's restrict array, filter it out
-      if(this.result.restrict && this.result.restrict.includes(move.type)) {
+      if(this.result.restrict.includes(move.type)) {
         return false;
       }
 
       // If the move's tag is in the result's restrict array, filter it out
-      if(this.result.restrict && this.result.restrict.includes(move.tag)) {
+      if(this.result.restrict.includes(move.tag)) {
         return false;
       }
 

@@ -12,20 +12,6 @@ export class Round {
    * @param {object} opponentsCharacter - The opponent's character
    */
   constructor(game, myMove, opponentsMove, myCharacter, opponentsCharacter) {
-    // Validate input parameters
-    if (!myMove) {
-      console.error('Round constructor: myMove is undefined');
-      throw new Error('Invalid move data: myMove is undefined');
-    }
-    if (!opponentsMove) {
-      console.error('Round constructor: opponentsMove is undefined');
-      throw new Error('Invalid move data: opponentsMove is undefined');
-    }
-    if (!myCharacter || !opponentsCharacter) {
-      console.error('Round constructor: Invalid character data');
-      throw new Error('Invalid character data');
-    }
-
     this.game = game;
     this.myMove = myMove;
     this.opponentsMove = opponentsMove;
@@ -48,48 +34,20 @@ export class Round {
   getOutcome(tables, move, opponentsMove) {
     const table = tables.find(table => table.id === move.id)?.outcomes[0];
     if (!table) {
-      console.error('Outcome table not found', {
-        moveId: move.id,
-        moveName: move.name,
-        opponentMoveId: opponentsMove.id,
-        opponentMoveName: opponentsMove.name
-      });
-      // Return a fallback outcome that maintains game flow
-      return '1'; // Use a common result ID that should exist
+      console.error('Outcome table not found');
+      return;
     }
-
-    const outcome = table[opponentsMove.id];
-    if (!outcome) {
-      console.error('Outcome not found in table', {
-        moveId: move.id,
-        moveName: move.name,
-        opponentMoveId: opponentsMove.id,
-        opponentMoveName: opponentsMove.name
-      });
-      // Return a fallback outcome
-      return '1';
-    }
-
-    return outcome;
+    return table[opponentsMove.id];
   }
 
   /**
    * getResult
    */
   getResult(outcome, character) {
-    if (!character || !character.results) {
-      console.error('getResult: Invalid character data', { character: character?.name || 'unknown' });
-      return { id: 'error', name: 'Error - Invalid character', range: 'close', restrict: [] };
-    }
-
     const result = character.results.find(result => result.id === outcome);
     if (!result) {
-      console.error('Result not found', {
-        outcome,
-        characterName: character.name
-      });
-      // Return a fallback result to prevent crashes
-      return character.results[0] || { id: 'fallback', name: 'Fallback result', range: 'close', restrict: [] };
+      console.error('Result not found');
+      return;
     }
     return result;
   }
@@ -115,14 +73,14 @@ export class Round {
    */
   getModifier() {
     const moveModifier = this.myMove.mod;
-    return parseInt(moveModifier) || 0; // Convert string to number, default to 0 if invalid
+    return moveModifier;
   }
 
   /**
    * getRestrictions
    */
   getRestrictions() {
-    const restrictions = this.result.restrict || [];
+    const restrictions = this.result.restrict;
     return restrictions;
   }
 
@@ -150,11 +108,11 @@ export class Round {
    */
   getBonus(character, myMove, opponentsMove) {
     if (this.game.rounds.length === 1) {
-      return [];
+      return 0;
     }
 
     const result = this.getResult(this.getOutcome(character.tables, myMove, opponentsMove), character);
-    const bonus = result.bonus || [];
+    const bonus = result.bonus || 0;
 
     return bonus;
   }
@@ -166,7 +124,7 @@ export class Round {
     let bonus = 0;
     const previousRoundBonus = this.getBonus(character, previousMove, previousOpponentsMove);
 
-    if (Array.isArray(previousRoundBonus) && previousRoundBonus.length) {
+    if (previousRoundBonus.length) {
       previousRoundBonus.forEach(obj => {
         for (const key in obj) {
           if (move.type === key || move.tag === key) {
