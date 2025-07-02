@@ -14,7 +14,7 @@ export class Multiplayer {
     console.log('Room ID: ', roomId);
 
     // Set up multiplayer
-    const room = joinRoom({ appId: 'swordfight.me' }, roomId);
+    const room = joinRoom({ appId: 'swordfight.me', rtcPolyfill: RTCPeerConnection }, roomId);
 
     // If the room already has 2 peers, log an error and return
     if (room.getPeers().length >= 2) {
