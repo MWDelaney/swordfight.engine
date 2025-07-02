@@ -1,6 +1,6 @@
 {
   "name": "swordfight-engine",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A multiplayer sword fighting game engine with character management, round-based combat, and real-time multiplayer support",
   "type": "module",
   "main": "dist/swordfight-engine.js",
