@@ -226,6 +226,9 @@ export default class Game {
           console.log('Waiting for opponent\'s move');
         }
       } else {
+        // Always listen for opponent's move, even when waiting for player's move
+        this.getOpponentsMove();
+
         if (window.logging) {
           console.log('Waiting for your move');
         }
