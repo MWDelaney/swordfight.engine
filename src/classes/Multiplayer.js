@@ -1,6 +1,6 @@
 
 // Import trystero from the trystero package
-import { joinRoom } from 'trystero';
+import { joinRoom } from 'trystero/torrent';
 
 export class Multiplayer {
   constructor(game) {
