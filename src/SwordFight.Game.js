@@ -32,21 +32,20 @@ import { Round } from './classes/Round.js';
 import { Multiplayer } from './classes/Multiplayer.js';
 import { ComputerOpponent } from './classes/Opponent.js';
 import { Moves } from './classes/Moves.js';
-import myCharacterData from './characters/humanFighter.json';
-import opponentsCharacterData from './characters/evilHumanFighter.json';
+import { CharacterLoader } from './classes/CharacterLoader.js';
 
 export class Game {
   /**
    * Create a game.
    * @param {string} gameId - The ID of the game.
    */
-  constructor(gameId) {
+  constructor(gameId, myCharacterSlug = 'human-fighter', opponentCharacterSlug = 'evil-human-fighter') {
     this.gameId = gameId;
     this.rounds = [];
     this.roundNumber = 0;
     this.opponentsRound = 0;
-    this.myCharacter = myCharacterData;
-    this.opponentsCharacter = opponentsCharacterData;
+    this.myCharacter = CharacterLoader.getCharacter(myCharacterSlug);
+    this.opponentsCharacter = CharacterLoader.getCharacter(opponentCharacterSlug);
     this.myMove = this.getInitialMove(this.myCharacter);
     this.opponentsMove = this.getInitialMove(this.opponentsCharacter);
     this.Moves = [];
@@ -475,3 +474,6 @@ export class Game {
     this.opponentsRound++;
   }
 }
+
+// Export CharacterLoader for independent use
+export { CharacterLoader };
