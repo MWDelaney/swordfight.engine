@@ -41,7 +41,7 @@ export class Game {
    * @param {string} myCharacterSlug - Slug for player's character
    * @param {string} opponentCharacterSlug - Slug for opponent's character
    * @param {Object} options - Optional configuration
-   * @param {Object} options.transport - Custom transport for multiplayer (e.g., TrysteroTransport, SocketTransport)
+   * @param {Object} options.transport - Custom transport for multiplayer (e.g., WebSocketTransport, custom implementations)
    */
   constructor(gameId, myCharacterSlug = 'human-fighter', opponentCharacterSlug = 'evil-human-fighter', options = {}) {
     this.gameId = gameId;
@@ -490,5 +490,4 @@ export { CharacterLoader };
 
 // Export transport classes for custom multiplayer implementations
 export { MultiplayerTransport } from './classes/transports/MultiplayerTransport.js';
-export { TrysteroTransport } from './classes/transports/TrysteroTransport.js';
 export { WebSocketTransport } from './classes/transports/WebSocketTransport.js';

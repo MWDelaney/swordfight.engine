@@ -1,16 +1,17 @@
 /**
  * Multiplayer class - Transport-agnostic multiplayer handler
  *
- * Uses a transport adapter (TrysteroTransport, SocketTransport, etc.)
+ * Uses a transport adapter (WebSocketTransport, custom transports, etc.)
  * to handle multiplayer communication
  */
 
-import { TrysteroTransport } from './transports/TrysteroTransport.js';
-
 export class Multiplayer {
-  constructor(game, transport = null) {
-    // Use provided transport or default to Trystero
-    this.transport = transport || new TrysteroTransport(game);
+  constructor(game, transport) {
+    if (!transport) {
+      throw new Error('A transport is required for multiplayer. Provide a transport implementation (e.g., WebSocketTransport).');
+    }
+
+    this.transport = transport;
 
     // Initialize connection
     this.transport.connect(game.gameId).catch(error => {
