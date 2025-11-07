@@ -61,7 +61,7 @@ jobs:
           echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
 
           # Check if this version exists on npm
-          if npm view swordfight-cli@$CURRENT_VERSION version > /dev/null 2>&1; then
+          if npm view swordfight-engine@$CURRENT_VERSION version > /dev/null 2>&1; then
             echo "version_exists=true" >> $GITHUB_OUTPUT
             echo "Version $CURRENT_VERSION already exists on npm"
           else
@@ -85,17 +85,24 @@ jobs:
           body: |
             ## Changes in v${{ steps.version-check.outputs.current_version }}
 
-            🎮 **SwordFight CLI** - Command-line sword fighting game
+            🎮 **SwordFight Engine** - Multiplayer sword fighting game engine
 
             ### Installation
             ```bash
-            npx --yes swordfight-cli
+            npm install swordfight-engine
             ```
 
-            Or install globally:
-            ```bash
-            npm install -g swordfight-cli
-            swordfight
+            ### Usage
+            ```javascript
+            import { Game, WebSocketTransport } from 'swordfight-engine';
+            
+            const transport = new WebSocketTransport(null, {
+              serverUrl: 'wss://your-server.com'
+            });
+            
+            const game = new Game('room-id', 'human-fighter', 'goblin-fighter', {
+              transport: transport
+            });
             ```
 
             ### What's New
@@ -128,10 +135,10 @@ jobs:
       - name: Notify Success
         if: needs.publish.result == 'success'
         run: |
-          echo "✅ Successfully published swordfight-cli to NPM and created GitHub release!"
+          echo "✅ Successfully published swordfight-engine to NPM and created GitHub release!"
 
       - name: Notify Failure
         if: needs.publish.result == 'failure'
         run: |
-          echo "❌ Failed to publish swordfight-cli"
+          echo "❌ Failed to publish swordfight-engine"
           exit 1
