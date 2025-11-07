@@ -8,6 +8,9 @@
     ".": "./dist/swordfight-engine.js",
     "./min": "./dist/swordfight-engine.min.js"
   },
+  "bin": {
+    "swordfight-cli": "./cli/index.js"
+  },
   "scripts": {
     "lint": "eslint src --ext .js",
     "lint:fix": "eslint src --ext .js --fix",
@@ -16,6 +19,7 @@
     "dev": "node build.js --watch",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node --experimental-modules src/SwordFight.Game.js",
+    "cli": "node cli/index.js",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -43,6 +47,7 @@
     "globals": "^15.0.0"
   },
   "dependencies": {
+    "chalk": "^5.6.2",
     "trystero": "^0.21.4"
   },
   "engines": {

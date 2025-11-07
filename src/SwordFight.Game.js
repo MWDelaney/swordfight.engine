@@ -38,12 +38,17 @@ export class Game {
   /**
    * Create a game.
    * @param {string} gameId - The ID of the game.
+   * @param {string} myCharacterSlug - Slug for player's character
+   * @param {string} opponentCharacterSlug - Slug for opponent's character
+   * @param {Object} options - Optional configuration
+   * @param {Object} options.transport - Custom transport for multiplayer (e.g., TrysteroTransport, SocketTransport)
    */
-  constructor(gameId, myCharacterSlug = 'human-fighter', opponentCharacterSlug = 'evil-human-fighter') {
+  constructor(gameId, myCharacterSlug = 'human-fighter', opponentCharacterSlug = 'evil-human-fighter', options = {}) {
     this.gameId = gameId;
     this.rounds = [];
     this.roundNumber = 0;
     this.opponentsRound = 0;
+    this.loaded = false;
     this.myCharacter = CharacterLoader.getCharacter(myCharacterSlug);
     this.opponentsCharacter = CharacterLoader.getCharacter(opponentCharacterSlug);
     this.myMove = this.getInitialMove(this.myCharacter);
@@ -62,7 +67,8 @@ export class Game {
     if(this.opponentsCharacter.isComputer) {
       this.Multiplayer = new ComputerOpponent(this);
     } else {
-      this.Multiplayer = new Multiplayer(this);
+      // Pass custom transport if provided
+      this.Multiplayer = new Multiplayer(this, options.transport);
     }
 
     // Load the game from localstorage
@@ -110,7 +116,10 @@ export class Game {
         this.rounds[0] = { 'myMove': this.myMove, 'opponentsMove': this.opponentsMove };
       }
 
-      this.getOpponentsMove();
+      // Only get opponent's move if we don't already have it for this round
+      if (!this.rounds[this.roundNumber] || !this.rounds[this.roundNumber]['opponentsMove']) {
+        this.getOpponentsMove();
+      }
 
       // If both myMove and opponentsMove are set in the current round, continue
       if (this.rounds[this.roundNumber] && this.rounds[this.roundNumber]['myMove'] && this.rounds[this.roundNumber]['opponentsMove']) {
@@ -138,8 +147,6 @@ export class Game {
         // Emit a round custom event with round data to the front end
         const roundEvent = new CustomEvent('round', { detail: { myRoundData: this.myRoundData, opponentsRoundData: this.opponentsRoundData } });
         document.dispatchEvent(roundEvent);
-        console.log('Round event dispatched');
-
 
         // If logging is enabled, endlog the current round
         if (window.logging) {
@@ -169,7 +176,7 @@ export class Game {
         this.saveGame();
 
         // If myMove is set in the current round, but opponentsMove is not, wait for the opponent's move
-      } else if (this.rounds[this.roundNumber]['myMove'] && !this.rounds[this.roundNumber]['opponentsMove']) {
+      } else if (this.rounds[this.roundNumber] && this.rounds[this.roundNumber]['myMove'] && !this.rounds[this.roundNumber]['opponentsMove']) {
         const moveEvent = new CustomEvent('move', { detail: this.rounds[this.roundNumber]['myMove'] });
         document.dispatchEvent(moveEvent);
 
@@ -336,7 +343,10 @@ export class Game {
     if (!this.loaded) {
       if (roundData.score !== '' && roundData.totalScore > 0) {
         character.health -= roundData.totalScore;
+        console.log(`Applied ${roundData.totalScore} damage to ${character.name}. New health: ${character.health}`);
       }
+    } else {
+      console.log(`Skipped damage (game was loaded). this.loaded = ${this.loaded}`);
     }
 
     // Dislodged weapon
@@ -477,3 +487,8 @@ export class Game {
 
 // Export CharacterLoader for independent use
 export { CharacterLoader };
+
+// Export transport classes for custom multiplayer implementations
+export { MultiplayerTransport } from './classes/transports/MultiplayerTransport.js';
+export { TrysteroTransport } from './classes/transports/TrysteroTransport.js';
+export { WebSocketTransport } from './classes/transports/WebSocketTransport.js';

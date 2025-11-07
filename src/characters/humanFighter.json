@@ -4,8 +4,8 @@
   "description": "Human with sword and shield",
   "health": "12",
   "firstMove": "62",
-  "weapon": true,
-  "shield": true,
+  "weapon": "Broadsword",
+  "shield": "Shield",
   "moves": [
     {
       "tag": "Down Swing",

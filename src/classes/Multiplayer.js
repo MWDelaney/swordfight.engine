@@ -1,65 +1,69 @@
-// Import trystero from the trystero package
-import { joinRoom } from 'trystero';
+/**
+ * Multiplayer class - Transport-agnostic multiplayer handler
+ *
+ * Uses a transport adapter (TrysteroTransport, SocketTransport, etc.)
+ * to handle multiplayer communication
+ */
+
+import { TrysteroTransport } from './transports/TrysteroTransport.js';
 
 export class Multiplayer {
-  constructor(game) {
-    // Create a random room ID
-    const roomId = game.gameId;
+  constructor(game, transport = null) {
+    // Use provided transport or default to Trystero
+    this.transport = transport || new TrysteroTransport(game);
 
-    // Set the started flag
-    this.started = false;
-
-    // Log the room ID
-    console.log('Room ID: ', roomId);
-
-    // Set up multiplayer
-    const room = joinRoom({ appId: 'swordfight.me' }, roomId);
-
-    // If the room already has 2 peers, log an error and return
-    if (room.getPeers().length >= 2) {
-      console.error('Room is full');
-      // Dispatch a room full event
-      const roomFullEvent = new CustomEvent('roomFull');
-      document.dispatchEvent(roomFullEvent);
-
-      return;
-    } else {
-      console.log('You have joined the room');
-    }
-
-    // Listen for peer join events, log them
-    room.onPeerJoin((peer) => {
-      console.log('Peer joined: ', peer);
-
-      // Count the number of items in the peers object
-      const peers = room.getPeers();
-
-      // If there are 2 peers, start the game
-      if (Object.keys(peers).length >= 1) {
-        // Set the started flag
-        this.started = true;
-
-        // If the player's name is set in localstorage, send it, or send the name from the character object
-        if (localStorage.getItem('playerName')) {
-          game.myCharacter.name = localStorage.getItem('playerName');
-          this.sendName({ name: game.myCharacter.name });
-        } else {
-          this.sendName({ name: game.myCharacter.name });
-        }
-        if (window.logging) {
-          console.log('Sent name: ', game.myCharacter.name);
-        }
-
-        // Bubble the start event
-        const startEvent = new CustomEvent('start', { detail: { game: game } });
-        document.dispatchEvent(startEvent);
-      }
+    // Initialize connection
+    this.transport.connect(game.gameId).catch(error => {
+      console.error('Failed to connect:', error);
     });
+  }
 
-    // Create the sendMove and getMove actions
-    [this.sendMove, this.getMove] = room.makeAction('move');
+  /**
+   * Send a move to the opponent
+   * @param {Object} data - Move data
+   */
+  sendMove(data) {
+    this.transport.sendMove(data);
+  }
 
-    // Create the sendName and getName actions
-    [this.sendName, this.getName] = room.makeAction('name');
+  /**
+   * Register callback for receiving opponent's move
+   * @param {Function} callback - Callback function
+   */
+  getMove(callback) {
+    this.transport.getMove(callback);
+  }
+
+  /**
+   * Send player name to opponent
+   * @param {Object} data - Name data
+   */
+  sendName(data) {
+    this.transport.sendName(data);
+  }
+
+  /**
+   * Register callback for receiving opponent's name
+   * @param {Function} callback - Callback function
+   */
+  getName(callback) {
+    this.transport.getName(callback);
+  }
+
+  /**
+   * Check if the game has started
+   * @returns {boolean}
+   */
+  get started() {
+    return this.transport.started;
+  }
+
+  /**
+   * Disconnect from multiplayer session
+   */
+  disconnect() {
+    if (this.transport) {
+      this.transport.disconnect();
+    }
   }
 }

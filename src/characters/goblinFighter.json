@@ -4,7 +4,8 @@
   "description": "Goblin with mace and shield",
   "health": "13",
   "firstMove": "62",
-  "weapon": true,
+  "weapon": "Mace",
+  "shield": "Wooden Shield",
   "moves": [
     {
       "tag": "Down Swing",

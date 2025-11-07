@@ -36,8 +36,6 @@ export class ComputerOpponent {
       move = moves.filteredMoves.find(move => move.name === 'Retrieve Weapon');
     }
 
-    console.log(`Opponent move: ${move.name}`);
-
     // Invoke the callback with the selected move
     callback({ move: move });
   }
