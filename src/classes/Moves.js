@@ -43,8 +43,10 @@ export class Moves {
         return false;
       }
 
-      // If this is the retreive weapon move, and the character already has their weapon, filter it out
-      if(move.name === 'Retrieve Weapon' && this.character.weapon) {
+      // If this is the retrieve weapon move, hide it if:
+      // 1) Character already has their weapon, or
+      // 2) Weapon has been permanently destroyed
+      if(move.name === 'Retrieve Weapon' && (this.character.weapon || this.character.weaponDestroyed)) {
         return false;
       }
 

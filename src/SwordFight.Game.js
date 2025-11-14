@@ -141,6 +141,14 @@ export class Game {
         this.takeDamage(this.myCharacter, this.opponentsRoundData);
         this.takeDamage(this.opponentsCharacter, this.myRoundData);
 
+        // Take self-damage
+        this.takeSelfDamage(this.myCharacter, this.myRoundData);
+        this.takeSelfDamage(this.opponentsCharacter, this.opponentsRoundData);
+
+        // Heal health (if applicable and not scored on)
+        this.healHealth(this.myCharacter, this.myRoundData, this.opponentsRoundData);
+        this.healHealth(this.opponentsCharacter, this.opponentsRoundData, this.myRoundData);
+
         // Initialize the moves object for the next round for the front-end
         this.Moves = new Moves(this.myCharacter, this.opponentsRoundData.result);
 
@@ -349,19 +357,63 @@ export class Game {
       console.log(`Skipped damage (game was loaded). this.loaded = ${this.loaded}`);
     }
 
-    // Dislodged weapon
+    // Dislodged weapon (temporary - can be retrieved)
     if (roundData.result.weaponDislodged) {
       character.weapon = false;
     }
 
-    // Retrieved weapon
-    if (roundData.result.retrieveWeapon) {
+    // Retrieved weapon (only if not destroyed)
+    if (roundData.result.retrieveWeapon && !character.weaponDestroyed) {
       character.weapon = true;
     }
 
-    // Smashed shield
+    // Destroyed weapon (permanent)
+    if (roundData.result.weaponDestroyed) {
+      character.weapon = false;
+      character.weaponDestroyed = true;
+    }
+
+    // Smashed shield (permanent)
     if (roundData.result.shieldDestroyed) {
       character.shield = false;
+    }
+  }
+
+  /**
+   * healHealth
+   */
+  healHealth(character, roundData, opponentsRoundData) {
+    // If we just loaded this game, don't heal this round (we're just resetting the game)
+    if (!this.loaded) {
+      // Only heal if the result has a heal property and opponent didn't score
+      if (roundData.result.heal && (opponentsRoundData.score === '' || opponentsRoundData.totalScore <= 0)) {
+        const healAmount = roundData.result.heal;
+        const maxHealth = parseInt(character.startingHealth);
+        const currentHealth = parseInt(character.health);
+
+        // Don't heal beyond starting health
+        const newHealth = Math.min(currentHealth + healAmount, maxHealth);
+        const actualHeal = newHealth - currentHealth;
+
+        if (actualHeal > 0) {
+          character.health = newHealth;
+          console.log(`Healed ${actualHeal} health for ${character.name}. New health: ${character.health}`);
+        }
+      }
+    }
+  }
+
+  /**
+   * takeSelfDamage
+   */
+  takeSelfDamage(character, roundData) {
+    // If we just loaded this game, don't take damage this round (we're just resetting the game)
+    if (!this.loaded) {
+      // Self-damage occurs when the character scores (hits opponent)
+      if (roundData.result.selfDamage && roundData.score !== '' && roundData.totalScore > 0) {
+        character.health -= roundData.result.selfDamage;
+        console.log(`Applied ${roundData.result.selfDamage} self-damage to ${character.name}. New health: ${character.health}`);
+      }
     }
   }
 

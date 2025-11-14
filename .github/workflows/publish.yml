@@ -95,11 +95,11 @@ jobs:
             ### Usage
             ```javascript
             import { Game, WebSocketTransport } from 'swordfight-engine';
-            
+
             const transport = new WebSocketTransport(null, {
               serverUrl: 'wss://your-server.com'
             });
-            
+
             const game = new Game('room-id', 'human-fighter', 'goblin-fighter', {
               transport: transport
             });

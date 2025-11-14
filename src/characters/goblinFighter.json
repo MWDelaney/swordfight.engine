@@ -1,6 +1,6 @@
 {
-  "name": "Goblin Fighter",
-  "slug": "goblin-fighter",
+  "name": "Goblin",
+  "slug": "goblin",
   "description": "Goblin with mace and shield",
   "health": "13",
   "firstMove": "62",
@@ -93,7 +93,7 @@
       "name": "Side Swing",
       "range": "close",
       "type": "low",
-      "id": "46",
+      "id": "48",
       "mod": "0",
       "requiresWeapon": true
     },
@@ -210,7 +210,7 @@
       "name": "Swing High",
       "range": "far",
       "type": "extended",
-      "id": "54",
+      "id": "64",
       "mod": "-6",
       "requiresWeapon": true
     },
@@ -1361,7 +1361,7 @@
       "score": "1",
       "restrict": [],
       "allowOnly": [
-        "jump"
+        "Jump"
       ]
     },
     {
