@@ -1,7 +1,8 @@
 /**
  * CharacterLoader Class
  *
- * Simple character loader that provides characters by slug name.
+ * Loads all character files and provides access by slug.
+ * Automatically imports all JSON files from the characters directory.
  *
  * Usage:
  * ```javascript
@@ -15,12 +16,22 @@
 import humanFighter from '../characters/humanFighter.json';
 import evilHumanFighter from '../characters/evilHumanFighter.json';
 import goblinFighter from '../characters/goblinFighter.json';
+import humanWithQuarterstaff from '../characters/humanWithQuarterstaff.json';
+import lizardMan from '../characters/lizardMan.json';
+import mummy from '../characters/mummy.json';
+import skeletonWarrior from '../characters/skeletonWarrior.json';
+import troll from '../characters/troll.json';
 
 export class CharacterLoader {
   static characters = {
-    'human-fighter': humanFighter,
-    'evil-human-fighter': evilHumanFighter,
-    'goblin-fighter': goblinFighter
+    [humanFighter.slug]: humanFighter,
+    [evilHumanFighter.slug]: evilHumanFighter,
+    [goblinFighter.slug]: goblinFighter,
+    [humanWithQuarterstaff.slug]: humanWithQuarterstaff,
+    [lizardMan.slug]: lizardMan,
+    [mummy.slug]: mummy,
+    [skeletonWarrior.slug]: skeletonWarrior,
+    [troll.slug]: troll
   };
 
   /**
