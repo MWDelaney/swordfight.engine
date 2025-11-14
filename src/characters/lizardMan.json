@@ -3,7 +3,7 @@
   "slug": "lizard-man",
   "description": "Lizard Man with Scimitar and Buckler",
   "health": "16",
-  "firstMove": "16",
+  "firstMove": "62",
   "weapon": "Scimitar",
   "shield": "Buckler",
   "moves": [
