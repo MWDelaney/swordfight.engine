@@ -39,7 +39,7 @@ export class CharacterLoader {
    * @param {string} slug - The character slug (e.g., 'human-fighter')
    * @returns {Object} A copy of the character data
    */
-  static getCharacter(slug) {
+  static async getCharacter(slug) {
     const character = this.characters[slug];
     if (!character) {
       throw new Error(`Character '${slug}' not found. Available: ${this.getAvailableCharacters().join(', ')}`);

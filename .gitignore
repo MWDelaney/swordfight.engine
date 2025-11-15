@@ -10,6 +10,9 @@ build/
 *.min.js
 *.min.css
 
+# API build output
+api/dist/
+
 # Environment variables
 .env
 .env.local

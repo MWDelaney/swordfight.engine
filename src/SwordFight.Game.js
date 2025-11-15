@@ -42,6 +42,7 @@ export class Game {
    * @param {string} opponentCharacterSlug - Slug for opponent's character
    * @param {Object} options - Optional configuration
    * @param {Object} options.transport - Custom transport for multiplayer (e.g., WebSocketTransport, custom implementations)
+   * @param {Object} options.characterLoader - Custom CharacterLoader (defaults to bundled loader)
    */
   constructor(gameId, myCharacterSlug = 'human-fighter', opponentCharacterSlug = 'evil-human-fighter', options = {}) {
     this.gameId = gameId;
@@ -49,13 +50,32 @@ export class Game {
     this.roundNumber = 0;
     this.opponentsRound = 0;
     this.loaded = false;
-    this.myCharacter = CharacterLoader.getCharacter(myCharacterSlug);
-    this.opponentsCharacter = CharacterLoader.getCharacter(opponentCharacterSlug);
-    this.myMove = this.getInitialMove(this.myCharacter);
-    this.opponentsMove = this.getInitialMove(this.opponentsCharacter);
+    this.myCharacterSlug = myCharacterSlug;
+    this.opponentCharacterSlug = opponentCharacterSlug;
+    this.options = options;
+    this.CharacterLoader = options.characterLoader || CharacterLoader;
+    this.myCharacter = null;
+    this.opponentsCharacter = null;
+    this.myMove = null;
+    this.opponentsMove = null;
     this.Moves = [];
 
-    if(gameId === 'computer') {
+    // Initialize the game (async)
+    this.init();
+  }
+
+  /**
+   * Initialize the game.
+   */
+  init = async() => {
+    // Load characters (supports both sync and async loaders)
+    this.myCharacter = await this.CharacterLoader.getCharacter(this.myCharacterSlug);
+    this.opponentsCharacter = await this.CharacterLoader.getCharacter(this.opponentCharacterSlug);
+
+    this.myMove = this.getInitialMove(this.myCharacter);
+    this.opponentsMove = this.getInitialMove(this.opponentsCharacter);
+
+    if(this.gameId === 'computer') {
       this.opponentsCharacter.isComputer = true;
     }
 
@@ -68,20 +88,12 @@ export class Game {
       this.Multiplayer = new ComputerOpponent(this);
     } else {
       // Pass custom transport if provided
-      this.Multiplayer = new Multiplayer(this, options.transport);
+      this.Multiplayer = new Multiplayer(this, this.options.transport);
     }
 
     // Load the game from localstorage
     this.loadGame();
 
-    // Initialize the game
-    this.init();
-  }
-
-  /**
-   * Initialize the game.
-   */
-  init = async() => {
     // Add event listeners
     document.addEventListener('inputMove', this.inputMove);
   };
@@ -539,6 +551,9 @@ export class Game {
 
 // Export CharacterLoader for independent use
 export { CharacterLoader };
+
+// Export Round class for API generation and external use
+export { Round } from './classes/Round.js';
 
 // Export transport classes for custom multiplayer implementations
 export { MultiplayerTransport } from './classes/transports/MultiplayerTransport.js';

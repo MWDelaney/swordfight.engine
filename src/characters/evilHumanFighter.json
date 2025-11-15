@@ -2,7 +2,7 @@
   "name": "Evil Human Fighter",
   "slug": "evil-human-fighter",
   "description": "Evil human with sword and shield",
- "health": "12",
+  "health": "12",
   "firstMove": "62",
   "weapon": "Long sword",
   "shield": "Buckler",

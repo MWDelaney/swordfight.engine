@@ -9,13 +9,11 @@ const isDev = isWatch || process.argv.includes('--dev');
 // Read package.json to get project info
 const packageJson = JSON.parse(readFileSync('package.json', 'utf8'));
 
-const buildOptions = {
-  entryPoints: ['src/SwordFight.Game.js'],
+const sharedOptions = {
   bundle: true,
   format: 'esm',
   target: 'es2020',
   platform: 'browser',
-  outfile: 'dist/swordfight-engine.js',
   sourcemap: isDev,
   minify: !isDev,
   banner: {
@@ -40,10 +38,42 @@ const buildOptions = {
   logLevel: 'info'
 };
 
-// Additional build for minified version in production
+// Full build (includes all character data)
+const buildOptions = {
+  ...sharedOptions,
+  entryPoints: ['src/SwordFight.Game.js'],
+  outfile: 'dist/swordfight-engine.js'
+};
+
+// Lite build (no character data, uses API)
+const liteBuildOptions = {
+  ...sharedOptions,
+  entryPoints: ['src/SwordFight.Game.Lite.js'],
+  outfile: 'dist/swordfight-engine.lite.js',
+  external: ['trystero'],
+  // Mark character JSON files as external so they're not bundled
+  plugins: [{
+    name: 'exclude-character-data',
+    setup(build) {
+      // Exclude all character JSON files
+      build.onResolve({ filter: /\/characters\/.*\.json$/ }, () => {
+        return { path: 'excluded', external: true };
+      });
+    }
+  }]
+};
+
+// Additional minified builds
 const minifiedOptions = {
   ...buildOptions,
   outfile: 'dist/swordfight-engine.min.js',
+  minify: true,
+  sourcemap: false
+};
+
+const liteMinifiedOptions = {
+  ...liteBuildOptions,
+  outfile: 'dist/swordfight-engine.lite.min.js',
   minify: true,
   sourcemap: false
 };
@@ -73,14 +103,21 @@ async function buildProject() {
         process.exit(0);
       });
     } else {
-      // Build main version
+      // Build full version
       await build(buildOptions);
-      console.log('✅ Main build completed');
+      console.log('✅ Full build completed');
 
-      // Build minified version in production
+      // Build lite version
+      await build(liteBuildOptions);
+      console.log('✅ Lite build completed');
+
+      // Build minified versions in production
       if (!isDev) {
         await build(minifiedOptions);
-        console.log('✅ Minified build completed');
+        console.log('✅ Full minified build completed');
+
+        await build(liteMinifiedOptions);
+        console.log('✅ Lite minified build completed');
       }
     }
   } catch (error) {

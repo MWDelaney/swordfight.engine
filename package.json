@@ -6,7 +6,9 @@
   "main": "dist/swordfight-engine.js",
   "exports": {
     ".": "./dist/swordfight-engine.js",
-    "./min": "./dist/swordfight-engine.min.js"
+    "./min": "./dist/swordfight-engine.min.js",
+    "./lite": "./dist/swordfight-engine.lite.js",
+    "./lite/min": "./dist/swordfight-engine.lite.min.js"
   },
   "bin": {
     "swordfight-cli": "./cli/index.js"
@@ -15,6 +17,9 @@
     "lint": "eslint src --ext .js",
     "lint:fix": "eslint src --ext .js --fix",
     "build": "npm run lint && npm run bundle",
+    "build:all": "npm run build && npm run build:api",
+    "build:api": "eleventy --input=api/src --output=api/dist",
+    "build:api:dev": "eleventy --input=api/src --output=api/dist --serve",
     "bundle": "node build.js",
     "dev": "node build.js --watch",
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -41,6 +46,7 @@
     "LICENSE"
   ],
   "devDependencies": {
+    "@11ty/eleventy": "^3.0.0",
     "@eslint/js": "^9.0.0",
     "esbuild": "^0.21.5",
     "eslint": "^9.0.0",

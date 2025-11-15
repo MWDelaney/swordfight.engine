@@ -7,6 +7,8 @@ A JavaScript-based multiplayer sword fighting game engine with character managem
 - **Character Management**: Multiple character types with unique abilities and stats
 - **Round-based Combat**: Strategic turn-based fighting system
 - **Multiplayer Support**: Real-time multiplayer functionality with computer opponent fallback
+- **Dual Build System**: Full version (115KB) with bundled data, or lite version (17KB) that uses the API
+- **Static API**: Pre-computed reference API with all possible game outcomes
 - **Local Storage**: Game state persistence
 - **Event-driven Architecture**: Custom events for UI integration
 - **Modular Design**: Clean separation of concerns with ES6 modules
@@ -15,21 +17,20 @@ A JavaScript-based multiplayer sword fighting game engine with character managem
 
 ```
 swordfight.engine/
-├── SwordFight.Game.js          # Main game class and entry point
-├── classes/                    # Core game logic classes
-│   ├── CharacterManager.js     # Character loading and management
-│   ├── Moves.js               # Move management and validation
-│   ├── Multiplayer.js         # Real-time multiplayer functionality
-│   ├── Opponent.js            # Computer opponent AI
-│   ├── Round.js               # Round logic and calculations
-│   └── SwordFight.Game.js     # Additional game utilities
-├── characters/                 # Character definitions
-│   ├── index.js               # Character exports
-│   ├── humanFighter.js        # Human fighter character
-│   ├── evilHumanFighter.js    # Evil human fighter character
-│   ├── goblinFighter.js       # Goblin fighter character
-│   └── *.json                 # Character data files
-└── dist/                      # Built/bundled files (generated)
+├── src/
+│   ├── SwordFight.Game.js        # Main game class (full version)
+│   ├── SwordFight.Game.Lite.js   # Lite version entry point
+│   ├── classes/                  # Core game logic classes
+│   │   ├── CharacterLoader.js    # Bundled character loader
+│   │   ├── Moves.js             # Move management and validation
+│   │   ├── Multiplayer.js       # Real-time multiplayer functionality
+│   │   ├── Opponent.js          # Computer opponent AI
+│   │   └── Round.js             # Round logic and calculations
+│   └── characters/              # Character JSON definitions
+├── api/                         # Static API generator (Eleventy)
+│   ├── src/                     # API templates
+│   └── dist/                    # Generated API (not in git)
+└── dist/                        # Built engine files (generated)
 ```
 
 ## Installation
@@ -49,8 +50,11 @@ npm install
 
 - `npm run lint` - Run ESLint to check code quality
 - `npm run lint:fix` - Automatically fix ESLint issues
-- `npm run build` - Lint and bundle the project
-- `npm run bundle` - Bundle the project with Rollup
+- `npm run build` - Lint and bundle the engine
+- `npm run build:api` - Build the static API
+- `npm run build:api:dev` - Start API dev server with live reload
+- `npm run build:all` - Build both engine and API
+- `npm run bundle` - Bundle the project with esbuild
 - `npm run dev` - Start development mode with file watching
 
 ### Code Style
@@ -58,6 +62,24 @@ npm install
 This project uses ESLint with strict rules for code quality and consistency. Run `npm run lint` to check your code before committing.
 
 ## Usage
+
+### Choosing a Version
+
+**Full Version (115KB)** - Includes all character data bundled:
+```javascript
+import { Game } from 'swordfight-engine';
+const game = new Game('my-game-id');
+```
+
+**Lite Version (17KB)** - Loads character data from API:
+```javascript
+import { Game, CharacterLoader } from 'swordfight-engine/lite';
+
+// Configure API endpoint
+CharacterLoader.setApiBase('https://api.swordfight.me');
+
+const game = new Game('my-game-id');
+```
 
 ### Basic Game Setup
 
@@ -129,10 +151,33 @@ The game engine communicates with the frontend through custom events:
 
 ## Building
 
-The project uses Rollup for bundling. Run `npm run build` to create:
+The project uses esbuild for bundling. 
 
-- `dist/swordfight-engine.js` - ES module bundle
-- `dist/swordfight-engine.umd.js` - UMD bundle for browser use
+### Build the Engine
+
+```bash
+npm run build
+```
+
+Creates:
+- `dist/swordfight-engine.js` - Full version (115KB)
+- `dist/swordfight-engine.min.js` - Full version minified
+- `dist/swordfight-engine.lite.js` - Lite version (17KB)
+- `dist/swordfight-engine.lite.min.js` - Lite version minified
+
+### Build the Static API
+
+```bash
+npm run build:api
+```
+
+Generates `api/dist/` with ~30,864 JSON files containing all possible game outcomes. See [api/README.md](api/README.md) for deployment instructions.
+
+### Build Everything
+
+```bash
+npm run build:all
+```
 
 ## License
 
