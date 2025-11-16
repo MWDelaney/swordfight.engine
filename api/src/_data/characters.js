@@ -1,6 +1,7 @@
 /**
  * Global Data: Characters
  * Loads all characters from JSON files in the parent project
+ * Strips out tables and results since outcomes are pre-computed in the API
  */
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
@@ -20,6 +21,15 @@ const characterFiles = [
   'troll.json'
 ];
 
+/**
+ * Strip tables and results from character data
+ * These are only needed for local calculation, not in the API
+ */
+function stripGameMechanics(character) {
+  const { tables, results, ...characterData } = character;
+  return characterData;
+}
+
 export default function() {
   const charactersDir = join(__dirname, '../../../src/characters');
   const characters = {};
@@ -27,7 +37,9 @@ export default function() {
 
   characterFiles.forEach(filename => {
     const filePath = join(charactersDir, filename);
-    const character = JSON.parse(readFileSync(filePath, 'utf-8'));
+    const rawCharacter = JSON.parse(readFileSync(filePath, 'utf-8'));
+    const character = stripGameMechanics(rawCharacter);
+
     characters[character.slug] = character;
     slugs.push(character.slug);
   });

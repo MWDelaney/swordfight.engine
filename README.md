@@ -81,6 +81,10 @@ CharacterLoader.setApiBase('https://api.swordfight.me');
 const game = new Game('my-game-id');
 ```
 
+**Using the API Directly** - Build custom clients:
+
+See [API_CLIENT_GUIDE.md](API_CLIENT_GUIDE.md) for details on using the static API without the engine.
+
 ### Basic Game Setup
 
 ```javascript
