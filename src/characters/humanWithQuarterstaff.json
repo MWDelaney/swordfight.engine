@@ -1,7 +1,7 @@
 {
   "name": "Human Monk",
   "slug": "human-monk",
-  "description": "Human with Quarterstaff",
+  "description": "Human monk with quarterstaff",
   "health": "10",
   "firstMove": "62",
   "weapon": "Quarterstaff",

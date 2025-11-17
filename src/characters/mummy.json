@@ -1,7 +1,7 @@
 {
   "name": "Mummy",
   "slug": "mummy",
-  "description": "A powerful royal mummy, beware of his hand to hand attacks",
+  "description": "A cursed mummy with heavy mace",
   "health": "12",
   "firstMove": "62",
   "weapon": "Mace",

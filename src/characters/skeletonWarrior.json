@@ -1,7 +1,7 @@
 {
   "name": "Skeleton",
   "slug": "skeleton",
-  "description": "Undead skeleton with sword and shield",
+  "description": "Animated skeleton with sword and shield",
   "health": "7",
   "firstMove": "62",
   "weapon": "Sword",

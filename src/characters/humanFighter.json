@@ -1,7 +1,7 @@
 {
   "name": "Human Fighter",
   "slug": "human-fighter",
-  "description": "Human with sword and shield",
+  "description": "Human fighter with sword and shield",
   "health": "12",
   "firstMove": "62",
   "weapon": "Broadsword",
