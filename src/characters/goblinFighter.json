@@ -1142,7 +1142,15 @@
       "mod": "1",
       "range": "close",
       "score": "",
-      "restrict": []
+      "restrict": [],
+      "bonus": [
+        {
+          "strong": "2",
+          "high": "2",
+          "low": "2",
+          "risky": "2"
+        }
+      ]
     },
     {
       "id": "3",
@@ -1294,6 +1302,11 @@
       "score": "",
       "restrict": [
         "strong"
+      ],
+      "bonus": [
+        {
+          "low": "2"
+        }
       ]
     },
     {
@@ -1316,7 +1329,13 @@
       },
       "range": "close",
       "score": "",
-      "restrict": []
+      "restrict": [],
+      "bonus": [
+        {
+          "Down Swing": "2",
+          "Side Swing": "2"
+        }
+      ]
     },
     {
       "id": "35",
@@ -1338,6 +1357,11 @@
       "score": "",
       "restrict": [
         "low"
+      ],
+      "bonus": [
+        {
+          "strong": "2"
+        }
       ]
     },
     {

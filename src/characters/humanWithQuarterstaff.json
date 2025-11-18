@@ -255,7 +255,7 @@
       "name": "Dodge",
       "range": "far",
       "type": "extended-defense",
-      "id": "62",
+      "id": "52",
       "mod": "-4",
       "requiresWeapon": false
     },
@@ -264,7 +264,7 @@
       "name": "Jump Back",
       "range": "far",
       "type": "extended-defense",
-      "id": "52",
+      "id": "62",
       "mod": "-4",
       "requiresWeapon": false
     }
@@ -1291,10 +1291,16 @@
     {
       "id": "29",
       "name": "Ducking",
+      "mod": "0",
       "range": "close",
       "score": "",
       "restrict": [
         "strong"
+      ],
+      "bonus": [
+        {
+          "low": "2"
+        }
       ]
     },
     {

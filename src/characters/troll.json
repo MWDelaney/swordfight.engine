@@ -155,7 +155,7 @@
       "name": "Swing High",
       "range": "far",
       "type": "extended",
-      "id": "62",
+      "id": "64",
       "mod": "2",
       "requiresWeapon": true
     },
@@ -209,7 +209,7 @@
       "name": "Jump Back",
       "range": "far",
       "type": "extended-defense",
-      "id": "64",
+      "id": "62",
       "mod": "-6",
       "requiresWeapon": false
     }
@@ -1243,6 +1243,11 @@
       "restrict": [
         "Rage",
         "strong"
+      ],
+      "bonus": [
+        {
+          "low": "2"
+        }
       ]
     },
     {
@@ -1265,6 +1270,12 @@
       "score": "",
       "restrict": [
         "Thrust"
+      ],
+      "bonus": [
+        {
+          "Down Swing": "2",
+          "Side Swing": "2"
+        }
       ]
     },
     {
@@ -1287,6 +1298,11 @@
       "score": "",
       "restrict": [
         "low"
+      ],
+      "bonus": [
+        {
+          "strong": "2"
+        }
       ]
     },
     {
