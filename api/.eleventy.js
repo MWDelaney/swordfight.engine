@@ -4,29 +4,24 @@
  */
 
 export default function(eleventyConfig) {
-  // Copy character source files directly
-  eleventyConfig.addPassthroughCopy({
-    "../src/characters/*.json": "characters"
-  });
-
   // Copy CNAME for custom domain
-  eleventyConfig.addPassthroughCopy("src/CNAME");
+  eleventyConfig.addPassthroughCopy('src/CNAME');
 
   // Set output to JSON by default
-  eleventyConfig.addGlobalData("permalink", () => {
+  eleventyConfig.addGlobalData('permalink', () => {
     return (data) => `${data.page.filePathStem}.json`;
   });
 
   return {
     dir: {
-      input: "src",
-      output: "dist",
-      includes: "_includes",
-      data: "_data"
+      input: 'src',
+      output: 'dist',
+      includes: '_includes',
+      data: '_data'
     },
     markdownTemplateEngine: false,
-    htmlTemplateEngine: "njk",
-    dataTemplateEngine: "njk",
-    templateFormats: ["njk", "11ty.js"]
+    htmlTemplateEngine: 'njk',
+    dataTemplateEngine: 'njk',
+    templateFormats: ['njk', '11ty.js', 'md']
   };
 }

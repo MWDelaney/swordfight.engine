@@ -22,6 +22,7 @@
     "build:api:dev": "eleventy --input=api/src --output=api/dist --serve",
     "bundle": "node build.js",
     "dev": "node build.js --watch",
+    "dev:api": "eleventy --input=api/src --output=api/dist --serve",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node --experimental-modules src/SwordFight.Game.js",
     "cli": "node cli/index.js",

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { build } from 'esbuild';
+import { build, context } from 'esbuild';
 import { readFileSync } from 'fs';
 
 const isWatch = process.argv.includes('--watch');
@@ -84,22 +84,13 @@ async function buildProject() {
 
     if (isWatch) {
       console.log('Watching for changes...');
-      const ctx = await build({
-        ...buildOptions,
-        watch: {
-          onRebuild(error, _result) {
-            if (error) {
-              console.error('Watch build failed:', error);
-            } else {
-              console.log('Rebuilt successfully');
-            }
-          }
-        }
-      });
+      const ctx = await context(buildOptions);
+      await ctx.watch();
+      console.log('Watching... (Press Ctrl+C to stop)');
 
       // Keep the process running
-      process.on('SIGINT', () => {
-        ctx.dispose();
+      process.on('SIGINT', async () => {
+        await ctx.dispose();
         process.exit(0);
       });
     } else {
