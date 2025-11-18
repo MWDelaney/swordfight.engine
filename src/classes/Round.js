@@ -18,13 +18,13 @@ export class Round {
     this.myCharacter = myCharacter;
     this.opponentsCharacter = opponentsCharacter;
     this.outcome = this.getOutcome(this.opponentsCharacter.tables, this.myMove, this.opponentsMove);
-    this.result = this.getResult(this.outcome, this.opponentsCharacter);
+    this.result = this.getResult(this.outcome, this.myCharacter);
     this.range = this.getRange();
     this.restrictions = this.getRestrictions();
     this.moveModifier = this.getModifier();
     this.score = this.getScore();
     this.bonus = this.getMyBonus();
-    this.nextRoundBonus = this.getBonus(this.myCharacter, this.myMove, this.opponentsMove);
+    this.nextRoundBonus = this.getBonus(this.myCharacter, this.opponentsCharacter, this.myMove, this.opponentsMove);
     this.totalScore = this.getTotalScore(this.score, this.moveModifier, this.bonus);
   }
 
@@ -106,12 +106,12 @@ export class Round {
   /**
    * getBonus
    */
-  getBonus(character, myMove, opponentsMove) {
+  getBonus(character, opponentCharacter, myMove, opponentsMove) {
     if (this.game.rounds.length === 1) {
       return 0;
     }
 
-    const result = this.getResult(this.getOutcome(character.tables, myMove, opponentsMove), character);
+    const result = this.getResult(this.getOutcome(opponentCharacter.tables, myMove, opponentsMove), character);
     const bonus = result.bonus || 0;
 
     return bonus;
@@ -120,9 +120,9 @@ export class Round {
   /**
    * calculateBonus
    */
-  calculateBonus(character, move, previousMove, previousOpponentsMove) {
+  calculateBonus(character, opponentCharacter, move, previousMove, previousOpponentsMove) {
     let bonus = 0;
-    const previousRoundBonus = this.getBonus(character, previousMove, previousOpponentsMove);
+    const previousRoundBonus = this.getBonus(character, opponentCharacter, previousMove, previousOpponentsMove);
 
     if (previousRoundBonus.length) {
       previousRoundBonus.forEach(obj => {
@@ -144,6 +144,6 @@ export class Round {
     if (this.game.rounds.length <= 1) {return 0;}
 
     const previousRound = this.game.rounds[this.game.rounds.length - 2];
-    return this.calculateBonus(this.myCharacter, this.myMove, previousRound.myMove, previousRound.opponentsMove);
+    return this.calculateBonus(this.myCharacter, this.opponentsCharacter, this.myMove, previousRound.myMove, previousRound.opponentsMove);
   }
 }
