@@ -127,7 +127,7 @@ export class Round {
     if (previousRoundBonus.length) {
       previousRoundBonus.forEach(obj => {
         for (const key in obj) {
-          if (move.type === key || move.tag === key) {
+          if (move.type === key || move.tag === key || move.name === key) {
             bonus += +obj[key];
           }
         }
