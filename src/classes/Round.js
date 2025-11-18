@@ -18,13 +18,13 @@ export class Round {
     this.myCharacter = myCharacter;
     this.opponentsCharacter = opponentsCharacter;
     this.outcome = this.getOutcome(this.opponentsCharacter.tables, this.myMove, this.opponentsMove);
-    this.result = this.getResult(this.outcome, this.myCharacter);
+    this.result = this.getResult(this.outcome, this.opponentsCharacter);
     this.range = this.getRange();
     this.restrictions = this.getRestrictions();
     this.moveModifier = this.getModifier();
     this.score = this.getScore();
     this.bonus = this.getMyBonus();
-    this.nextRoundBonus = this.getBonus(this.myCharacter, this.opponentsCharacter, this.myMove, this.opponentsMove);
+    this.nextRoundBonus = this.getBonus(this.myCharacter, this.myCharacter, this.opponentsMove, this.myMove);
     this.totalScore = this.getTotalScore(this.score, this.moveModifier, this.bonus);
   }
 
@@ -111,7 +111,7 @@ export class Round {
       return 0;
     }
 
-    const result = this.getResult(this.getOutcome(opponentCharacter.tables, myMove, opponentsMove), character);
+    const result = this.getResult(this.getOutcome(opponentCharacter.tables, myMove, opponentsMove), opponentCharacter);
     const bonus = result.bonus || 0;
 
     return bonus;
