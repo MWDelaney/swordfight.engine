@@ -3,29 +3,19 @@
  * Loads all characters from JSON files in the parent project
  * Strips out tables and results since outcomes are pre-computed in the API
  */
-import { readFileSync } from 'fs';
+import { readFileSync, readdirSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const characterFiles = [
-  'humanFighter.json',
-  'evilHumanFighter.json',
-  'goblinFighter.json',
-  'humanWithQuarterstaff.json',
-  'lizardMan.json',
-  'mummy.json',
-  'skeletonWarrior.json'
-];
-
 /**
  * Strip tables and results from character data
  * These are only needed for local calculation, not in the API
  */
 function stripGameMechanics(character) {
-  const { tables, results, ...characterData } = character;
+  const { tables: _tables, results: _results, ...characterData } = character;
   return characterData;
 }
 
@@ -33,6 +23,9 @@ export default function() {
   const charactersDir = join(__dirname, '../../../src/characters');
   const characters = {};
   const slugs = [];
+
+  // Dynamically load all JSON files from the characters directory
+  const characterFiles = readdirSync(charactersDir).filter(file => file.endsWith('.json'));
 
   characterFiles.forEach(filename => {
     const filePath = join(charactersDir, filename);
