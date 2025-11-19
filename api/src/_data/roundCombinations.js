@@ -2,28 +2,20 @@
  * Global Data: Round Combinations
  * Pre-generates all possible round combinations for pagination
  */
-import { readFileSync } from 'fs';
+import { readFileSync, readdirSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const characterFiles = [
-  'humanFighter.json',
-  'evilHumanFighter.json',
-  'goblinFighter.json',
-  'humanWithQuarterstaff.json',
-  'lizardMan.json',
-  'mummy.json',
-  'skeletonWarrior.json',
-  'troll.json'
-];
-
 export default function() {
   const charactersDir = join(__dirname, '../../../src/characters');
   const characters = {};
   const slugs = [];
+
+  // Dynamically load all JSON files from the characters directory
+  const characterFiles = readdirSync(charactersDir).filter(file => file.endsWith('.json'));
 
   // Load all characters
   characterFiles.forEach(filename => {
