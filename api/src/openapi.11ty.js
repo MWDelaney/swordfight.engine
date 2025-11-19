@@ -69,7 +69,24 @@ export default {
                         characterDetail: "/characters/{slug}.json",
                         rounds: "/rounds/{char1}/{char2}/{move1}/{move2}.json"
                       },
-                      characters: data.characters.list
+                      characters: [
+                        {
+                          slug: "human-fighter",
+                          name: "Human Fighter",
+                          description: "Human fighter with sword and shield",
+                          health: "12",
+                          weapon: "Broadsword",
+                          shield: "Shield"
+                        },
+                        {
+                          slug: "goblin",
+                          name: "Goblin",
+                          description: "Goblin with mace and shield",
+                          health: "13",
+                          weapon: "Mace",
+                          shield: "Wooden Shield"
+                        }
+                      ]
                     }
                   }
                 }
@@ -99,7 +116,24 @@ export default {
                       }
                     },
                     example: {
-                      characters: data.characters.list
+                      characters: [
+                        {
+                          slug: "human-fighter",
+                          name: "Human Fighter",
+                          description: "Human fighter with sword and shield",
+                          health: "12",
+                          weapon: "Broadsword",
+                          shield: "Shield"
+                        },
+                        {
+                          slug: "goblin",
+                          name: "Goblin",
+                          description: "Goblin with mace and shield",
+                          health: "13",
+                          weapon: "Mace",
+                          shield: "Wooden Shield"
+                        }
+                      ]
                     }
                   }
                 }
@@ -133,7 +167,35 @@ export default {
                     schema: {
                       $ref: "#/components/schemas/Character"
                     },
-                    example: data.characters.all['human-fighter'] || data.characters.all[data.characters.slugs[0]]
+                    example: {
+                      name: "Human Fighter",
+                      slug: "human-fighter",
+                      description: "Human fighter with sword and shield",
+                      health: "12",
+                      firstMove: "62",
+                      weapon: "Broadsword",
+                      shield: "Shield",
+                      moves: [
+                        {
+                          tag: "Down Swing",
+                          name: "Smash",
+                          range: "close",
+                          type: "strong",
+                          id: "24",
+                          mod: "3",
+                          requiresWeapon: true
+                        },
+                        {
+                          tag: "Side Swing",
+                          name: "High",
+                          range: "close",
+                          type: "high",
+                          id: "10",
+                          mod: "1",
+                          requiresWeapon: true
+                        }
+                      ]
+                    }
                   }
                 }
               },
@@ -213,32 +275,32 @@ export default {
                           name: "Smash",
                           tag: "Down Swing"
                         },
-                        outcome: 7,
-                        result: "You deliver a crushing blow!",
+                        outcome: "45",
+                        result: "Parrying high",
                         range: "close",
-                        score: 3,
-                        totalScore: 3,
-                        modifier: 3,
+                        score: "-4",
+                        totalScore: 0,
+                        modifier: "3",
                         bonus: 0,
                         nextRoundBonus: 0,
                         restrictions: []
                       },
                       player2: {
                         character: {
-                          slug: "goblin-fighter",
-                          name: "Goblin Fighter"
+                          slug: "goblin",
+                          name: "Goblin"
                         },
                         move: {
                           id: "10",
                           name: "High",
                           tag: "Side Swing"
                         },
-                        outcome: 4,
-                        result: "Your attack is blocked!",
+                        outcome: "45",
+                        result: "Parrying high",
                         range: "close",
-                        score: 0,
+                        score: "-4",
                         totalScore: 0,
-                        modifier: 1,
+                        modifier: "1",
                         bonus: 0,
                         nextRoundBonus: 0,
                         restrictions: []
@@ -314,13 +376,19 @@ export default {
                 example: "12"
               },
               weapon: {
-                type: "string",
-                description: "Equipped weapon",
+                oneOf: [
+                  { type: "string" },
+                  { type: "boolean" }
+                ],
+                description: "Equipped weapon or false if none",
                 example: "Broadsword"
               },
               shield: {
-                type: "string",
-                description: "Equipped shield (if any)",
+                oneOf: [
+                  { type: "string" },
+                  { type: "boolean" }
+                ],
+                description: "Equipped shield or false if none",
                 example: "Shield"
               }
             }
@@ -350,12 +418,18 @@ export default {
                 description: "ID of the first available move"
               },
               weapon: {
-                type: "string",
-                description: "Equipped weapon"
+                oneOf: [
+                  { type: "string" },
+                  { type: "boolean" }
+                ],
+                description: "Equipped weapon or false if none"
               },
               shield: {
-                type: "string",
-                description: "Equipped shield (if any)"
+                oneOf: [
+                  { type: "string" },
+                  { type: "boolean" }
+                ],
+                description: "Equipped shield or false if none"
               },
               moves: {
                 type: "array",
@@ -436,8 +510,8 @@ export default {
                 }
               },
               outcome: {
-                type: "number",
-                description: "Numeric outcome ID from combat resolution"
+                type: "string",
+                description: "Outcome ID from combat resolution"
               },
               result: {
                 type: "string",
@@ -449,7 +523,10 @@ export default {
                 description: "Combat range for this round"
               },
               score: {
-                type: "number",
+                oneOf: [
+                  { type: "string" },
+                  { type: "number" }
+                ],
                 description: "Base damage score for this round"
               },
               totalScore: {
@@ -457,7 +534,10 @@ export default {
                 description: "Total damage including modifiers and bonuses"
               },
               modifier: {
-                type: "number",
+                oneOf: [
+                  { type: "string" },
+                  { type: "number" }
+                ],
                 description: "Move-specific damage modifier"
               },
               bonus: {
