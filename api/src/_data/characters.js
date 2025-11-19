@@ -17,8 +17,7 @@ const characterFiles = [
   'humanWithQuarterstaff.json',
   'lizardMan.json',
   'mummy.json',
-  'skeletonWarrior.json',
-  'troll.json'
+  'skeletonWarrior.json'
 ];
 
 /**
