@@ -22,12 +22,13 @@ export class ComputerOpponent {
    * Get a random move for the opponent
    */
   getMove(callback) {
-    if (!this.game.opponentsRoundData) {
-      return;
-    }
-    // Use opponentsRoundData.result because the stored data is swapped:
-    // rounds[N].opponentsRoundData actually contains what happened to the opponent
-    const result = this.game.opponentsRoundData.result;
+    // Get the result from the previous round that determines opponent's available moves
+    // Use stored round data (myRoundData contains what happened to opponent after the swap)
+    const previousRound = this.game.roundNumber > 0 ? this.game.rounds[this.game.roundNumber - 1] : null;
+    const result = previousRound?.myRoundData?.result
+      ? previousRound.myRoundData.result
+      : { range: this.game.opponentsCharacter.moves[0].range, restrict: [] };
+
     const moves = new Moves(this.game.opponentsCharacter, result);
 
     // Get a random move from the opponent's moves
