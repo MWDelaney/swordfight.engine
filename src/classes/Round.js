@@ -10,13 +10,15 @@ export class Round {
    * @param {object} opponentsMove - The opponent's move
    * @param {object} myCharacter - The player's character
    * @param {object} opponentsCharacter - The opponent's character
+   * @param {object} previousRoundData - The previous round's complete data (includes bonuses)
    */
-  constructor(game, myMove, opponentsMove, myCharacter, opponentsCharacter) {
+  constructor(game, myMove, opponentsMove, myCharacter, opponentsCharacter, previousRoundData = null) {
     this.game = game;
     this.myMove = myMove;
     this.opponentsMove = opponentsMove;
     this.myCharacter = myCharacter;
     this.opponentsCharacter = opponentsCharacter;
+    this.previousRoundData = previousRoundData;
     this.outcome = this.getOutcome(this.opponentsCharacter.tables, this.myMove, this.opponentsMove);
     this.result = this.getResult(this.outcome, this.opponentsCharacter);
     this.range = this.getRange();
@@ -24,7 +26,7 @@ export class Round {
     this.moveModifier = this.getModifier();
     this.score = this.getScore();
     this.bonus = this.getMyBonus();
-    this.nextRoundBonus = this.getBonus(this.myCharacter, this.myCharacter, this.opponentsMove, this.myMove);
+    this.nextRoundBonus = this.getNextRoundBonus();
     this.totalScore = this.getTotalScore(this.score, this.moveModifier, this.bonus);
   }
 
@@ -104,7 +106,17 @@ export class Round {
   }
 
   /**
-   * getBonus
+   * getNextRoundBonus
+   * Calculate what bonus this round's result will provide to the next round
+   */
+  getNextRoundBonus() {
+    // Return the bonus array from this round's result, or 0 if none exists
+    return this.result.bonus || 0;
+  }
+
+  /**
+   * getBonus (deprecated - kept for backward compatibility)
+   * This method is no longer used in the primary flow but kept for any external dependencies
    */
   getBonus(character, opponentCharacter, myMove, opponentsMove) {
     if (this.game.rounds.length === 1) {
@@ -119,31 +131,42 @@ export class Round {
 
   /**
    * calculateBonus
+   * Calculate the bonus to apply to the current move based on the previous round's bonus data
+   * @param {object} move - The current move being made
+   * @param {array} previousRoundBonus - The bonus array from the previous round's result
    */
-  calculateBonus(character, opponentCharacter, move, previousMove, previousOpponentsMove) {
+  calculateBonus(move, previousRoundBonus) {
     let bonus = 0;
-    const previousRoundBonus = this.getBonus(character, opponentCharacter, previousMove, previousOpponentsMove);
 
-    if (previousRoundBonus.length) {
-      previousRoundBonus.forEach(obj => {
-        for (const key in obj) {
-          if (move.type === key || move.tag === key || move.name === key) {
-            bonus += +obj[key];
-          }
-        }
-      });
+    // If there's no bonus data or it's not an array, return 0
+    if (!previousRoundBonus || !previousRoundBonus.length) {
+      return 0;
     }
+
+    // Check each bonus object in the array
+    previousRoundBonus.forEach(obj => {
+      for (const key in obj) {
+        // Apply bonus if the key matches the move's type, tag, or name
+        if (move.type === key || move.tag === key || move.name === key) {
+          bonus += +obj[key];
+        }
+      }
+    });
 
     return bonus;
   }
 
   /**
    * getMyBonus
+   * Get the bonus that should be applied to this round based on the previous round's outcome
    */
   getMyBonus() {
-    if (this.game.rounds.length <= 1) {return 0;}
+    // No bonus for the first round or if no previous round data
+    if (!this.previousRoundData || !this.previousRoundData.myRoundData) {
+      return 0;
+    }
 
-    const previousRound = this.game.rounds[this.game.rounds.length - 2];
-    return this.calculateBonus(this.myCharacter, this.opponentsCharacter, this.myMove, previousRound.myMove, previousRound.opponentsMove);
+    // Use the stored nextRoundBonus from the previous round
+    return this.calculateBonus(this.myMove, this.previousRoundData.myRoundData.nextRoundBonus);
   }
 }

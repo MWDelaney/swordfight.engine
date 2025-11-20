@@ -146,8 +146,10 @@ export class Game {
         }
 
         // Create a new round object for each player
-        this.myRoundData = new Round(this, this.myMove, this.opponentsMove, this.myCharacter, this.opponentsCharacter);
-        this.opponentsRoundData = new Round(this, this.opponentsMove, this.myMove, this.opponentsCharacter, this.myCharacter);
+        // Pass the previous round's data so bonuses can be applied
+        const previousRoundData = this.roundNumber > 0 ? this.rounds[this.roundNumber - 1] : null;
+        this.myRoundData = new Round(this, this.myMove, this.opponentsMove, this.myCharacter, this.opponentsCharacter, previousRoundData);
+        this.opponentsRoundData = new Round(this, this.opponentsMove, this.myMove, this.opponentsCharacter, this.myCharacter, previousRoundData);
 
         // Take damage
         this.takeDamage(this.myCharacter, this.opponentsRoundData);
@@ -184,6 +186,10 @@ export class Game {
 
         // Check for defeat
         this.checkForDefeat();
+
+        // Store the complete round data for bonus calculations in the next round
+        this.rounds[this.roundNumber].myRoundData = this.myRoundData;
+        this.rounds[this.roundNumber].opponentsRoundData = this.opponentsRoundData;
 
         // Increment the round number
         this.incrementRound();
