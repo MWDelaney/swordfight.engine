@@ -188,14 +188,15 @@ export class Game {
         this.checkForDefeat();
 
         // Store only the data needed for next round (avoid circular references)
-        // Note: myRoundData contains the result of MY move, which affects the OPPONENT's restrictions
-        // So we swap them when storing for the next round's perspective
+        // Note: For result, we swap perspectives because myRoundData.result is what happened to ME,
+        // which determines the OPPONENT's restrictions, and vice versa
+        // But for bonuses, each character keeps their own (from their result)
         this.rounds[this.roundNumber].myRoundData = {
-          nextRoundBonus: this.opponentsRoundData.nextRoundBonus,
+          nextRoundBonus: this.myRoundData.nextRoundBonus,
           result: this.opponentsRoundData.result
         };
         this.rounds[this.roundNumber].opponentsRoundData = {
-          nextRoundBonus: this.myRoundData.nextRoundBonus,
+          nextRoundBonus: this.opponentsRoundData.nextRoundBonus,
           result: this.myRoundData.result
         };
 
