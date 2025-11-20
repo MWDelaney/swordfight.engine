@@ -188,11 +188,13 @@ export class Game {
         this.checkForDefeat();
 
         // Store only the bonus data needed for next round calculations (avoid circular references)
+        // Note: myRoundData contains the result of MY move, which creates a bonus for the OPPONENT
+        // So we swap them when storing for the next round's perspective
         this.rounds[this.roundNumber].myRoundData = {
-          nextRoundBonus: this.myRoundData.nextRoundBonus
+          nextRoundBonus: this.opponentsRoundData.nextRoundBonus
         };
         this.rounds[this.roundNumber].opponentsRoundData = {
-          nextRoundBonus: this.opponentsRoundData.nextRoundBonus
+          nextRoundBonus: this.myRoundData.nextRoundBonus
         };
 
         // Increment the round number
