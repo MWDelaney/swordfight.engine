@@ -187,14 +187,16 @@ export class Game {
         // Check for defeat
         this.checkForDefeat();
 
-        // Store only the bonus data needed for next round calculations (avoid circular references)
-        // Note: myRoundData contains the result of MY move, which creates a bonus for the OPPONENT
+        // Store only the data needed for next round (avoid circular references)
+        // Note: myRoundData contains the result of MY move, which affects the OPPONENT's restrictions
         // So we swap them when storing for the next round's perspective
         this.rounds[this.roundNumber].myRoundData = {
-          nextRoundBonus: this.opponentsRoundData.nextRoundBonus
+          nextRoundBonus: this.opponentsRoundData.nextRoundBonus,
+          result: this.opponentsRoundData.result
         };
         this.rounds[this.roundNumber].opponentsRoundData = {
-          nextRoundBonus: this.myRoundData.nextRoundBonus
+          nextRoundBonus: this.myRoundData.nextRoundBonus,
+          result: this.myRoundData.result
         };
 
         // Increment the round number
@@ -318,8 +320,21 @@ export class Game {
           this.rounds[this.roundNumber] = {};
         }
 
-        // Find the move corresponding to the received move ID
-        const opponentsMove = this.opponentsCharacter.moves.find(move => move.id === data.move.id);
+        // Get the filtered moves available to the opponent based on the previous round's result
+        // Use the stored result from the previous round (my result affects opponent's available moves)
+        const previousRoundResult = this.roundNumber > 0 && this.rounds[this.roundNumber - 1]?.myRoundData?.result
+          ? this.rounds[this.roundNumber - 1].myRoundData.result
+          : { range: this.opponentsCharacter.moves[0].range, restrict: [] };
+        const opponentMoves = new Moves(this.opponentsCharacter, previousRoundResult);
+
+        // Find the move in the FILTERED moves list (validates it's actually allowed)
+        const opponentsMove = opponentMoves.filteredMoves.find(move => move.id === data.move.id);
+
+        // If the move is not in the filtered list, it's an invalid move
+        if (!opponentsMove) {
+          console.error(`Invalid move received: ${data.move.id} is not allowed in current state`);
+          throw new Error('Move not allowed in current state');
+        }
 
         // Dispatch a custom event for the opponent's move for the front end
         const opponentsMoveEvent = new CustomEvent('opponentsMove', { detail: opponentsMove });

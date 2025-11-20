@@ -25,6 +25,8 @@ export class ComputerOpponent {
     if (!this.game.opponentsRoundData) {
       return;
     }
+    // Use opponentsRoundData.result because the stored data is swapped:
+    // rounds[N].opponentsRoundData actually contains what happened to the opponent
     const result = this.game.opponentsRoundData.result;
     const moves = new Moves(this.game.opponentsCharacter, result);
 
