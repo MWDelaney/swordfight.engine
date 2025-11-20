@@ -363,10 +363,14 @@ export class Game {
     if (!this.loaded) {
       if (roundData.score !== '' && roundData.totalScore > 0) {
         character.health -= roundData.totalScore;
-        console.log(`Applied ${roundData.totalScore} damage to ${character.name}. New health: ${character.health}`);
+        if (window.logging) {
+          console.log(`Applied ${roundData.totalScore} damage to ${character.name}. New health: ${character.health}`);
+        }
       }
     } else {
-      console.log(`Skipped damage (game was loaded). this.loaded = ${this.loaded}`);
+      if (window.logging) {
+        console.log(`Skipped damage (game was loaded). this.loaded = ${this.loaded}`);
+      }
     }
 
     // Dislodged weapon (temporary - can be retrieved)
@@ -409,7 +413,9 @@ export class Game {
 
         if (actualHeal > 0) {
           character.health = newHealth;
-          console.log(`Healed ${actualHeal} health for ${character.name}. New health: ${character.health}`);
+          if (window.logging) {
+            console.log(`Healed ${actualHeal} health for ${character.name}. New health: ${character.health}`);
+          }
         }
       }
     }
@@ -424,7 +430,9 @@ export class Game {
       // Self-damage occurs when the character scores (hits opponent)
       if (roundData.result.selfDamage && roundData.score !== '' && roundData.totalScore > 0) {
         character.health -= roundData.result.selfDamage;
-        console.log(`Applied ${roundData.result.selfDamage} self-damage to ${character.name}. New health: ${character.health}`);
+        if (window.logging) {
+          console.log(`Applied ${roundData.result.selfDamage} self-damage to ${character.name}. New health: ${character.health}`);
+        }
       }
     }
   }
@@ -488,12 +496,16 @@ export class Game {
 
     // If either character's health is less than or equal to 0, dispatch the appropriate event
     if (this.myCharacter.health <= 0) {
-      console.log(`${this.myCharacter.name} (you) is defeated!`);
+      if (window.logging) {
+        console.log(`${this.myCharacter.name} (you) is defeated!`);
+      }
       document.dispatchEvent(defeatEvent);
       return;
     }
     if (this.opponentsCharacter.health <= 0) {
-      console.log(`${this.opponentsCharacter.name} (your opponent) is defeated!`);
+      if (window.logging) {
+        console.log(`${this.opponentsCharacter.name} (your opponent) is defeated!`);
+      }
       document.dispatchEvent(victoryEvent);
       return;
     }
