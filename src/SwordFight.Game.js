@@ -233,8 +233,8 @@ export class Game {
   saveGame() {
     const savedGame = {
       rounds: this.rounds,
-      roundNumber: this.roundNumber - 1,
-      opponentsRound: this.opponentsRound - 1,
+      roundNumber: this.roundNumber,
+      opponentsRound: this.opponentsRound,
       myCharacter: this.myCharacter,
       opponentsCharacter: this.opponentsCharacter,
       myMove: this.myMove,
@@ -310,38 +310,15 @@ export class Game {
     try {
       // Request the opponent's move from the multiplayer service
       this.Multiplayer.getMove((data) => {
-        // Validate the received data
-        if (!data || !data.move || !data.move.id) {
-          throw new Error('Invalid move data received');
-        }
-
-        // Ensure the current round exists in the rounds array
+        // Store the move in the rounds array
         if (!this.rounds[this.roundNumber]) {
           this.rounds[this.roundNumber] = {};
         }
-
-        // Get the filtered moves available to the opponent based on the previous round's result
-        // Use the stored result from the previous round (my result affects opponent's available moves)
-        const previousRoundResult = this.roundNumber > 0 && this.rounds[this.roundNumber - 1]?.myRoundData?.result
-          ? this.rounds[this.roundNumber - 1].myRoundData.result
-          : { range: this.opponentsCharacter.moves[0].range, restrict: [] };
-        const opponentMoves = new Moves(this.opponentsCharacter, previousRoundResult);
-
-        // Find the move in the FILTERED moves list (validates it's actually allowed)
-        const opponentsMove = opponentMoves.filteredMoves.find(move => move.id === data.move.id);
-
-        // If the move is not in the filtered list, it's an invalid move
-        if (!opponentsMove) {
-          console.error(`Invalid move received: ${data.move.id} is not allowed in current state`);
-          throw new Error('Move not allowed in current state');
-        }
+        this.rounds[this.roundNumber]['opponentsMove'] = data.move;
 
         // Dispatch a custom event for the opponent's move for the front end
-        const opponentsMoveEvent = new CustomEvent('opponentsMove', { detail: opponentsMove });
+        const opponentsMoveEvent = new CustomEvent('opponentsMove', { detail: data.move });
         document.dispatchEvent(opponentsMoveEvent);
-
-        // Assign the move to the current round
-        this.rounds[this.roundNumber]['opponentsMove'] = opponentsMove;
 
         // Set up the game state for the next step
         this.setUp();

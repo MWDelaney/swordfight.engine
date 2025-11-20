@@ -23,11 +23,9 @@ export class ComputerOpponent {
    */
   getMove(callback) {
     // Get the result from the previous round that determines opponent's available moves
-    // Use stored round data (myRoundData contains what happened to opponent after the swap)
+    // The result that affects the opponent is in opponentsRoundData (from player's perspective, it's the result the player inflicted)
     const previousRound = this.game.roundNumber > 0 ? this.game.rounds[this.game.roundNumber - 1] : null;
-    const result = previousRound?.myRoundData?.result
-      ? previousRound.myRoundData.result
-      : { range: this.game.opponentsCharacter.moves[0].range, restrict: [] };
+    const result = previousRound?.opponentsRoundData?.result || { range: this.game.opponentsCharacter.moves[0].range, restrict: [], allowOnly: null };
 
     const moves = new Moves(this.game.opponentsCharacter, result);
 
@@ -36,7 +34,10 @@ export class ComputerOpponent {
 
     // If the character does not have their weapon, the opponent has a 1 in 3 chance of retrieving their weapon
     if (!this.game.opponentsCharacter.weapon && Math.random() > 0.75) {
-      move = moves.filteredMoves.find(move => move.name === 'Retrieve Weapon');
+      const retrieveMove = moves.filteredMoves.find(move => move.name === 'Retrieve Weapon');
+      if (retrieveMove) {
+        move = retrieveMove;
+      }
     }
 
     // Invoke the callback with the selected move
