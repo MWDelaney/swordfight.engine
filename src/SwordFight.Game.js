@@ -187,9 +187,13 @@ export class Game {
         // Check for defeat
         this.checkForDefeat();
 
-        // Store the complete round data for bonus calculations in the next round
-        this.rounds[this.roundNumber].myRoundData = this.myRoundData;
-        this.rounds[this.roundNumber].opponentsRoundData = this.opponentsRoundData;
+        // Store only the bonus data needed for next round calculations (avoid circular references)
+        this.rounds[this.roundNumber].myRoundData = {
+          nextRoundBonus: this.myRoundData.nextRoundBonus
+        };
+        this.rounds[this.roundNumber].opponentsRoundData = {
+          nextRoundBonus: this.opponentsRoundData.nextRoundBonus
+        };
 
         // Increment the round number
         this.incrementRound();
