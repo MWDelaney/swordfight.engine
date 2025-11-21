@@ -65,6 +65,11 @@ export class Moves {
         return false;
       }
 
+      // If the move's name is in the result's restrict array, filter it out
+      if(this.result.restrict.includes(move.name)) {
+        return false;
+      }
+
       return true;
     });
   }
