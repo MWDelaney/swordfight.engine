@@ -59,7 +59,7 @@ const liteBuildOptions = {
       build.onResolve({ filter: /\/characters\/.*\.json$/ }, () => {
         return { path: 'excluded', namespace: 'excluded-ns' };
       });
-      
+
       // Return an empty object for excluded modules
       build.onLoad({ filter: /.*/, namespace: 'excluded-ns' }, () => {
         return { contents: 'export default {}', loader: 'js' };
