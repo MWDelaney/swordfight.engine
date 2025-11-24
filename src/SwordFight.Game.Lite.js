@@ -35,6 +35,10 @@ export class CharacterLoader {
    */
   static setApiBase(url) {
     this.apiBase = url.replace(/\/$/, '');
+    // Also update RoundAPI class API base for consistency
+    import('./classes/RoundAPI.js').then(({ RoundAPI }) => {
+      RoundAPI.setApiBase(url);
+    });
   }
 
   /**
@@ -130,6 +134,8 @@ export class Game extends BaseGame {
 
 // Export core classes for independent use
 export { Round } from './classes/Round.js';
+export { RoundAPI } from './classes/RoundAPI.js';
+export { RoundFactory } from './classes/RoundFactory.js';
 export { Moves } from './classes/Moves.js';
 export { Multiplayer } from './classes/Multiplayer.js';
 export { BonusCalculator } from './classes/BonusCalculator.js';

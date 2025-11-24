@@ -1,0 +1,114 @@
+import { BonusCalculator } from './BonusCalculator.js';
+
+/**
+ * @class RoundAPI
+ * @description This class manages game rounds by fetching pre-computed data from an API.
+ * Used with lightweight character data that doesn't include tables and results.
+ */
+export class RoundAPI {
+  static apiBase = 'https://api.swordfight.me';
+
+  /**
+   * Set the API base URL for fetching round data
+   * @param {string} url - Base URL for the API
+   */
+  static setApiBase(url) {
+    RoundAPI.apiBase = url.replace(/\/$/, '');
+  }
+
+  /**
+   * @constructor
+   * @param {object} game - The game object
+   * @param {object} myMove - The player's move
+   * @param {object} opponentsMove - The opponent's move
+   * @param {object} myCharacter - The player's character
+   * @param {object} opponentsCharacter - The opponent's character
+   * @param {object} previousRoundData - The previous round's complete data (includes bonuses)
+   */
+  constructor(game, myMove, opponentsMove, myCharacter, opponentsCharacter, previousRoundData = null) {
+    this.game = game;
+    this.myMove = myMove;
+    this.opponentsMove = opponentsMove;
+    this.myCharacter = myCharacter;
+    this.opponentsCharacter = opponentsCharacter;
+    this.previousRoundData = previousRoundData;
+    
+    // Initialize properties (will be populated by init())
+    this.outcome = null;
+    this.result = null;
+    this.range = null;
+    this.restrictions = null;
+    this.moveModifier = null;
+    this.score = null;
+    this.bonus = null;
+    this.nextRoundBonus = null;
+    this.totalScore = null;
+  }
+
+  /**
+   * Initialize round by fetching data from API
+   * MUST be called after construction
+   */
+  async init() {
+    try {
+      const url = `${RoundAPI.apiBase}/rounds/${this.myCharacter.slug}/${this.opponentsCharacter.slug}/${this.myMove.id}/${this.opponentsMove.id}.json`;
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch round data: ${response.status}`);
+      }
+      
+      const roundData = await response.json();
+      
+      // Map API response to Round properties
+      // player1 is "me", player2 is "opponent"
+      this.outcome = roundData.player1.outcome;
+      this.result = roundData.player1.result;
+      this.range = roundData.player1.range;
+      this.restrictions = roundData.player1.restrictions;
+      this.moveModifier = roundData.player1.modifier;
+      this.score = roundData.player1.score;
+      this.nextRoundBonus = roundData.player1.nextRoundBonus;
+      
+      // Calculate bonus from previous round (not from API)
+      this.bonus = this.getMyBonus();
+      
+      // Recalculate total score with our bonus
+      this.totalScore = this.getTotalScore(this.score, this.moveModifier, this.bonus);
+    } catch (error) {
+      console.error('Failed to initialize round from API:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * getTotalScore
+   */
+  getTotalScore(score, movemod, bonus) {
+    return BonusCalculator.calculateTotalScore(score, movemod, bonus);
+  }
+
+  /**
+   * getMyBonus
+   * Get the bonus that should be applied to this round based on the previous round's outcome
+   */
+  getMyBonus() {
+    // No bonus for the first round or if no previous round data
+    if (!this.previousRoundData || !this.previousRoundData.myRoundData) {
+      return 0;
+    }
+
+    // Use the stored nextRoundBonus from the previous round
+    return BonusCalculator.calculateBonus(this.myMove, this.previousRoundData.myRoundData.nextRoundBonus);
+  }
+
+  /**
+   * calculateBonus
+   * Calculate the bonus to apply to the current move based on the previous round's bonus data
+   * @param {object} move - The current move being made
+   * @param {array} previousRoundBonus - The bonus array from the previous round's result
+   */
+  calculateBonus(move, previousRoundBonus) {
+    return BonusCalculator.calculateBonus(move, previousRoundBonus);
+  }
+}

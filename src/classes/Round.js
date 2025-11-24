@@ -2,7 +2,8 @@ import { BonusCalculator } from './BonusCalculator.js';
 
 /**
  * @class Round
- * @description This class is responsible for managing the game rounds.
+ * @description This class is responsible for managing the game rounds with local calculation.
+ * Uses bundled character data with tables and results.
  */
 export class Round {
   /**
@@ -30,6 +31,15 @@ export class Round {
     this.bonus = this.getMyBonus();
     this.nextRoundBonus = this.getNextRoundBonus();
     this.totalScore = this.getTotalScore(this.score, this.moveModifier, this.bonus);
+  }
+
+  /**
+   * No-op init for compatibility with RoundAPI
+   * Allows Game class to call init() on all rounds without checking type
+   */
+  async init() {
+    // Already initialized in constructor
+    return Promise.resolve();
   }
 
   /**

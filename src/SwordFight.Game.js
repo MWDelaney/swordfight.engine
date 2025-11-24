@@ -28,7 +28,7 @@
  * ```
  */
 
-import { Round } from './classes/Round.js';
+import { RoundFactory } from './classes/RoundFactory.js';
 import { Multiplayer } from './classes/Multiplayer.js';
 import { ComputerOpponent } from './classes/Opponent.js';
 import { Moves } from './classes/Moves.js';
@@ -112,7 +112,7 @@ export class Game {
   /**
    * Set up the game.
    */
-  setUp() {
+  async setUp() {
     try {
       // If this is the first round, set myMove and opponentsMove to the initial moves
       this.logGameState();
@@ -147,9 +147,14 @@ export class Game {
 
         // Create a new round object for each player
         // Pass the previous round's data so bonuses can be applied
+        // Factory automatically chooses Round or RoundAPI based on character data
         const previousRoundData = this.roundNumber > 0 ? this.rounds[this.roundNumber - 1] : null;
-        this.myRoundData = new Round(this, this.myMove, this.opponentsMove, this.myCharacter, this.opponentsCharacter, previousRoundData);
-        this.opponentsRoundData = new Round(this, this.opponentsMove, this.myMove, this.opponentsCharacter, this.myCharacter, previousRoundData);
+        this.myRoundData = RoundFactory.create(this, this.myMove, this.opponentsMove, this.myCharacter, this.opponentsCharacter, previousRoundData);
+        this.opponentsRoundData = RoundFactory.create(this, this.opponentsMove, this.myMove, this.opponentsCharacter, this.myCharacter, previousRoundData);
+
+        // Initialize rounds (no-op for Round, API fetch for RoundAPI)
+        await this.myRoundData.init();
+        await this.opponentsRoundData.init();
 
         // Take damage
         this.takeDamage(this.myCharacter, this.opponentsRoundData);
