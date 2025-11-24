@@ -6,9 +6,9 @@
  * opponents the same as multiplayer transports.
  */
 
-import { Moves } from './Moves.js';
-import { BonusCalculator } from './BonusCalculator.js';
-import { MultiplayerTransport } from './transports/MultiplayerTransport.js';
+import { Moves } from '../Moves.js';
+import { BonusCalculator } from '../BonusCalculator.js';
+import { MultiplayerTransport } from './MultiplayerTransport.js';
 
 export class ComputerTransport extends MultiplayerTransport {
   constructor(game, options = {}) {
