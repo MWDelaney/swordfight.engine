@@ -23,9 +23,14 @@ swordfight.engine/
 │   ├── classes/                  # Core game logic classes
 │   │   ├── CharacterLoader.js    # Bundled character loader
 │   │   ├── Moves.js             # Move management and validation
-│   │   ├── Multiplayer.js       # Real-time multiplayer functionality
-│   │   ├── Opponent.js          # Computer opponent AI
-│   │   └── Round.js             # Round logic and calculations
+│   │   ├── Round.js             # Round logic and calculations
+│   │   ├── RoundAPI.js          # API-based round calculation
+│   │   ├── RoundFactory.js      # Round creation factory
+│   │   ├── BonusCalculator.js   # Bonus calculation utilities
+│   │   └── transports/          # Transport implementations
+│   │       ├── MultiplayerTransport.js  # Base transport class
+│   │       ├── ComputerTransport.js     # Computer opponent AI
+│   │       └── WebSocketTransport.js    # WebSocket multiplayer
 │   └── characters/              # Character JSON definitions
 ├── api/                         # Static API generator (Eleventy)
 │   ├── src/                     # API templates

@@ -142,3 +142,4 @@ export { BonusCalculator } from './classes/BonusCalculator.js';
 // Export transport classes for custom multiplayer implementations
 export { MultiplayerTransport } from './classes/transports/MultiplayerTransport.js';
 export { WebSocketTransport } from './classes/transports/WebSocketTransport.js';
+export { ComputerTransport } from './classes/transports/ComputerTransport.js';

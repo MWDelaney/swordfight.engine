@@ -1,21 +1,40 @@
 /**
- * Opponent class
+ * ComputerTransport - Computer opponent implementation
+ *
+ * Implements the MultiplayerTransport interface for single-player games
+ * with AI opponent behavior. This allows the Game class to treat computer
+ * opponents the same as multiplayer transports.
  */
 
 import { Moves } from './Moves.js';
 import { BonusCalculator } from './BonusCalculator.js';
+import { MultiplayerTransport } from './transports/MultiplayerTransport.js';
 
-export class ComputerOpponent {
-  constructor(game) {
-    this.game = game;
+export class ComputerTransport extends MultiplayerTransport {
+  constructor(game, options = {}) {
+    super(game);
+    this.startDelay = options.startDelay || 3000;
+  }
 
-    // Bubble the start event
-    const startEvent = new CustomEvent('start', { detail: { game: this.game } });
-    // Wait 3 seconds then dispatch the start event
-    setTimeout(() => {
-      this.started = true;
-      document.dispatchEvent(startEvent);
-    }, 3000);
+  /**
+   * Connect to the "computer opponent session"
+   * @param {string} _roomId - Not used for computer opponent
+   * @returns {Promise<void>}
+   */
+  async connect(_roomId) {
+    return new Promise((resolve) => {
+      // Dispatch start event after delay
+      setTimeout(() => {
+        this.started = true;
+
+        if (typeof document !== 'undefined') {
+          const startEvent = new CustomEvent('start', { detail: { game: this.game } });
+          document.dispatchEvent(startEvent);
+        }
+
+        resolve();
+      }, this.startDelay);
+    });
   }
 
   /**
@@ -101,4 +120,22 @@ export class ComputerOpponent {
   sendName(name) {
     return name;
   }
+
+  /**
+   * Get the number of connected peers
+   * @returns {number} Always returns 1 for computer opponent
+   */
+  getPeerCount() {
+    return this.started ? 1 : 0;
+  }
+
+  /**
+   * Disconnect from the computer opponent session
+   */
+  disconnect() {
+    this.started = false;
+  }
 }
+
+// Backward compatibility alias
+export const ComputerOpponent = ComputerTransport;

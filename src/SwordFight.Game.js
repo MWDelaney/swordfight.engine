@@ -29,7 +29,7 @@
  */
 
 import { RoundFactory } from './classes/RoundFactory.js';
-import { ComputerOpponent } from './classes/Opponent.js';
+import { ComputerTransport } from './classes/transports/ComputerTransport.js';
 import { Moves } from './classes/Moves.js';
 import { CharacterLoader } from './classes/CharacterLoader.js';
 
@@ -74,30 +74,26 @@ export class Game {
     this.myMove = this.getInitialMove(this.myCharacter);
     this.opponentsMove = this.getInitialMove(this.opponentsCharacter);
 
-    if(this.gameId === 'computer') {
-      this.opponentsCharacter.isComputer = true;
-    }
-
     // Record the starting health
     this.myCharacter.startingHealth = this.myCharacter.health;
     this.opponentsCharacter.startingHealth = this.opponentsCharacter.health;
 
-    // Load the opponent
-    if(this.opponentsCharacter.isComputer) {
-      this.Multiplayer = new ComputerOpponent(this);
-    } else {
-      // Use transport directly (no wrapper layer)
-      // Transport implements the full multiplayer interface
-      if (!this.options.transport) {
-        throw new Error('A transport is required for multiplayer games. Pass options.transport (e.g., new WebSocketTransport(this))');
-      }
+    // Set up transport (computer or multiplayer)
+    if(this.options.transport) {
+      // Use explicitly provided transport (computer or multiplayer)
       this.Multiplayer = this.options.transport;
-
-      // Connect to the multiplayer session
-      this.Multiplayer.connect(this.gameId).catch(error => {
-        console.error('Failed to connect to multiplayer:', error);
-      });
+    } else if(this.gameId === 'computer') {
+      // Auto-create ComputerTransport for convenience when gameId='computer'
+      this.Multiplayer = new ComputerTransport(this, this.options.computerOptions);
+    } else {
+      // No transport provided and not a computer game
+      throw new Error('A transport is required for multiplayer games. Pass options.transport (e.g., new WebSocketTransport(this)) or use gameId="computer"');
     }
+
+    // Connect to the session (works for both computer and multiplayer)
+    this.Multiplayer.connect(this.gameId).catch(error => {
+      console.error('Failed to connect:', error);
+    });
 
     // Load the game from localstorage
     this.loadGame();
@@ -590,3 +586,4 @@ export { BonusCalculator } from './classes/BonusCalculator.js';
 // Export transport classes for custom multiplayer implementations
 export { MultiplayerTransport } from './classes/transports/MultiplayerTransport.js';
 export { WebSocketTransport } from './classes/transports/WebSocketTransport.js';
+export { ComputerTransport } from './classes/transports/ComputerTransport.js';

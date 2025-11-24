@@ -2,16 +2,36 @@
  * Examples of using different multiplayer transports
  *
  * Note: As of v1.1.0, a transport must be explicitly provided.
+ * For computer opponents, you can either use gameId='computer' (automatic)
+ * or explicitly pass a ComputerTransport.
  */
 
-// Example 1: WebSocket transport
-import { Game, WebSocketTransport } from './dist/swordfight-engine.js';
+// Example 1: Computer opponent (automatic when gameId='computer')
+import { Game } from './dist/swordfight-engine.js';
+
+const singlePlayerGame = new Game('computer', 'human-fighter', 'goblin-fighter');
+console.log('Single-player game created:', singlePlayerGame.gameId);
+
+// Example 2: Computer opponent (explicit transport with custom options)
+import { Game as Game0, ComputerTransport } from './dist/swordfight-engine.js';
+
+const computerTransport = new ComputerTransport(null, {
+  startDelay: 1000 // 1 second instead of default 3 seconds
+});
+
+const customComputerGame = new Game0('custom-computer', 'human-monk', 'skeleton-warrior', {
+  transport: computerTransport
+});
+console.log('Custom computer game created:', customComputerGame.gameId);
+
+// Example 3: WebSocket transport
+import { Game as Game1, WebSocketTransport } from './dist/swordfight-engine.js';
 
 const wsTransport = new WebSocketTransport(null, {
   serverUrl: 'wss://my-game-server.com'
 });
 
-const game1 = new Game('room-123', 'human-fighter', 'goblin-fighter', {
+const game1 = new Game1('room-123', 'human-fighter', 'goblin-fighter', {
   transport: wsTransport
 });
 console.log('Game 1 created:', game1.gameId);

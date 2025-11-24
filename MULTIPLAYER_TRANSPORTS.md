@@ -9,18 +9,49 @@ Game Class
     ↓
 Transport (extends MultiplayerTransport)
     ↓
-├── WebSocketTransport
-├── TrysteroTransport (P2P)
+├── ComputerTransport (single-player AI)
+├── WebSocketTransport (server-based multiplayer)
+├── TrysteroTransport (P2P multiplayer)
 └── Custom implementations
 ```
 
-**Key Change:** Transports are used directly by the Game class, eliminating the wrapper layer. This allows P2P transports like Trystero to expose their methods without interference.
+**Key Change:** Transports are used directly by the Game class, eliminating the wrapper layer. This allows P2P transports like Trystero to expose their methods without interference. Even the computer opponent is now a transport, providing a unified interface for both single-player and multiplayer games.
 
 See [MULTIPLAYER_ARCHITECTURE.md](./MULTIPLAYER_ARCHITECTURE.md) for detailed architecture documentation.
 
 ## Using Different Transports
 
-**Note:** A transport must be explicitly provided when creating a multiplayer game.
+**Note:** A transport must be explicitly provided when creating a multiplayer game. For single-player games with a computer opponent, use `gameId='computer'` (automatic) or explicitly pass a `ComputerTransport`.
+
+### Computer Transport (Single-Player)
+
+For single-player games with an AI opponent, the engine automatically uses `ComputerTransport` when `gameId='computer'`:
+
+```javascript
+import { Game } from 'swordfight-engine';
+
+// Automatic - uses ComputerTransport internally
+const game = new Game('computer', 'human-fighter', 'goblin-fighter');
+```
+
+You can also explicitly pass a `ComputerTransport` with custom options:
+
+```javascript
+import { Game, ComputerTransport } from 'swordfight-engine';
+
+const game = new Game('my-game', 'human-monk', 'skeleton-warrior', {
+  transport: new ComputerTransport(game, {
+    startDelay: 1000 // Start after 1 second instead of default 3 seconds
+  })
+});
+```
+
+**Features:**
+- AI opponent with strategic behavior
+- Considers healing moves when health is low
+- Prefers moves with bonuses from previous rounds
+- Has a chance to retrieve dislodged weapons
+- No server or network connection required
 
 ### WebSocket Transport
 
@@ -275,11 +306,15 @@ document.addEventListener('round', (e) => {
 ### Breaking Change: Transport Required
 
 **Before (v1.0.x):**
+
 ```javascript
 const game = new Game('room-123'); // Used Trystero by default
 ```
 
 **After (v1.1.0+):**
+
+For multiplayer:
+
 ```javascript
 import { WebSocketTransport } from './dist/swordfight-engine.js';
 
@@ -290,6 +325,13 @@ const transport = new WebSocketTransport(null, {
 const game = new Game('room-123', 'human-fighter', 'evil-human-fighter', {
   transport: transport
 });
+```
+
+For single-player (computer opponent):
+
+```javascript
+const game = new Game('computer', 'human-fighter', 'goblin-fighter');
+// Automatically uses ComputerTransport
 ```
 
 **Note:** If you were using Trystero/WebRTC, you'll need to implement it in your front-end application. The engine no longer includes Trystero as a dependency.
