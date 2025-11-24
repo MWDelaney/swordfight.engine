@@ -4,12 +4,6 @@
  */
 
 export default function(eleventyConfig) {
-  // Copy CNAME for custom domain
-  eleventyConfig.addPassthroughCopy('src/CNAME');
-
-  // Copy _headers for Netlify CORS configuration
-  eleventyConfig.addPassthroughCopy('_headers');
-
   // Set output to JSON by default
   eleventyConfig.addGlobalData('permalink', () => {
     return (data) => `${data.page.filePathStem}.json`;
