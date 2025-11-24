@@ -50,7 +50,7 @@ const liteBuildOptions = {
   ...sharedOptions,
   entryPoints: ['src/SwordFight.Game.Lite.js'],
   outfile: 'dist/swordfight-engine.lite.js',
-  external: ['trystero'],
+  external: ['trystero', 'excluded'],
   // Mark character JSON files as external so they're not bundled
   plugins: [{
     name: 'exclude-character-data',
