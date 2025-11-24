@@ -50,14 +50,19 @@ const liteBuildOptions = {
   ...sharedOptions,
   entryPoints: ['src/SwordFight.Game.Lite.js'],
   outfile: 'dist/swordfight-engine.lite.js',
-  external: ['trystero', 'excluded'],
+  external: ['trystero'],
   // Mark character JSON files as external so they're not bundled
   plugins: [{
     name: 'exclude-character-data',
     setup(build) {
-      // Exclude all character JSON files
+      // Exclude all character JSON files by providing an empty module
       build.onResolve({ filter: /\/characters\/.*\.json$/ }, () => {
-        return { path: 'excluded', external: true };
+        return { path: 'excluded', namespace: 'excluded-ns' };
+      });
+      
+      // Return an empty object for excluded modules
+      build.onLoad({ filter: /.*/, namespace: 'excluded-ns' }, () => {
+        return { contents: 'export default {}', loader: 'js' };
       });
     }
   }]
