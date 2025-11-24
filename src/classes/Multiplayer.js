@@ -1,17 +1,30 @@
 /**
- * Multiplayer class - Transport-agnostic multiplayer handler
+ * Multiplayer class - DEPRECATED
  *
- * Uses a transport adapter (WebSocketTransport, custom transports, etc.)
- * to handle multiplayer communication
+ * This class is maintained for backward compatibility only.
+ * New code should use transports directly (they extend MultiplayerTransport).
+ *
+ * @deprecated Use transport classes directly instead of wrapping them
+ *
+ * Old way:
+ *   const transport = new WebSocketTransport(game);
+ *   const multiplayer = new Multiplayer(game, transport);
+ *
+ * New way:
+ *   const multiplayer = new WebSocketTransport(game);
+ *   await multiplayer.connect(gameId);
  */
 
 export class Multiplayer {
   constructor(game, transport) {
+    console.warn('Multiplayer wrapper class is deprecated. Use transport classes directly.');
+
     if (!transport) {
       throw new Error('A transport is required for multiplayer. Provide a transport implementation (e.g., WebSocketTransport).');
     }
 
     this.transport = transport;
+    this.game = game;
 
     // Initialize connection
     this.transport.connect(game.gameId).catch(error => {
@@ -19,36 +32,20 @@ export class Multiplayer {
     });
   }
 
-  /**
-   * Send a move to the opponent
-   * @param {Object} data - Move data
-   */
-  sendMove(data) {
-    this.transport.sendMove(data);
-  }
-
-  /**
-   * Register callback for receiving opponent's move
-   * @param {Function} callback - Callback function
-   */
   getMove(callback) {
     this.transport.getMove(callback);
   }
 
-  /**
-   * Send player name to opponent
-   * @param {Object} data - Name data
-   */
-  sendName(data) {
-    this.transport.sendName(data);
-  }
-
-  /**
-   * Register callback for receiving opponent's name
-   * @param {Function} callback - Callback function
-   */
   getName(callback) {
     this.transport.getName(callback);
+  }
+
+  sendMove(data) {
+    this.transport.sendMove(data);
+  }
+
+  sendName(data) {
+    this.transport.sendName(data);
   }
 
   /**

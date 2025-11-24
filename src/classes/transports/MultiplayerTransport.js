@@ -1,9 +1,24 @@
 /**
  * MultiplayerTransport Base Class
  *
- * Abstract interface for multiplayer communication adapters.
- * Implement this interface to support different communication methods
- * (Trystero, Socket.io, WebSockets, etc.)
+ * Abstract base class for multiplayer communication.
+ * Transports extend this class and implement the full multiplayer interface directly.
+ *
+ * This eliminates wrapper layers and allows P2P transports (like Trystero)
+ * to expose their methods directly without breaking the method chain.
+ *
+ * Required methods:
+ * - connect(roomId): async - Connect to room/session
+ * - sendMove(data): void - Send move to opponent
+ * - getMove(callback): void - Register callback for receiving moves
+ * - sendName(data): void - Send player name to opponent
+ * - getName(callback): void - Register callback for receiving name
+ * - disconnect(): void - Disconnect from session
+ * - getPeerCount(): number - Get number of connected peers
+ *
+ * Required properties:
+ * - started: boolean - Whether multiplayer session has started
+ * - game: object - Reference to the game instance
  */
 
 export class MultiplayerTransport {

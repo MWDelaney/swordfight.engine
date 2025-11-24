@@ -21,7 +21,7 @@ export class RoundFactory {
   static create(game, myMove, opponentsMove, myCharacter, opponentsCharacter, previousRoundData = null) {
     // Check if character has complete data for local calculation
     const hasCompleteData = opponentsCharacter.tables && opponentsCharacter.results;
-    
+
     if (hasCompleteData) {
       // Use local Round calculation
       return new Round(game, myMove, opponentsMove, myCharacter, opponentsCharacter, previousRoundData);

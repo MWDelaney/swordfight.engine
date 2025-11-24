@@ -29,7 +29,6 @@
  */
 
 import { RoundFactory } from './classes/RoundFactory.js';
-import { Multiplayer } from './classes/Multiplayer.js';
 import { ComputerOpponent } from './classes/Opponent.js';
 import { Moves } from './classes/Moves.js';
 import { CharacterLoader } from './classes/CharacterLoader.js';
@@ -87,8 +86,17 @@ export class Game {
     if(this.opponentsCharacter.isComputer) {
       this.Multiplayer = new ComputerOpponent(this);
     } else {
-      // Pass custom transport if provided
-      this.Multiplayer = new Multiplayer(this, this.options.transport);
+      // Use transport directly (no wrapper layer)
+      // Transport implements the full multiplayer interface
+      if (!this.options.transport) {
+        throw new Error('A transport is required for multiplayer games. Pass options.transport (e.g., new WebSocketTransport(this))');
+      }
+      this.Multiplayer = this.options.transport;
+
+      // Connect to the multiplayer session
+      this.Multiplayer.connect(this.gameId).catch(error => {
+        console.error('Failed to connect to multiplayer:', error);
+      });
     }
 
     // Load the game from localstorage

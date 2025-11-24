@@ -32,7 +32,7 @@ export class RoundAPI {
     this.myCharacter = myCharacter;
     this.opponentsCharacter = opponentsCharacter;
     this.previousRoundData = previousRoundData;
-    
+
     // Initialize properties (will be populated by init())
     this.outcome = null;
     this.result = null;
@@ -53,13 +53,13 @@ export class RoundAPI {
     try {
       const url = `${RoundAPI.apiBase}/rounds/${this.myCharacter.slug}/${this.opponentsCharacter.slug}/${this.myMove.id}/${this.opponentsMove.id}.json`;
       const response = await fetch(url);
-      
+
       if (!response.ok) {
         throw new Error(`Failed to fetch round data: ${response.status}`);
       }
-      
+
       const roundData = await response.json();
-      
+
       // Map API response to Round properties
       // player1 is "me", player2 is "opponent"
       this.outcome = roundData.player1.outcome;
@@ -69,10 +69,10 @@ export class RoundAPI {
       this.moveModifier = roundData.player1.modifier;
       this.score = roundData.player1.score;
       this.nextRoundBonus = roundData.player1.nextRoundBonus;
-      
+
       // Calculate bonus from previous round (not from API)
       this.bonus = this.getMyBonus();
-      
+
       // Recalculate total score with our bonus
       this.totalScore = this.getTotalScore(this.score, this.moveModifier, this.bonus);
     } catch (error) {

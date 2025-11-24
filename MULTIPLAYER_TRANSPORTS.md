@@ -1,36 +1,41 @@
 # Multiplayer Transport System
 
-The game engine supports multiple communication methods through a transport adapter pattern. This allows you to use WebSockets, WebRTC (via custom implementation), or any custom protocol.
+The game engine supports multiple communication methods through transports that extend `MultiplayerTransport`. Transports implement the full multiplayer interface directly, with no wrapper layer.
 
 ## Architecture
 
 ```
 Game Class
     ↓
-Multiplayer Class
+Transport (extends MultiplayerTransport)
     ↓
-MultiplayerTransport (Interface)
-    ↓
-├── WebSocketTransport (WebSocket)
-└── Custom implementations (WebRTC, Socket.io, etc.)
+├── WebSocketTransport
+├── TrysteroTransport (P2P)
+└── Custom implementations
 ```
+
+**Key Change:** Transports are used directly by the Game class, eliminating the wrapper layer. This allows P2P transports like Trystero to expose their methods without interference.
+
+See [MULTIPLAYER_ARCHITECTURE.md](./MULTIPLAYER_ARCHITECTURE.md) for detailed architecture documentation.
 
 ## Using Different Transports
 
-**Note:** As of version 1.1.0, a transport must be explicitly provided. There is no default transport.
+**Note:** A transport must be explicitly provided when creating a multiplayer game.
 
 ### WebSocket Transport
 
 ```javascript
-import { Game } from './dist/swordfight-engine.js';
-import { WebSocketTransport } from './classes/transports/WebSocketTransport.js';
-
-const transport = new WebSocketTransport(null, {
-  serverUrl: 'wss://your-server.com'
-});
+import { Game, WebSocketTransport } from 'swordfight-engine';
 
 const game = new Game('room-123', 'human-fighter', 'evil-human-fighter', {
-  transport: transport
+  transport: new WebSocketTransport(game, {
+    serverUrl: 'wss://your-server.com'
+  })
+});
+
+// Transport is accessible as game.Multiplayer
+game.Multiplayer.getMove((data) => {
+  console.log('Received move:', data);
 });
 ```
 

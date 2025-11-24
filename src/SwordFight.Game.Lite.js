@@ -137,7 +137,6 @@ export { Round } from './classes/Round.js';
 export { RoundAPI } from './classes/RoundAPI.js';
 export { RoundFactory } from './classes/RoundFactory.js';
 export { Moves } from './classes/Moves.js';
-export { Multiplayer } from './classes/Multiplayer.js';
 export { BonusCalculator } from './classes/BonusCalculator.js';
 
 // Export transport classes for custom multiplayer implementations
