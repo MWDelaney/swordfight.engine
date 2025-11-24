@@ -153,6 +153,36 @@ The game engine communicates with the frontend through custom events:
 - `victory` - Dispatched when the player wins
 - `defeat` - Dispatched when the player loses
 
+## Exported Utilities
+
+The engine exports several utilities for advanced usage:
+
+### BonusCalculator
+
+Static utility class for calculating bonus damage from previous rounds. Useful when building custom clients or using the API directly.
+
+```javascript
+import { BonusCalculator } from 'swordfight-engine';
+
+// Calculate bonus for a move based on previous round's bonus data
+const bonus = BonusCalculator.calculateBonus(move, previousRoundBonus);
+
+// Calculate total score including bonus
+const totalScore = BonusCalculator.calculateTotalScore(baseScore, moveModifier, bonus);
+
+// Get the bonus that will apply to next round
+const nextBonus = BonusCalculator.getNextRoundBonus(result);
+```
+
+See [API_CLIENT_GUIDE.md](API_CLIENT_GUIDE.md#calculating-bonuses) for detailed examples.
+
+### Other Exports
+
+- `CharacterLoader` - Load character data (bundled or from API)
+- `Round` - Round calculation class
+- `MultiplayerTransport` - Base class for custom transport implementations
+- `WebSocketTransport` - WebSocket-based multiplayer transport
+
 ## Building
 
 The project uses esbuild for bundling. 

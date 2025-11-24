@@ -3,6 +3,7 @@
  */
 
 import { Moves } from './Moves.js';
+import { BonusCalculator } from './BonusCalculator.js';
 
 export class ComputerOpponent {
   constructor(game) {
@@ -23,9 +24,9 @@ export class ComputerOpponent {
    */
   getMove(callback) {
     // Get the result from the previous round that determines opponent's available moves
-    // The result that affects the opponent is in opponentsRoundData (from player's perspective, it's the result the player inflicted)
+    // Due to the swap in storage, myRoundData.result contains the opponent's state after the swap
     const previousRound = this.game.roundNumber > 0 ? this.game.rounds[this.game.roundNumber - 1] : null;
-    const result = previousRound?.opponentsRoundData?.result || { range: this.game.opponentsCharacter.moves[0].range, restrict: [], allowOnly: null };
+    const result = previousRound?.myRoundData?.result || { range: this.game.opponentsCharacter.moves[0].range, restrict: [], allowOnly: null };
 
     const moves = new Moves(this.game.opponentsCharacter, result);
 
@@ -38,6 +39,39 @@ export class ComputerOpponent {
       if (retrieveMove) {
         move = retrieveMove;
       }
+    }
+
+    // If the character has less than full health, the opponent has a 1 in 4 chance of using a healing move (if available)
+    if (this.game.opponentsCharacter.health < this.game.opponentsCharacter.startingHealth && Math.random() > 0.75) {
+      // Find moves that could potentially lead to healing results
+      const potentialHealingMoves = moves.filteredMoves.filter(move => {
+        // Check if any possible outcome from this move has a heal property
+        const table = this.game.opponentsCharacter.tables.find(t => t.id === move.id);
+        if (table?.outcomes) {
+          const outcomes = table.outcomes[0];
+          return Object.values(outcomes).some(outcomeId => {
+            const result = this.game.opponentsCharacter.results.find(r => r.id === outcomeId);
+            return result?.heal;
+          });
+        }
+        return false;
+      });
+
+      if (potentialHealingMoves.length > 0) {
+        move = potentialHealingMoves[Math.floor(Math.random() * potentialHealingMoves.length)];
+      }
+    }
+
+    // If a move has a bonus from the previous round, there's a 50% chance the opponent will choose that move
+    const previousRoundData = this.game.roundNumber > 0 ? this.game.rounds[this.game.roundNumber - 1] : null;
+    const opponentPreviousBonus = previousRoundData?.opponentsRoundData?.nextRoundBonus || [];
+    const bonusMoves = moves.filteredMoves.filter(mv => {
+      const bonus = BonusCalculator.calculateBonus(mv, opponentPreviousBonus);
+      return bonus > 0;
+    });
+
+    if (bonusMoves.length > 0 && Math.random() > 0.5) {
+      move = bonusMoves[Math.floor(Math.random() * bonusMoves.length)];
     }
 
     // Invoke the callback with the selected move

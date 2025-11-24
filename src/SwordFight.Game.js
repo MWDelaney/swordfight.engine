@@ -571,6 +571,9 @@ export { CharacterLoader };
 // Export Round class for API generation and external use
 export { Round } from './classes/Round.js';
 
+// Export BonusCalculator for client-side bonus calculations
+export { BonusCalculator } from './classes/BonusCalculator.js';
+
 // Export transport classes for custom multiplayer implementations
 export { MultiplayerTransport } from './classes/transports/MultiplayerTransport.js';
 export { WebSocketTransport } from './classes/transports/WebSocketTransport.js';

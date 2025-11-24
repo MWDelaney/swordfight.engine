@@ -1,3 +1,5 @@
+import { BonusCalculator } from './BonusCalculator.js';
+
 /**
  * @class Round
  * @description This class is responsible for managing the game rounds.
@@ -87,22 +89,10 @@ export class Round {
   }
 
   /**
-   * getScore
+   * getTotalScore
    */
   getTotalScore(score, movemod, bonus) {
-    if (isNaN(score)) {
-      return 0;
-    }
-
-    // Calculate the total score
-    let totalScore = +score + +movemod + +bonus;
-
-    // If the score is less than zero, return zero
-    if (totalScore < 0) {
-      totalScore = 0;
-    }
-
-    return +totalScore;
+    return BonusCalculator.calculateTotalScore(score, movemod, bonus);
   }
 
   /**
@@ -110,8 +100,7 @@ export class Round {
    * Calculate what bonus this round's result will provide to the next round
    */
   getNextRoundBonus() {
-    // Return the bonus array from this round's result, or 0 if none exists
-    return this.result.bonus || 0;
+    return BonusCalculator.getNextRoundBonus(this.result);
   }
 
   /**
@@ -134,26 +123,10 @@ export class Round {
    * Calculate the bonus to apply to the current move based on the previous round's bonus data
    * @param {object} move - The current move being made
    * @param {array} previousRoundBonus - The bonus array from the previous round's result
+   * @deprecated Use BonusCalculator.calculateBonus() instead for direct access to static method
    */
   calculateBonus(move, previousRoundBonus) {
-    let bonus = 0;
-
-    // If there's no bonus data or it's not an array, return 0
-    if (!previousRoundBonus || !previousRoundBonus.length) {
-      return 0;
-    }
-
-    // Check each bonus object in the array
-    previousRoundBonus.forEach(obj => {
-      for (const key in obj) {
-        // Apply bonus if the key matches the move's type, tag, or name
-        if (move.type === key || move.tag === key || move.name === key) {
-          bonus += +obj[key];
-        }
-      }
-    });
-
-    return bonus;
+    return BonusCalculator.calculateBonus(move, previousRoundBonus);
   }
 
   /**
@@ -167,6 +140,6 @@ export class Round {
     }
 
     // Use the stored nextRoundBonus from the previous round
-    return this.calculateBonus(this.myMove, this.previousRoundData.myRoundData.nextRoundBonus);
+    return BonusCalculator.calculateBonus(this.myMove, this.previousRoundData.myRoundData.nextRoundBonus);
   }
 }
