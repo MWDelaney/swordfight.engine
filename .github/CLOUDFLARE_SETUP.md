@@ -10,48 +10,49 @@ This guide explains how to set up automatic deployment of the multiplayer server
 
 ## Step 1: Get CloudFlare API Token
 
-1. Go to [CloudFlare Dashboard](https://dash.cloudflare.com/profile/api-tokens)
-2. Click "Create Token"
-3. Use the "Edit Cloudflare Workers" template
-4. Configure token:
-   - **Permissions**: `Account > Cloudflare Workers Scripts > Edit`
-   - **Account Resources**: Include > Your Account
-5. Click "Continue to summary"
-6. Click "Create Token"
-7. **Copy the token** (you won't see it again!)
+1. **Log in to Cloudflare** at https://dash.cloudflare.com
+2. **Click your profile icon** (top right corner) → Select **"My Profile"**
+3. In the left sidebar, click **"API Tokens"**
+4. Click the blue **"Create Token"** button
+5. Find **"Edit Cloudflare Workers"** template and click **"Use template"**
+6. **Token configuration** (should be pre-filled):
+   - Permissions: `Account > Cloudflare Workers Scripts > Edit`
+   - Account Resources: `Include > [Your Account Name]`
+7. Scroll down and click **"Continue to summary"**
+8. Review and click **"Create Token"**
+9. **IMPORTANT**: Copy the token that appears - you cannot see it again after closing this page
+   - It looks like: `abcdef123456789...`
 
-## Step 2: Add Secret to GitHub
+## Step 2: Add Secrets to GitHub
 
-1. Go to your GitHub repository
-2. Navigate to: **Settings > Secrets and variables > Actions**
-3. Click "New repository secret"
-4. Add secret:
-   - **Name**: `CLOUDFLARE_API_TOKEN`
-   - **Value**: Paste the token from Step 1
-5. Click "Add secret"
+You need to add two secrets: your API token and account ID.
 
-## Step 3: Configure CloudFlare Account ID (Optional)
+### Add API Token
 
-If your `wrangler.toml` doesn't include `account_id`, add it as a secret:
+1. **Go to your GitHub repository** at https://github.com/MWDelaney/swordfight.engine
+2. Click the **"Settings"** tab (top right, next to Insights)
+3. In the left sidebar, expand **"Secrets and variables"** → click **"Actions"**
+4. Click the green **"New repository secret"** button (top right)
+5. Fill in the form:
+   - **Name**: Type exactly `CLOUDFLARE_API_TOKEN`
+   - **Secret**: Paste the token you copied from Step 1
+6. Click **"Add secret"**
 
-1. Get your account ID from CloudFlare Dashboard (right sidebar)
-2. Add another secret:
-   - **Name**: `CLOUDFLARE_ACCOUNT_ID`
-   - **Value**: Your account ID
+### Add Account ID
 
-3. Update `server/wrangler.toml`:
-   ```toml
-   name = "swordfight-multiplayer"
-   # account_id is read from CLOUDFLARE_ACCOUNT_ID env var in CI
-   ```
+1. Go back to the Cloudflare Dashboard at <https://dash.cloudflare.com>
+2. In the main dashboard, look at the **right sidebar**
+3. You'll see **"Account ID"** with a string like `abc123def456...`
+4. Click the **copy icon** next to it
+5. Go back to your GitHub repository **Settings → Secrets and variables → Actions**
+6. Click **"New repository secret"** again
+7. Fill in the form:
+   - **Name**: Type exactly `CLOUDFLARE_ACCOUNT_ID`
+   - **Secret**: Paste your account ID
+8. Click **"Add secret"**
+9. You should now see both `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` in your secrets list
 
-Or simply add it directly to `wrangler.toml` (it's not sensitive):
-```toml
-name = "swordfight-multiplayer"
-account_id = "your-account-id-here"
-```
-
-## Step 4: Verify Workflow
+## Step 3: Verify Workflow
 
 The workflow (`.github/workflows/deploy-cloudflare.yml`) will:
 
@@ -64,11 +65,11 @@ The workflow (`.github/workflows/deploy-cloudflare.yml`) will:
    - Run `wrangler deploy`
    - Output the worker URL
 
-## Step 5: Deploy
+## Step 4: Deploy
 
 ### Automatic Deployment
 
-Push changes to the `server/` directory:
+Any time you push changes to the `server/` directory, GitHub Actions will automatically deploy:
 
 ```bash
 git add server/
@@ -76,29 +77,45 @@ git commit -m "Update multiplayer server"
 git push origin main
 ```
 
-The workflow will automatically deploy to CloudFlare.
+**Watch the deployment:**
 
-### Manual Deployment
+1. Go to your repository on GitHub
+2. Click the **"Actions"** tab (top navigation)
+3. You'll see your deployment running with a yellow dot (in progress) or green checkmark (complete)
+4. Click on the workflow run to see details and the deployed URL
 
-1. Go to **Actions** tab in GitHub
-2. Select "Deploy to CloudFlare"
-3. Click "Run workflow"
-4. Select branch (usually `main`)
-5. Click "Run workflow"
+### Manual Deployment (Testing)
 
-## Step 6: Get Your Worker URL
+To trigger a deployment without making changes:
 
-After successful deployment, your worker will be available at:
+1. Go to your repository on GitHub
+2. Click the **"Actions"** tab
+3. In the left sidebar, click **"Deploy to CloudFlare"**
+4. Click the **"Run workflow"** dropdown button (top right)
+5. Ensure `main` branch is selected
+6. Click the green **"Run workflow"** button
 
-```
-https://swordfight-multiplayer.<your-username>.workers.dev
-```
+## Step 5: Get Your Worker URL
 
-For WebSocket connections, use:
+After successful deployment, find your URL:
 
-```
-wss://swordfight-multiplayer.<your-username>.workers.dev
-```
+**Option 1: From GitHub Actions**
+
+1. Go to **Actions** tab → Click your workflow run
+2. Scroll to the bottom of the logs
+3. Look for: `Published swordfight-multiplayer` followed by your URL
+
+**Option 2: From Cloudflare Dashboard**
+
+1. Go to <https://dash.cloudflare.com>
+2. Click **"Workers & Pages"** in the left sidebar
+3. Click **"swordfight-multiplayer"**
+4. Your URL is shown at the top: `https://swordfight-multiplayer.YOUR-SUBDOMAIN.workers.dev`
+
+**Use these URLs in your client:**
+
+- HTTP/HTTPS: `https://swordfight-multiplayer.YOUR-SUBDOMAIN.workers.dev`
+- WebSocket: `wss://swordfight-multiplayer.YOUR-SUBDOMAIN.workers.dev`
 
 ## Troubleshooting
 
@@ -110,8 +127,8 @@ wss://swordfight-multiplayer.<your-username>.workers.dev
 
 ### Error: "Account ID not found"
 
-- Add `account_id` to `server/wrangler.toml`
-- Or set `CLOUDFLARE_ACCOUNT_ID` secret in GitHub
+- Verify `CLOUDFLARE_ACCOUNT_ID` is set correctly in GitHub Secrets
+- Make sure you copied the entire account ID from Cloudflare Dashboard
 
 ### Error: "Durable Objects not available"
 
@@ -163,16 +180,19 @@ Your multiplayer server will stay well within free tier limits at 10,000+ games/
 
 ## Security Notes
 
-- API tokens are stored as encrypted GitHub Secrets
+- API tokens and account IDs are stored as encrypted GitHub Secrets
 - Never commit tokens to the repository
+- Account IDs are not sensitive, but using secrets keeps your config clean
 - Rotate tokens periodically via CloudFlare Dashboard
 - Use minimal permissions (Workers Edit only)
 
 ## Next Steps
 
-1. Set up the CloudFlare API token (Step 1-2)
-2. Push to main branch to trigger deployment
-3. Update your client with the worker URL
-4. Test the connection!
+1. Get your CloudFlare API token (Step 1)
+2. Add both secrets to GitHub (Step 2)
+3. Push to main branch to trigger deployment (Step 4)
+4. Get your worker URL (Step 5)
+5. Update your client with the worker URL
+6. Test the connection!
 
 See [server/README.md](../server/README.md) for server configuration details.
