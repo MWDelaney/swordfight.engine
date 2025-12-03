@@ -83,6 +83,55 @@ const liteMinifiedOptions = {
   sourcemap: false
 };
 
+// Transport builds (individual files for tree-shaking)
+const transportBuildOptions = {
+  bundle: true,
+  format: 'esm',
+  target: 'es2020',
+  platform: 'browser',
+  sourcemap: false,
+  minify: false,
+  banner: {
+    js: `/**
+ * ${packageJson.name} v${packageJson.version}
+ * Transport Modules
+ *
+ * @author ${packageJson.author}
+ * @license ${packageJson.license}
+ */`
+  },
+  external: [],
+  logLevel: 'info'
+};
+
+const transportBuilds = [
+  {
+    ...transportBuildOptions,
+    entryPoints: ['src/transports.js'],
+    outfile: 'dist/transports.js'
+  },
+  {
+    ...transportBuildOptions,
+    entryPoints: ['src/classes/transports/MultiplayerTransport.js'],
+    outfile: 'dist/transports/MultiplayerTransport.js'
+  },
+  {
+    ...transportBuildOptions,
+    entryPoints: ['src/classes/transports/WebSocketTransport.js'],
+    outfile: 'dist/transports/WebSocketTransport.js'
+  },
+  {
+    ...transportBuildOptions,
+    entryPoints: ['src/classes/transports/DurableObjectTransport.js'],
+    outfile: 'dist/transports/DurableObjectTransport.js'
+  },
+  {
+    ...transportBuildOptions,
+    entryPoints: ['src/classes/transports/ComputerTransport.js'],
+    outfile: 'dist/transports/ComputerTransport.js'
+  }
+];
+
 async function buildProject() {
   try {
     console.log(`Building ${packageJson.name} v${packageJson.version}...`);
@@ -115,6 +164,12 @@ async function buildProject() {
         await build(liteMinifiedOptions);
         console.log('✅ Lite minified build completed');
       }
+
+      // Build transport modules
+      for (const transportBuild of transportBuilds) {
+        await build(transportBuild);
+      }
+      console.log('✅ Transport modules built');
     }
   } catch (error) {
     console.error('Build failed:', error);
