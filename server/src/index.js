@@ -6,6 +6,12 @@
  * connections between two players and forwards messages between them.
  */
 
+const ALLOWED_ORIGINS = [
+  'https://swordfight.me',
+  'https://www.swordfight.me',
+  'http://localhost:8080', // for development
+];
+
 /**
  * GameRoom Durable Object
  *
@@ -24,6 +30,8 @@ export class GameRoom {
    * Handle incoming requests (WebSocket upgrades)
    */
   async fetch(request) {
+    const origin = request.headers.get('Origin');
+
     // Upgrade to WebSocket
     const upgradeHeader = request.headers.get('Upgrade');
     if (!upgradeHeader || upgradeHeader !== 'websocket') {
@@ -45,6 +53,9 @@ export class GameRoom {
       return new Response(null, {
         status: 101,
         webSocket: client,
+        headers: {
+          'Access-Control-Allow-Origin': origin || ALLOWED_ORIGINS[0],
+        },
       });
     }
 
@@ -112,6 +123,9 @@ export class GameRoom {
     return new Response(null, {
       status: 101,
       webSocket: client,
+      headers: {
+        'Access-Control-Allow-Origin': origin || ALLOWED_ORIGINS[0],
+      },
     });
   }
 
@@ -148,12 +162,18 @@ export default {
   async fetch(request, env) {
     try {
       const url = new URL(request.url);
+      const origin = request.headers.get('Origin');
+
+      // Validate origin
+      if (origin && !ALLOWED_ORIGINS.includes(origin)) {
+        return new Response('Forbidden', { status: 403 });
+      }
 
       // Handle CORS preflight
       if (request.method === 'OPTIONS') {
         return new Response(null, {
           headers: {
-            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Origin': origin || ALLOWED_ORIGINS[0],
             'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
             'Access-Control-Allow-Headers': 'Content-Type, Upgrade, Connection',
           },
