@@ -10,4 +10,4 @@ class_name = "GameRoom"
 # Migrations for Durable Objects
 [[migrations]]
 tag = "v1"
-new_classes = ["GameRoom"]
+new_sqlite_classes = ["GameRoom"]
