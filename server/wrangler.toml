@@ -1,0 +1,13 @@
+name = "swordfight-multiplayer"
+main = "src/index.js"
+compatibility_date = "2024-12-03"
+
+# Durable Objects configuration
+[[durable_objects.bindings]]
+name = "SWORD_FIGHTS"
+class_name = "GameRoom"
+
+# Migrations for Durable Objects
+[[migrations]]
+tag = "v1"
+new_classes = ["GameRoom"]

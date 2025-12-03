@@ -60,30 +60,6 @@ export class ComputerTransport extends MultiplayerTransport {
       }
     }
 
-    // If the character has less than full health, the opponent has a 1 in 4 chance of using a healing move (if available)
-    // Only check for healing moves if tables and results are available (not using Lite/API mode)
-    if (this.game.opponentsCharacter.health < this.game.opponentsCharacter.startingHealth &&
-        this.game.opponentsCharacter.tables &&
-        this.game.opponentsCharacter.results &&
-        Math.random() > 0.75) {
-      // Find moves from filteredMoves that could potentially lead to healing results
-      const potentialHealingMoves = moves.filteredMoves.filter(filteredMove => {
-        const table = this.game.opponentsCharacter.tables.find(t => t.id === filteredMove.id);
-        if (table?.outcomes) {
-          const outcomes = table.outcomes[0];
-          return Object.values(outcomes).some(outcomeId => {
-            const result = this.game.opponentsCharacter.results.find(r => r.id === outcomeId);
-            return result?.heal;
-          });
-        }
-        return false;
-      });
-
-      if (potentialHealingMoves.length > 0) {
-        move = potentialHealingMoves[Math.floor(Math.random() * potentialHealingMoves.length)];
-      }
-    }
-
     // If a move has a bonus from the previous round, there's a 50% chance the opponent will choose that move
     const previousRoundData = this.game.roundNumber > 0 ? this.game.rounds[this.game.roundNumber - 1] : null;
     const opponentPreviousBonus = previousRoundData?.opponentsRoundData?.nextRoundBonus || [];

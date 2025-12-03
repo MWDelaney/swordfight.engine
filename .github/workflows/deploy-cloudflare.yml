@@ -1,0 +1,39 @@
+name: Deploy to CloudFlare
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'server/**'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy CloudFlare Worker
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: ./server
+        run: npm ci
+
+      - name: Deploy to CloudFlare
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: './server'
+          command: deploy
+
+      - name: Get Worker URL
+        id: worker-url
+        run: |
+          echo "Worker deployed successfully!"
+          echo "URL will be: wss://swordfight-multiplayer.your-username.workers.dev"

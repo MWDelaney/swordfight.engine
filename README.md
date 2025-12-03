@@ -73,10 +73,26 @@ This project uses ESLint with strict rules for code quality and consistency. Run
 **Full Version (115KB)** - Includes all character data bundled:
 ```javascript
 import { Game } from 'swordfight-engine';
-const game = new Game('my-game-id');
+const game = new Game('computer', 'human-fighter', 'goblin');
 ```
 
-**Lite Version (17KB)** - Loads character data from API:
+**Lite Version (17KB)** - Loads character data from API (recommended for web):
+```javascript
+import { Game, CharacterLoader } from 'swordfight-engine/lite';
+import { DurableObjectTransport } from 'swordfight-engine/transports';
+
+// Configure API endpoint
+CharacterLoader.setApiBase('https://api.swordfight.me');
+
+// Create multiplayer game
+const game = new Game('room-123', 'human-fighter', 'goblin', {
+  transport: new DurableObjectTransport(game, {
+    serverUrl: 'wss://swordfight.your-username.workers.dev'
+  })
+});
+```
+
+**Note:** Transports work the same for both versions - import from `/transports`:
 ```javascript
 import { Game, CharacterLoader } from 'swordfight-engine/lite';
 
@@ -90,14 +106,13 @@ const game = new Game('my-game-id');
 
 See [API_CLIENT_GUIDE.md](API_CLIENT_GUIDE.md) for details on using the static API without the engine.
 
-### Basic Game Setup
+### Basic Game Setup (Single Player)
 
 ```javascript
-import Game from 'swordfight-engine';
+import { Game } from 'swordfight-engine';
 
-// Create a new game instance
-const game = new Game('my-game-id', {
-  myCharacterSlug: 'human-fighter'
+// Computer opponent game (automatic)
+const game = new Game('computer', 'human-fighter', 'goblin-fighter');
 });
 
 // Use CharacterManager for character selection

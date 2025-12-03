@@ -94,14 +94,18 @@ jobs:
 
             ### Usage
             ```javascript
-            import { Game, WebSocketTransport } from 'swordfight-engine';
+            // Computer opponent (single-player)
+            import { Game } from 'swordfight-engine';
+            const game = new Game('computer', 'human-fighter', 'goblin-fighter');
 
-            const transport = new WebSocketTransport(null, {
-              serverUrl: 'wss://your-server.com'
-            });
+            // Multiplayer with CloudFlare
+            import { Game } from 'swordfight-engine';
+            import { DurableObjectTransport } from 'swordfight-engine/transports';
 
             const game = new Game('room-id', 'human-fighter', 'goblin-fighter', {
-              transport: transport
+              transport: new DurableObjectTransport(game, {
+                serverUrl: 'wss://swordfight.your-username.workers.dev'
+              })
             });
             ```
 

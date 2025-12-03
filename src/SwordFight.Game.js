@@ -583,7 +583,8 @@ export { Round } from './classes/Round.js';
 // Export BonusCalculator for client-side bonus calculations
 export { BonusCalculator } from './classes/BonusCalculator.js';
 
-// Export transport classes for custom multiplayer implementations
-export { MultiplayerTransport } from './classes/transports/MultiplayerTransport.js';
-export { WebSocketTransport } from './classes/transports/WebSocketTransport.js';
-export { ComputerTransport } from './classes/transports/ComputerTransport.js';
+// Note: Transport classes should be imported individually from their respective files:
+// import { WebSocketTransport } from 'swordfight-engine/transports/WebSocketTransport';
+// import { DurableObjectTransport } from 'swordfight-engine/transports/DurableObjectTransport';
+// import { ComputerTransport } from 'swordfight-engine/transports/ComputerTransport';
+// This keeps the main bundle small and enables better tree-shaking.

@@ -1,0 +1,24 @@
+{
+  "name": "swordfight-multiplayer-server",
+  "version": "1.0.0",
+  "description": "CloudFlare Workers + Durable Objects multiplayer server for SwordFight Engine",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "tail": "wrangler tail"
+  },
+  "keywords": [
+    "swordfight",
+    "multiplayer",
+    "cloudflare",
+    "durable-objects",
+    "websocket"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}
