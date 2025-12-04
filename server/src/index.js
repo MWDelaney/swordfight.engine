@@ -99,6 +99,8 @@ export class GameRoom {
     server.addEventListener('message', async (event) => {
       try {
         const message = JSON.parse(event.data);
+        console.log(`Received message from player ${sessionId + 1}, type: ${message.type}`, 
+          `Total sessions: ${this.sessions.length}`);
         await this.handleMessage(message, server);
       } catch (error) {
         console.error('Error handling message:', error);
@@ -164,15 +166,23 @@ export class GameRoom {
     }
 
     // Forward message to opponent
+    let forwarded = false;
     this.sessions.forEach(session => {
       if (session !== sender && session.readyState === 1) {
         try {
           session.send(JSON.stringify(message));
+          forwarded = true;
+          console.log(`Forwarded message type: ${message.type} to opponent`);
         } catch (error) {
           console.error('Error forwarding message:', error);
         }
       }
     });
+    
+    if (!forwarded && this.sessions.length > 1) {
+      console.warn(`Message type ${message.type} not forwarded. Sessions: ${this.sessions.length}, Ready states:`, 
+        this.sessions.map(s => s.readyState));
+    }
   }
 }
 

@@ -74,6 +74,7 @@ export class DurableObjectTransport extends MultiplayerTransport {
       this.ws.onmessage = (event) => {
         try {
           const message = JSON.parse(event.data);
+          console.log('[DurableObjectTransport] Received message:', message.type, message);
           this._handleMessage(message);
         } catch (error) {
           console.error('Error parsing message:', error);
@@ -146,9 +147,11 @@ export class DurableObjectTransport extends MultiplayerTransport {
       break;
 
     case 'move':
+      console.log('[DurableObjectTransport] Processing move, callbacks:', this.moveCallbacks.length);
       // Call all registered move callbacks
       this.moveCallbacks.forEach(callback => {
         try {
+          console.log('[DurableObjectTransport] Calling move callback with data:', message.data);
           callback(message.data);
         } catch (error) {
           console.error('Error in move callback:', error);
@@ -157,9 +160,11 @@ export class DurableObjectTransport extends MultiplayerTransport {
       break;
 
     case 'name':
+      console.log('[DurableObjectTransport] Processing name, callbacks:', this.nameCallbacks.length);
       // Call all registered name callbacks
       this.nameCallbacks.forEach(callback => {
         try {
+          console.log('[DurableObjectTransport] Calling name callback with data:', message.data);
           callback(message.data);
         } catch (error) {
           console.error('Error in name callback:', error);
