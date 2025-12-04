@@ -24,6 +24,7 @@ export class GameRoom {
     this.env = env;
     this.sessions = [];
     this.players = new Map(); // Track player metadata
+    this.messageBuffer = []; // Buffer for messages before second player joins
   }
 
   /**
@@ -74,6 +75,16 @@ export class GameRoom {
 
     // Notify if second player joined
     if (this.sessions.length === 2) {
+      // Replay buffered messages to the new player
+      if (this.messageBuffer.length > 0) {
+        console.log(`Replaying ${this.messageBuffer.length} buffered messages to player 2`);
+        server.send(JSON.stringify({
+          type: 'history',
+          messages: this.messageBuffer
+        }));
+      }
+
+      // Notify both players that opponent connected
       this.sessions.forEach(s => {
         if (s.readyState === 1) { // WebSocket.OPEN
           s.send(JSON.stringify({
@@ -140,6 +151,16 @@ export class GameRoom {
         message: 'Message must have a type'
       }));
       return;
+    }
+
+    // Buffer messages if only one player is connected
+    // (moves, names, and other game state that needs to be replayed)
+    if (this.sessions.length === 1) {
+      const bufferableTypes = ['move', 'name', 'character-select', 'ready'];
+      if (bufferableTypes.includes(message.type)) {
+        this.messageBuffer.push(message);
+        console.log(`Buffered message type: ${message.type}. Buffer size: ${this.messageBuffer.length}`);
+      }
     }
 
     // Forward message to opponent

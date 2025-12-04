@@ -126,6 +126,14 @@ export class DurableObjectTransport extends MultiplayerTransport {
    */
   _handleMessage(message) {
     switch (message.type) {
+    case 'history':
+      // Replay all buffered messages from before we joined
+      console.log(`Replaying ${message.messages.length} buffered messages`);
+      message.messages.forEach(bufferedMessage => {
+        this._handleMessage(bufferedMessage);
+      });
+      break;
+
     case 'peer-joined':
       console.log('Peer joined the room');
       this.started = true;
