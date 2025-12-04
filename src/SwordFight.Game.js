@@ -58,15 +58,28 @@ export class Game {
     this.myMove = null;
     this.opponentsMove = null;
     this.Moves = [];
+    this.initialized = false;
 
-    // Initialize the game (async)
-    this.init();
+    // Set up transport but don't connect yet
+    if (options.transport) {
+      this.Multiplayer = options.transport;
+    } else if (gameId === 'computer') {
+      this.Multiplayer = new ComputerTransport(this, options.computerOptions);
+    } else {
+      throw new Error('A transport is required for multiplayer games. Pass options.transport (e.g., new WebSocketTransport(this)) or use gameId="computer"');
+    }
   }
 
   /**
-   * Initialize the game.
+   * Initialize the game by loading character data.
+   * Must be called before connect().
+   * @returns {Promise<Game>} Returns this for chaining
    */
-  init = async() => {
+  async initialize() {
+    if (this.initialized) {
+      return this;
+    }
+
     // Load characters (supports both sync and async loaders)
     this.myCharacter = await this.CharacterLoader.getCharacter(this.myCharacterSlug);
     this.opponentsCharacter = await this.CharacterLoader.getCharacter(this.opponentCharacterSlug);
@@ -78,34 +91,35 @@ export class Game {
     this.myCharacter.startingHealth = this.myCharacter.health;
     this.opponentsCharacter.startingHealth = this.opponentsCharacter.health;
 
-    // Set up transport (computer or multiplayer)
-    if(this.options.transport) {
-      // Use explicitly provided transport (computer or multiplayer)
-      this.Multiplayer = this.options.transport;
-    } else if(this.gameId === 'computer') {
-      // Auto-create ComputerTransport for convenience when gameId='computer'
-      this.Multiplayer = new ComputerTransport(this, this.options.computerOptions);
-    } else {
-      // No transport provided and not a computer game
-      throw new Error('A transport is required for multiplayer games. Pass options.transport (e.g., new WebSocketTransport(this)) or use gameId="computer"');
+    // Load saved game state if exists
+    this.loadGame();
+
+    this.initialized = true;
+    return this;
+  }
+
+  /**
+   * Connect to the multiplayer session.
+   * Must be called after initialize().
+   * @returns {Promise<Game>} Returns this for chaining
+   */
+  async connect() {
+    if (!this.initialized) {
+      throw new Error('Must call initialize() before connect()');
     }
 
     // Connect to the session (works for both computer and multiplayer)
-    this.Multiplayer.connect(this.gameId).then(() => {
-      // Register callbacks immediately after connection
-      // This ensures we catch messages that arrive before the player interacts with the game
-      this.getOpponentsMove();
-      this.getOpponentsName();
-    }).catch(error => {
-      console.error('Failed to connect:', error);
-    });
+    await this.Multiplayer.connect(this.gameId);
 
-    // Load the game from localstorage
-    this.loadGame();
+    // Register callbacks immediately after connection
+    this.getOpponentsMove();
+    this.getOpponentsName();
 
-    // Add event listeners
+    // Add event listener
     document.addEventListener('inputMove', this.inputMove);
-  };
+
+    return this;
+  }
 
 
   /**

@@ -73,7 +73,15 @@ This project uses ESLint with strict rules for code quality and consistency. Run
 **Full Version (115KB)** - Includes all character data bundled:
 ```javascript
 import { Game } from 'swordfight-engine';
+
+// Create game instance (synchronous)
 const game = new Game('computer', 'human-fighter', 'goblin');
+
+// Initialize (loads character data)
+await game.initialize();
+
+// Connect to transport (starts the game)
+await game.connect();
 ```
 
 **Lite Version (17KB)** - Loads character data from API (recommended for web):
@@ -84,22 +92,32 @@ import { DurableObjectTransport } from 'swordfight-engine/transports';
 // Configure API endpoint
 CharacterLoader.setApiBase('https://api.swordfight.me');
 
-// Create multiplayer game
+// Create game instance (synchronous)
 const game = new Game('room-123', 'human-fighter', 'goblin', {
   transport: new DurableObjectTransport(game, {
     serverUrl: 'wss://swordfight.your-username.workers.dev'
   })
 });
+
+// Initialize (loads character data from API)
+await game.initialize();
+
+// Connect to multiplayer transport
+await game.connect();
 ```
 
-**Note:** Transports work the same for both versions - import from `/transports`:
+**Note:** Both versions use the same initialization pattern:
 ```javascript
-import { Game, CharacterLoader } from 'swordfight-engine/lite';
+import { Game } from 'swordfight-engine';
 
-// Configure API endpoint
-CharacterLoader.setApiBase('https://api.swordfight.me');
+// 1. Create game instance (synchronous)
+const game = new Game('computer', 'human-fighter', 'goblin');
 
-const game = new Game('my-game-id');
+// 2. Initialize (load character data)
+await game.initialize();
+
+// 3. Connect to transport
+await game.connect();
 ```
 
 **Using the API Directly** - Build custom clients:
@@ -111,23 +129,11 @@ See [API_CLIENT_GUIDE.md](API_CLIENT_GUIDE.md) for details on using the static A
 ```javascript
 import { Game } from 'swordfight-engine';
 
-// Computer opponent game (automatic)
+// Step 1: Create game instance (synchronous)
 const game = new Game('computer', 'human-fighter', 'goblin-fighter');
-});
 
-// Use CharacterManager for character selection
-const characterManager = new Game.CharacterManager();
-await characterManager.loadCharacters();
-
-// Get all available characters for selection screen
-const characters = characterManager.getAllCharacters();
-console.log('Available characters:', characters);
-
-// Get character options for UI
-const characterOptions = characterManager.getCharacterOptions();
-// Returns: [{ slug: 'human-fighter', name: 'Human Fighter', description: '...' }, ...]
-
-// Listen for game events
+// Step 2: Set up event listeners BEFORE initializing
+// (allows you to show loading UI immediately)
 document.addEventListener('round', (event) => {
   const { myRoundData, opponentsRoundData } = event.detail;
   // Handle round completion
@@ -141,24 +147,48 @@ document.addEventListener('defeat', () => {
   // Handle player defeat
 });
 
-// Send a move
+// Step 3: Initialize (loads character data)
+await game.initialize();
+
+// Step 4: Connect to transport (starts the game)
+await game.connect();
+
+// Step 5: Send moves during gameplay
 const moveEvent = new CustomEvent('inputMove', {
   detail: { move: 'attack-high' }
 });
 document.dispatchEvent(moveEvent);
 ```
 
-### Character Selection
+### Initialization Lifecycle
 
+The engine uses a three-stage initialization pattern for better control over the game lifecycle:
+
+1. **Constructor** (synchronous) - Creates the game instance and sets up the transport
+2. **initialize()** (async) - Loads character data from bundled files or API
+3. **connect()** (async) - Connects the transport and begins multiplayer session
+
+**Benefits:**
+- Show loading/waiting UI immediately after creating the game instance
+- Control when character data is loaded (useful for showing "waiting for opponent" screens)
+- Prevent race conditions where transport connects before client is ready
+- Better testability with explicit lifecycle stages
+
+**Example with UI flow:**
 ```javascript
-import Game from 'swordfight-engine';
+// Create game (instant)
+const game = new Game('room-123', 'human-fighter', 'goblin', { transport });
 
-// Get available characters using the CharacterManager attached to Game
-const characterManager = new Game.CharacterManager();
-const characters = await characterManager.loadCharacters();
+// Show "Waiting for opponent" modal immediately
+showWaitingModal();
 
-// Create a character instance
-const myCharacter = characterManager.createCharacterInstance('human-fighter');
+// Load character data
+await game.initialize();
+updateModalStatus('Connecting...');
+
+// Connect to multiplayer
+await game.connect();
+hideModal();
 ```
 
 ## Game Events
