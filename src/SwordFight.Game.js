@@ -91,7 +91,12 @@ export class Game {
     }
 
     // Connect to the session (works for both computer and multiplayer)
-    this.Multiplayer.connect(this.gameId).catch(error => {
+    this.Multiplayer.connect(this.gameId).then(() => {
+      // Register callbacks immediately after connection
+      // This ensures we catch messages that arrive before the player interacts with the game
+      this.getOpponentsMove();
+      this.getOpponentsName();
+    }).catch(error => {
       console.error('Failed to connect:', error);
     });
 
@@ -121,8 +126,8 @@ export class Game {
       // If this is the first round, set myMove and opponentsMove to the initial moves
       this.logGameState();
 
-      // If this is the first round, get the opponent's name
-      this.getOpponentsName();
+      // Note: getOpponentsName() is now called immediately on connection (in constructor)
+      // to avoid race conditions where name messages arrive before setup
 
       // Validate the round numbers
       if (!this.validateRoundNumbers()) {return;}
@@ -132,10 +137,8 @@ export class Game {
         this.rounds[0] = { 'myMove': this.myMove, 'opponentsMove': this.opponentsMove };
       }
 
-      // Only get opponent's move if we don't already have it for this round
-      if (!this.rounds[this.roundNumber] || !this.rounds[this.roundNumber]['opponentsMove']) {
-        this.getOpponentsMove();
-      }
+      // Note: getOpponentsMove() is now called immediately on connection (in constructor)
+      // The callback remains registered throughout the game to receive all moves
 
       // If both myMove and opponentsMove are set in the current round, continue
       if (this.rounds[this.roundNumber] && this.rounds[this.roundNumber]['myMove'] && this.rounds[this.roundNumber]['opponentsMove']) {
