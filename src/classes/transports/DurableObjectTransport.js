@@ -229,6 +229,7 @@ export class DurableObjectTransport extends MultiplayerTransport {
    * @param {Function} callback - Callback function to handle received move
    */
   getMove(callback) {
+    console.log('DurableObjectTransport: Registering move callback. Total callbacks:', this.moveCallbacks.length + 1);
     this.moveCallbacks.push(callback);
   }
 
