@@ -24,6 +24,7 @@ export class DurableObjectTransport extends MultiplayerTransport {
     this.ws = null;
     this.moveCallbacks = [];
     this.nameCallbacks = [];
+    this.characterCallbacks = [];
     this.roomId = null;
     this.reconnectAttempts = 0;
     this.maxReconnectAttempts = options.maxReconnectAttempts || 5;
@@ -172,6 +173,19 @@ export class DurableObjectTransport extends MultiplayerTransport {
       });
       break;
 
+    case 'character':
+      console.log('[DurableObjectTransport] Processing character, callbacks:', this.characterCallbacks.length);
+      // Call all registered character callbacks
+      this.characterCallbacks.forEach(callback => {
+        try {
+          console.log('[DurableObjectTransport] Calling character callback with data:', message.data);
+          callback(message.data);
+        } catch (error) {
+          console.error('Error in character callback:', error);
+        }
+      });
+      break;
+
     case 'room-full':
       console.error('Room is full');
       if (typeof document !== 'undefined') {
@@ -257,6 +271,29 @@ export class DurableObjectTransport extends MultiplayerTransport {
   }
 
   /**
+   * Send character slug to opponent
+   * @param {Object} data - Character data { characterSlug: string }
+   */
+  sendCharacter(data) {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({
+        type: 'character',
+        data: data
+      }));
+    } else {
+      console.error('Cannot send character: WebSocket not open');
+    }
+  }
+
+  /**
+   * Register callback for receiving opponent's character slug
+   * @param {Function} callback - Callback function to handle received character slug
+   */
+  getCharacter(callback) {
+    this.characterCallbacks.push(callback);
+  }
+
+  /**
    * Disconnect from the session
    */
   disconnect() {
@@ -267,6 +304,7 @@ export class DurableObjectTransport extends MultiplayerTransport {
     this.started = false;
     this.moveCallbacks = [];
     this.nameCallbacks = [];
+    this.characterCallbacks = [];
   }
 
   /**

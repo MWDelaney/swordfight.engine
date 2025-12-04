@@ -9,7 +9,7 @@
 const ALLOWED_ORIGINS = [
   'https://swordfight.me',
   'https://www.swordfight.me',
-  'http://localhost:8080', // for development
+  'http://localhost:8080' // for development
 ];
 
 /**
@@ -99,7 +99,7 @@ export class GameRoom {
     server.addEventListener('message', async (event) => {
       try {
         const message = JSON.parse(event.data);
-        console.log(`Received message from player ${sessionId + 1}, type: ${message.type}`, 
+        console.log(`Received message from player ${sessionId + 1}, type: ${message.type}`,
           `Total sessions: ${this.sessions.length}`);
         await this.handleMessage(message, server);
       } catch (error) {
@@ -156,9 +156,9 @@ export class GameRoom {
     }
 
     // Buffer messages if only one player is connected
-    // (moves, names, and other game state that needs to be replayed)
+    // (moves, names, characters, and other game state that needs to be replayed)
     if (this.sessions.length === 1) {
-      const bufferableTypes = ['move', 'name', 'character-select', 'ready'];
+      const bufferableTypes = ['move', 'name', 'character', 'character-select', 'ready'];
       if (bufferableTypes.includes(message.type)) {
         this.messageBuffer.push(message);
         console.log(`Buffered message type: ${message.type}. Buffer size: ${this.messageBuffer.length}`);
@@ -178,9 +178,9 @@ export class GameRoom {
         }
       }
     });
-    
+
     if (!forwarded && this.sessions.length > 1) {
-      console.warn(`Message type ${message.type} not forwarded. Sessions: ${this.sessions.length}, Ready states:`, 
+      console.warn(`Message type ${message.type} not forwarded. Sessions: ${this.sessions.length}, Ready states:`,
         this.sessions.map(s => s.readyState));
     }
   }

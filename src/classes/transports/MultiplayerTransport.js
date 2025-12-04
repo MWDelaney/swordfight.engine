@@ -13,6 +13,8 @@
  * - getMove(callback): void - Register callback for receiving moves
  * - sendName(data): void - Send player name to opponent
  * - getName(callback): void - Register callback for receiving name
+ * - sendCharacter(data): void - Send character slug to opponent
+ * - getCharacter(callback): void - Register callback for receiving character slug
  * - disconnect(): void - Disconnect from session
  * - getPeerCount(): number - Get number of connected peers
  *
@@ -70,6 +72,22 @@ export class MultiplayerTransport {
    */
   getName(_callback) {
     throw new Error('getName() must be implemented by subclass');
+  }
+
+  /**
+   * Send character slug to opponent
+   * @param {Object} _data - Character data { characterSlug: string }
+   */
+  sendCharacter(_data) {
+    throw new Error('sendCharacter() must be implemented by subclass');
+  }
+
+  /**
+   * Register callback for receiving opponent's character slug
+   * @param {Function} _callback - Callback function to handle received character slug
+   */
+  getCharacter(_callback) {
+    throw new Error('getCharacter() must be implemented by subclass');
   }
 
   /**

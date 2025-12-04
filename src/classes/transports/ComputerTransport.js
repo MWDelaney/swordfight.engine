@@ -101,6 +101,24 @@ export class ComputerTransport extends MultiplayerTransport {
   }
 
   /**
+   * sendCharacter
+   * Send the character slug (not used in single-player, but included for consistency)
+   */
+  sendCharacter(data) {
+    return data;
+  }
+
+  /**
+   * getCharacter
+   * Get the character slug (not used in single-player, but included for consistency)
+   */
+  getCharacter(callback) {
+    // Computer opponent's character is already set in the game constructor
+    // This is a no-op for single-player
+    callback({ characterSlug: this.game.opponentCharacterSlug });
+  }
+
+  /**
    * Get the number of connected peers
    * @returns {number} Always returns 1 for computer opponent
    */

@@ -15,6 +15,7 @@ export class WebSocketTransport extends MultiplayerTransport {
     this.ws = null;
     this.moveCallbacks = [];
     this.nameCallbacks = [];
+    this.characterCallbacks = [];
     this.roomId = null;
   }
 
@@ -107,6 +108,11 @@ export class WebSocketTransport extends MultiplayerTransport {
       this.nameCallbacks.forEach(callback => callback(message.data));
       break;
 
+    case 'character':
+      // Call all registered character callbacks
+      this.characterCallbacks.forEach(callback => callback(message.data));
+      break;
+
     case 'room-full':
       console.error('Room is full');
       if (typeof document !== 'undefined') {
@@ -181,6 +187,28 @@ export class WebSocketTransport extends MultiplayerTransport {
   }
 
   /**
+   * Send character slug to opponent via WebSocket
+   * @param {Object} data - Character data { characterSlug: string }
+   */
+  sendCharacter(data) {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({
+        type: 'character',
+        roomId: this.roomId,
+        data: data
+      }));
+    }
+  }
+
+  /**
+   * Register callback for receiving opponent's character slug
+   * @param {Function} callback - Callback function
+   */
+  getCharacter(callback) {
+    this.characterCallbacks.push(callback);
+  }
+
+  /**
    * Get the number of connected peers
    * @returns {number}
    */
@@ -205,5 +233,6 @@ export class WebSocketTransport extends MultiplayerTransport {
     this.started = false;
     this.moveCallbacks = [];
     this.nameCallbacks = [];
+    this.characterCallbacks = [];
   }
 }
