@@ -42,7 +42,9 @@ export class DurableObjectTransport extends MultiplayerTransport {
       // Construct WebSocket URL with room parameter
       const wsUrl = `${this.serverUrl}?room=${encodeURIComponent(roomId)}`;
 
-      console.log('Connecting to CloudFlare Worker:', wsUrl);
+      if (window.logging) {
+        console.log('Connecting to CloudFlare Worker:', wsUrl);
+      }
 
       try {
         this.ws = new WebSocket(wsUrl);
@@ -62,7 +64,9 @@ export class DurableObjectTransport extends MultiplayerTransport {
 
       this.ws.onopen = () => {
         clearTimeout(timeout);
-        console.log('Connected to CloudFlare Worker');
+        if (window.logging) {
+          console.log('Connected to CloudFlare Worker');
+        }
 
         // Send player name and character immediately on connection
         const playerName = this._getPlayerName();
@@ -78,7 +82,9 @@ export class DurableObjectTransport extends MultiplayerTransport {
       this.ws.onmessage = (event) => {
         try {
           const message = JSON.parse(event.data);
-          console.log('[DurableObjectTransport] Received message:', message.type, message);
+          if (window.logging) {
+            console.log('[DurableObjectTransport] Received message:', message.type, message);
+          }
           this._handleMessage(message);
         } catch (error) {
           console.error('Error parsing message:', error);
@@ -93,7 +99,9 @@ export class DurableObjectTransport extends MultiplayerTransport {
 
       this.ws.onclose = (event) => {
         clearTimeout(timeout);
-        console.log('WebSocket connection closed', event.code, event.reason);
+        if (window.logging) {
+          console.log('WebSocket connection closed', event.code, event.reason);
+        }
         this.started = false;
 
         // Attempt reconnection for non-normal closures
@@ -110,7 +118,9 @@ export class DurableObjectTransport extends MultiplayerTransport {
    */
   _attemptReconnect() {
     this.reconnectAttempts++;
-    console.log(`Attempting reconnection ${this.reconnectAttempts}/${this.maxReconnectAttempts}...`);
+    if (window.logging) {
+      console.log(`Attempting reconnection ${this.reconnectAttempts}/${this.maxReconnectAttempts}...`);
+    }
 
     setTimeout(() => {
       this.connect(this.roomId).catch(error => {
@@ -133,14 +143,18 @@ export class DurableObjectTransport extends MultiplayerTransport {
     switch (message.type) {
     case 'history':
       // Replay all buffered messages from before we joined
-      console.log(`Replaying ${message.messages.length} buffered messages`);
+      if (window.logging) {
+        console.log(`Replaying ${message.messages.length} buffered messages`);
+      }
       message.messages.forEach(bufferedMessage => {
         this._handleMessage(bufferedMessage);
       });
       break;
 
     case 'peer-joined':
-      console.log('Peer joined the room');
+      if (window.logging) {
+        console.log('Peer joined the room');
+      }
       this.started = true;
 
       // Dispatch start event
@@ -151,11 +165,15 @@ export class DurableObjectTransport extends MultiplayerTransport {
       break;
 
     case 'move':
-      console.log('[DurableObjectTransport] Processing move, callbacks:', this.moveCallbacks.length);
+      if (window.logging) {
+        console.log('[DurableObjectTransport] Processing move, callbacks:', this.moveCallbacks.length);
+      }
       // Call all registered move callbacks
       this.moveCallbacks.forEach(callback => {
         try {
-          console.log('[DurableObjectTransport] Calling move callback with data:', message.data);
+          if (window.logging) {
+            console.log('[DurableObjectTransport] Calling move callback with data:', message.data);
+          }
           callback(message.data);
         } catch (error) {
           console.error('Error in move callback:', error);
@@ -164,11 +182,15 @@ export class DurableObjectTransport extends MultiplayerTransport {
       break;
 
     case 'name':
-      console.log('[DurableObjectTransport] Processing name, callbacks:', this.nameCallbacks.length);
+      if (window.logging) {
+        console.log('[DurableObjectTransport] Processing name, callbacks:', this.nameCallbacks.length);
+      }
       // Call all registered name callbacks
       this.nameCallbacks.forEach(callback => {
         try {
-          console.log('[DurableObjectTransport] Calling name callback with data:', message.data);
+          if (window.logging) {
+            console.log('[DurableObjectTransport] Calling name callback with data:', message.data);
+          }
           callback(message.data);
         } catch (error) {
           console.error('Error in name callback:', error);
@@ -177,11 +199,15 @@ export class DurableObjectTransport extends MultiplayerTransport {
       break;
 
     case 'character':
-      console.log('[DurableObjectTransport] Processing character, callbacks:', this.characterCallbacks.length);
+      if (window.logging) {
+        console.log('[DurableObjectTransport] Processing character, callbacks:', this.characterCallbacks.length);
+      }
       // Call all registered character callbacks
       this.characterCallbacks.forEach(callback => {
         try {
-          console.log('[DurableObjectTransport] Calling character callback with data:', message.data);
+          if (window.logging) {
+            console.log('[DurableObjectTransport] Calling character callback with data:', message.data);
+          }
           callback(message.data);
         } catch (error) {
           console.error('Error in character callback:', error);
@@ -198,7 +224,9 @@ export class DurableObjectTransport extends MultiplayerTransport {
       break;
 
     case 'peer-left':
-      console.log('Peer left the room');
+      if (window.logging) {
+        console.log('Peer left the room');
+      }
       this.started = false;
       if (typeof document !== 'undefined') {
         const peerLeftEvent = new CustomEvent('peerLeft');
@@ -246,7 +274,9 @@ export class DurableObjectTransport extends MultiplayerTransport {
    * @param {Function} callback - Callback function to handle received move
    */
   getMove(callback) {
-    console.log('DurableObjectTransport: Registering move callback. Total callbacks:', this.moveCallbacks.length + 1);
+    if (window.logging) {
+      console.log('DurableObjectTransport: Registering move callback. Total callbacks:', this.moveCallbacks.length + 1);
+    }
     this.moveCallbacks.push(callback);
   }
 
