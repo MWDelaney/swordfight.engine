@@ -85,10 +85,13 @@ export class WebSocketTransport extends MultiplayerTransport {
       console.log('Peer joined the room');
       this.started = true;
 
-      // Send player name
+      // Send player name and character
       const playerName = this._getPlayerName();
       this.game.myCharacter.name = playerName;
-      this.sendName({ name: playerName });
+      this.sendName({ 
+        name: playerName,
+        characterSlug: this.game.myCharacterSlug
+      });
 
       // Dispatch start event
       if (typeof document !== 'undefined') {

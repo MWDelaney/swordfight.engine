@@ -64,10 +64,13 @@ export class DurableObjectTransport extends MultiplayerTransport {
         clearTimeout(timeout);
         console.log('Connected to CloudFlare Worker');
 
-        // Send player name immediately on connection
+        // Send player name and character immediately on connection
         const playerName = this._getPlayerName();
         this.game.myCharacter.name = playerName;
-        this.sendName({ name: playerName });
+        this.sendName({ 
+          name: playerName,
+          characterSlug: this.game.myCharacterSlug
+        });
 
         resolve();
       };

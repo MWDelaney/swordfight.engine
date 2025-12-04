@@ -78,10 +78,18 @@ export class ComputerTransport extends MultiplayerTransport {
 
   /**
    * getName
-   * Get the opponent's name
+   * Get the opponent's name and character
    */
   getName(callback) {
-    callback({ name: this.game.opponentsCharacter.name });
+    // For computer mode, we need to pick a random character if not set
+    // This maintains backward compatibility
+    const computerCharacters = ['evil-human-fighter', 'goblin-fighter', 'skeleton-warrior', 'mummy', 'lizard-man'];
+    const opponentSlug = this.game.opponentCharacterSlug || computerCharacters[Math.floor(Math.random() * computerCharacters.length)];
+    
+    callback({ 
+      name: this.game.opponentsCharacter?.name || 'Computer',
+      characterSlug: opponentSlug
+    });
   }
 
   /**
