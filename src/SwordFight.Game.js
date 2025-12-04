@@ -37,13 +37,13 @@ export class Game {
   /**
    * Create a game.
    * @param {string} gameId - The ID of the game.
-   * @param {string} myCharacterSlug - Slug for player's character
-   * @param {string} opponentCharacterSlug - Slug for opponent's character
+   * @param {string} [myCharacterSlug] - Optional slug for player's character (can be set later with setCharacters())
+   * @param {string} [opponentCharacterSlug] - Optional slug for opponent's character (can be set later with setCharacters())
    * @param {Object} options - Optional configuration
-   * @param {Object} options.transport - Custom transport for multiplayer (e.g., WebSocketTransport, custom implementations)
    * @param {Object} options.characterLoader - Custom CharacterLoader (defaults to bundled loader)
+   * @param {Object} options.computerOptions - Options for computer transport (if using computer mode)
    */
-  constructor(gameId, myCharacterSlug = 'human-fighter', opponentCharacterSlug = 'evil-human-fighter', options = {}) {
+  constructor(gameId, myCharacterSlug = null, opponentCharacterSlug = null, options = {}) {
     this.gameId = gameId;
     this.rounds = [];
     this.roundNumber = 0;
@@ -59,15 +59,23 @@ export class Game {
     this.opponentsMove = null;
     this.Moves = [];
     this.initialized = false;
+    this.Multiplayer = null;
+  }
 
-    // Set up transport but don't connect yet
-    if (options.transport) {
-      this.Multiplayer = options.transport;
-    } else if (gameId === 'computer') {
-      this.Multiplayer = new ComputerTransport(this, options.computerOptions);
-    } else {
-      throw new Error('A transport is required for multiplayer games. Pass options.transport (e.g., new WebSocketTransport(this)) or use gameId="computer"');
+  /**
+   * Set character slugs before initialization.
+   * Allows character selection/exchange before loading character data.
+   * @param {string} myCharacterSlug - Slug for player's character
+   * @param {string} opponentCharacterSlug - Slug for opponent's character
+   * @returns {Game} Returns this for chaining
+   */
+  setCharacters(myCharacterSlug, opponentCharacterSlug) {
+    if (this.initialized) {
+      throw new Error('Cannot change characters after initialize() has been called');
     }
+    this.myCharacterSlug = myCharacterSlug;
+    this.opponentCharacterSlug = opponentCharacterSlug;
+    return this;
   }
 
   /**
@@ -78,6 +86,11 @@ export class Game {
   async initialize() {
     if (this.initialized) {
       return this;
+    }
+
+    // Validate character slugs are set
+    if (!this.myCharacterSlug || !this.opponentCharacterSlug) {
+      throw new Error('Character slugs must be set before initialize(). Call setCharacters() or pass them to constructor.');
     }
 
     // Load characters (supports both sync and async loaders)
@@ -101,11 +114,25 @@ export class Game {
   /**
    * Connect to the multiplayer session.
    * Must be called after initialize().
+   * @param {Object} transport - Transport instance for multiplayer (e.g., WebSocketTransport, DurableObjectTransport)
+   *                            If gameId is 'computer', this parameter is optional and ComputerTransport will be used
    * @returns {Promise<Game>} Returns this for chaining
    */
-  async connect() {
+  async connect(transport = null) {
     if (!this.initialized) {
       throw new Error('Must call initialize() before connect()');
+    }
+
+    // Set up transport
+    if (transport) {
+      // Use explicitly provided transport
+      this.Multiplayer = transport;
+    } else if (this.gameId === 'computer') {
+      // Auto-create ComputerTransport for convenience when gameId='computer'
+      this.Multiplayer = new ComputerTransport(this, this.options.computerOptions);
+    } else {
+      // No transport provided and not a computer game
+      throw new Error('A transport is required for multiplayer games. Pass a transport to connect() (e.g., new WebSocketTransport(this))');
     }
 
     // Connect to the session (works for both computer and multiplayer)

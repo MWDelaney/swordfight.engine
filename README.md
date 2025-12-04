@@ -80,7 +80,7 @@ const game = new Game('computer', 'human-fighter', 'goblin');
 // Initialize (loads character data)
 await game.initialize();
 
-// Connect to transport (starts the game)
+// Connect (computer mode doesn't need a transport parameter)
 await game.connect();
 ```
 
@@ -93,17 +93,16 @@ import { DurableObjectTransport } from 'swordfight-engine/transports';
 CharacterLoader.setApiBase('https://api.swordfight.me');
 
 // Create game instance (synchronous)
-const game = new Game('room-123', 'human-fighter', 'goblin', {
-  transport: new DurableObjectTransport(game, {
-    serverUrl: 'wss://swordfight.your-username.workers.dev'
-  })
-});
+const game = new Game('room-123', 'human-fighter', 'goblin');
 
 // Initialize (loads character data from API)
 await game.initialize();
 
-// Connect to multiplayer transport
-await game.connect();
+// Create and connect transport (NOW characters are loaded)
+const transport = new DurableObjectTransport(game, {
+  serverUrl: 'wss://swordfight.your-username.workers.dev'
+});
+await game.connect(transport);
 ```
 
 **Note:** Both versions use the same initialization pattern:
@@ -113,10 +112,10 @@ import { Game } from 'swordfight-engine';
 // 1. Create game instance (synchronous)
 const game = new Game('computer', 'human-fighter', 'goblin');
 
-// 2. Initialize (load character data)
+// 2. Initialize (load character data - NOW game.myCharacter exists)
 await game.initialize();
 
-// 3. Connect to transport
+// 3. Connect (transport can now access game.myCharacter)
 await game.connect();
 ```
 
@@ -150,7 +149,7 @@ document.addEventListener('defeat', () => {
 // Step 3: Initialize (loads character data)
 await game.initialize();
 
-// Step 4: Connect to transport (starts the game)
+// Step 4: Connect (computer mode auto-creates ComputerTransport)
 await game.connect();
 
 // Step 5: Send moves during gameplay
@@ -162,33 +161,50 @@ document.dispatchEvent(moveEvent);
 
 ### Initialization Lifecycle
 
-The engine uses a three-stage initialization pattern for better control over the game lifecycle:
+The engine uses a flexible initialization pattern for better control over the game lifecycle:
 
-1. **Constructor** (synchronous) - Creates the game instance and sets up the transport
-2. **initialize()** (async) - Loads character data from bundled files or API
-3. **connect()** (async) - Connects the transport and begins multiplayer session
+1. **Constructor** (synchronous) - Creates the game instance
+2. **setCharacters()** (optional) - Set or change character selections before loading
+3. **initialize()** (async) - Loads character data from bundled files or API
+4. **connect()** (async) - Connects the transport and begins multiplayer session
 
 **Benefits:**
 - Show loading/waiting UI immediately after creating the game instance
+- Exchange character selections before loading data (perfect for lobby screens)
 - Control when character data is loaded (useful for showing "waiting for opponent" screens)
 - Prevent race conditions where transport connects before client is ready
 - Better testability with explicit lifecycle stages
 
-**Example with UI flow:**
+**Example with character exchange:**
 ```javascript
-// Create game (instant)
-const game = new Game('room-123', 'human-fighter', 'goblin', { transport });
+// Create game without characters (instant)
+const game = new Game('room-123');
 
-// Show "Waiting for opponent" modal immediately
-showWaitingModal();
+// Show lobby where players can select characters
+showLobby();
 
-// Load character data
+// When both players have selected, set characters
+game.setCharacters('human-fighter', 'goblin');
+
+// Load character data (now game.myCharacter exists)
 await game.initialize();
-updateModalStatus('Connecting...');
+
+// Create transport (can now access game.myCharacter safely)
+const transport = new WebSocketTransport(game);
 
 // Connect to multiplayer
-await game.connect();
-hideModal();
+await game.connect(transport);
+hideLobby();
+```
+
+**Example with characters at construction:**
+```javascript
+// Characters known upfront
+const game = new Game('room-123', 'human-fighter', 'goblin');
+
+// Initialize and connect
+await game.initialize();
+await game.connect(transport);
 ```
 
 ## Game Events

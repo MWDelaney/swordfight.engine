@@ -123,7 +123,7 @@ export class CharacterLoader {
  * Game class wrapper that uses API-based CharacterLoader by default
  */
 export class Game extends BaseGame {
-  constructor(gameId, myCharacterSlug = 'human-fighter', opponentCharacterSlug = 'evil-human-fighter', options = {}) {
+  constructor(gameId, myCharacterSlug = null, opponentCharacterSlug = null, options = {}) {
     // Use the lite CharacterLoader unless a custom one is provided
     super(gameId, myCharacterSlug, opponentCharacterSlug, {
       ...options,
