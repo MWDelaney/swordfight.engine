@@ -74,13 +74,14 @@ This project uses ESLint with strict rules for code quality and consistency. Run
 ```javascript
 import { Game } from 'swordfight-engine';
 
-// Create game instance (synchronous)
-const game = new Game('computer', 'human-fighter', 'goblin');
+// Create game instance with your character (synchronous)
+const game = new Game('computer', 'human-fighter');
 
-// Initialize (loads character data)
+// Initialize (loads your character data)
 await game.initialize();
 
 // Connect (computer mode doesn't need a transport parameter)
+// Opponent character is set via name/character exchange
 await game.connect();
 ```
 
@@ -92,13 +93,17 @@ import { DurableObjectTransport } from 'swordfight-engine/transports';
 // Configure API endpoint
 CharacterLoader.setApiBase('https://api.swordfight.me');
 
-// Create game instance (synchronous)
-const game = new Game('room-123', 'human-fighter', 'goblin');
+// Get player's character from localStorage
+const myCharacter = localStorage.getItem('myCharacter') || 'human-fighter';
 
-// Initialize (loads character data from API)
+// Create game instance with your character (synchronous)
+const game = new Game('room-123', myCharacter);
+
+// Initialize (loads your character data from API)
 await game.initialize();
 
-// Create and connect transport (NOW characters are loaded)
+// Create and connect transport (NOW your character is loaded)
+// Opponent character will be set automatically via name/character exchange
 const transport = new DurableObjectTransport(game, {
   serverUrl: 'wss://swordfight.your-username.workers.dev'
 });
@@ -109,13 +114,13 @@ await game.connect(transport);
 ```javascript
 import { Game } from 'swordfight-engine';
 
-// 1. Create game instance (synchronous)
-const game = new Game('computer', 'human-fighter', 'goblin');
+// 1. Create game with your character slug (synchronous)
+const game = new Game('computer', 'human-fighter');
 
-// 2. Initialize (load character data - NOW game.myCharacter exists)
+// 2. Initialize (load your character data - NOW game.myCharacter exists)
 await game.initialize();
 
-// 3. Connect (transport can now access game.myCharacter)
+// 3. Connect (opponent character exchanged automatically)
 await game.connect();
 ```
 
@@ -128,8 +133,8 @@ See [API_CLIENT_GUIDE.md](API_CLIENT_GUIDE.md) for details on using the static A
 ```javascript
 import { Game } from 'swordfight-engine';
 
-// Step 1: Create game instance (synchronous)
-const game = new Game('computer', 'human-fighter', 'goblin-fighter');
+// Step 1: Create game with your character (synchronous)
+const game = new Game('computer', 'human-fighter');
 
 // Step 2: Set up event listeners BEFORE initializing
 // (allows you to show loading UI immediately)
@@ -146,10 +151,17 @@ document.addEventListener('defeat', () => {
   // Handle player defeat
 });
 
-// Step 3: Initialize (loads character data)
+// Optional: Listen for opponent character being set
+document.addEventListener('name', (event) => {
+  // event.detail contains { name, characterSlug }
+  console.log('Opponent:', event.detail);
+});
+
+// Step 3: Initialize (loads your character data)
 await game.initialize();
 
 // Step 4: Connect (computer mode auto-creates ComputerTransport)
+// Opponent character is exchanged automatically
 await game.connect();
 
 // Step 5: Send moves during gameplay
@@ -161,50 +173,42 @@ document.dispatchEvent(moveEvent);
 
 ### Initialization Lifecycle
 
-The engine uses a flexible initialization pattern for better control over the game lifecycle:
+The engine uses a simple initialization pattern that supports automatic character exchange:
 
-1. **Constructor** (synchronous) - Creates the game instance
-2. **setCharacters()** (optional) - Set or change character selections before loading
-3. **initialize()** (async) - Loads character data from bundled files or API
-4. **connect()** (async) - Connects the transport and begins multiplayer session
+1. **Constructor** (synchronous) - Creates game with your character slug
+2. **initialize()** (async) - Loads your character data from bundled files or API
+3. **connect()** (async) - Connects transport and exchanges character/name data with opponent
 
 **Benefits:**
 - Show loading/waiting UI immediately after creating the game instance
-- Exchange character selections before loading data (perfect for lobby screens)
-- Control when character data is loaded (useful for showing "waiting for opponent" screens)
+- Your character loads first, then opponent character is exchanged automatically
+- Character exchange happens via existing name exchange mechanism
+- Transport can be created before opponent character is known
 - Prevent race conditions where transport connects before client is ready
-- Better testability with explicit lifecycle stages
 
-**Example with character exchange:**
+**How Character Exchange Works:**
 ```javascript
-// Create game without characters (instant)
-const game = new Game('room-123');
+// Client side: Create game with your character
+const myChar = localStorage.getItem('myCharacter') || 'human-fighter';
+const game = new Game('room-123', myChar);
 
-// Show lobby where players can select characters
-showLobby();
+// Initialize loads YOUR character
+await game.initialize(); // game.myCharacter now exists
 
-// When both players have selected, set characters
-game.setCharacters('human-fighter', 'goblin');
-
-// Load character data (now game.myCharacter exists)
-await game.initialize();
-
-// Create transport (can now access game.myCharacter safely)
+// Transport can now be created (has access to game.myCharacter)
 const transport = new WebSocketTransport(game);
 
-// Connect to multiplayer
+// Connect exchanges name + character data
+// Transport sends: { name: 'Player1', characterSlug: 'human-fighter' }
+// Transport receives: { name: 'Player2', characterSlug: 'goblin' }
 await game.connect(transport);
-hideLobby();
-```
 
-**Example with characters at construction:**
-```javascript
-// Characters known upfront
-const game = new Game('room-123', 'human-fighter', 'goblin');
-
-// Initialize and connect
-await game.initialize();
-await game.connect(transport);
+// Listen for when opponent character is received
+document.addEventListener('name', (event) => {
+  const { name, characterSlug } = event.detail;
+  console.log(`Opponent ${name} is using ${characterSlug}`);
+  // game.opponentsCharacter is now loaded
+});
 ```
 
 ## Game Events

@@ -37,20 +37,19 @@ export class Game {
   /**
    * Create a game.
    * @param {string} gameId - The ID of the game.
-   * @param {string} [myCharacterSlug] - Optional slug for player's character (can be set later with setCharacters())
-   * @param {string} [opponentCharacterSlug] - Optional slug for opponent's character (can be set later with setCharacters())
+   * @param {string} myCharacterSlug - Slug for player's character
    * @param {Object} options - Optional configuration
    * @param {Object} options.characterLoader - Custom CharacterLoader (defaults to bundled loader)
    * @param {Object} options.computerOptions - Options for computer transport (if using computer mode)
    */
-  constructor(gameId, myCharacterSlug = null, opponentCharacterSlug = null, options = {}) {
+  constructor(gameId, myCharacterSlug, options = {}) {
     this.gameId = gameId;
     this.rounds = [];
     this.roundNumber = 0;
     this.opponentsRound = 0;
     this.loaded = false;
     this.myCharacterSlug = myCharacterSlug;
-    this.opponentCharacterSlug = opponentCharacterSlug;
+    this.opponentCharacterSlug = null; // Set by transport during name/character exchange
     this.options = options;
     this.CharacterLoader = options.characterLoader || CharacterLoader;
     this.myCharacter = null;
@@ -63,18 +62,19 @@ export class Game {
   }
 
   /**
-   * Set character slugs before initialization.
-   * Allows character selection/exchange before loading character data.
-   * @param {string} myCharacterSlug - Slug for player's character
+   * Set opponent character slug.
+   * Called by transport when opponent character data is received.
    * @param {string} opponentCharacterSlug - Slug for opponent's character
-   * @returns {Game} Returns this for chaining
+   * @returns {Promise<Game>} Returns this for chaining
    */
-  setCharacters(myCharacterSlug, opponentCharacterSlug) {
-    if (this.initialized) {
-      throw new Error('Cannot change characters after initialize() has been called');
-    }
-    this.myCharacterSlug = myCharacterSlug;
+  async setOpponentCharacter(opponentCharacterSlug) {
     this.opponentCharacterSlug = opponentCharacterSlug;
+
+    // If already initialized, reinitialize with new opponent
+    if (this.initialized) {
+      await this.initialize();
+    }
+
     return this;
   }
 
@@ -84,25 +84,22 @@ export class Game {
    * @returns {Promise<Game>} Returns this for chaining
    */
   async initialize() {
-    if (this.initialized) {
-      return this;
+    // Validate my character slug is set
+    if (!this.myCharacterSlug) {
+      throw new Error('myCharacterSlug must be set in constructor');
     }
 
-    // Validate character slugs are set
-    if (!this.myCharacterSlug || !this.opponentCharacterSlug) {
-      throw new Error('Character slugs must be set before initialize(). Call setCharacters() or pass them to constructor.');
-    }
-
-    // Load characters (supports both sync and async loaders)
+    // Load my character
     this.myCharacter = await this.CharacterLoader.getCharacter(this.myCharacterSlug);
-    this.opponentsCharacter = await this.CharacterLoader.getCharacter(this.opponentCharacterSlug);
-
     this.myMove = this.getInitialMove(this.myCharacter);
-    this.opponentsMove = this.getInitialMove(this.opponentsCharacter);
-
-    // Record the starting health
     this.myCharacter.startingHealth = this.myCharacter.health;
-    this.opponentsCharacter.startingHealth = this.opponentsCharacter.health;
+
+    // Load opponent character if we have it
+    if (this.opponentCharacterSlug) {
+      this.opponentsCharacter = await this.CharacterLoader.getCharacter(this.opponentCharacterSlug);
+      this.opponentsMove = this.getInitialMove(this.opponentsCharacter);
+      this.opponentsCharacter.startingHealth = this.opponentsCharacter.health;
+    }
 
     // Load saved game state if exists
     this.loadGame();
@@ -387,23 +384,30 @@ export class Game {
    */
   getOpponentsName() {
     try {
-      // Request the opponent's name from the multiplayer service
-      this.Multiplayer.getName((data) => {
+      // Request the opponent's name and character from the multiplayer service
+      this.Multiplayer.getName(async(data) => {
         // Validate the received data
         if (!data || !data.name) {
           throw new Error('Invalid name data received');
         }
 
-        // Log the received name if logging is enabled
+        // Log the received data if logging is enabled
         if (window.logging) {
-          console.log('Received name: ', data.name);
+          console.log('Received opponent data: ', data);
+        }
+
+        // Set opponent character if provided
+        if (data.characterSlug) {
+          await this.setOpponentCharacter(data.characterSlug);
         }
 
         // Assign the received name to the opponent's character
-        this.opponentsCharacter.name = data.name;
+        if (this.opponentsCharacter) {
+          this.opponentsCharacter.name = data.name;
+        }
 
         // Dispatch a custom event to notify that the opponent's name has been received
-        const nameEvent = new CustomEvent('name');
+        const nameEvent = new CustomEvent('name', { detail: data });
         document.dispatchEvent(nameEvent);
       });
     } catch (error) {
