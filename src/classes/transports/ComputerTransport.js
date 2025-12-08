@@ -17,12 +17,7 @@ export class ComputerTransport extends MultiplayerTransport {
     this.startDelay = options.startDelay || 3000;
     this.moveCallbacks = [];
     this.nameCallbacks = [];
-
-    // Select a random computer opponent character on construction
-    // Filter out player-oriented characters
-    const availableCharacters = CharacterLoader.getAvailableCharacters()
-      .filter(slug => !slug.includes('human-fighter') && slug !== 'human-monk');
-    this.selectedOpponentSlug = availableCharacters[Math.floor(Math.random() * availableCharacters.length)];
+    this.selectedOpponentSlug = null;
   }
 
   /**
@@ -31,6 +26,12 @@ export class ComputerTransport extends MultiplayerTransport {
    * @returns {Promise<void>}
    */
   async connect(_roomId) {
+    // Select a random computer opponent character
+    const availableCharacters = await CharacterLoader.getAvailableCharacters();
+    const computerCharacters = availableCharacters
+      .filter(slug => !slug.includes('human-fighter') && slug !== 'human-monk');
+    this.selectedOpponentSlug = computerCharacters[Math.floor(Math.random() * computerCharacters.length)];
+
     return new Promise((resolve) => {
       setTimeout(() => {
         this.started = true;

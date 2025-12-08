@@ -49,18 +49,18 @@ export class CharacterLoader {
 
   /**
    * Get available character slugs
-   * @returns {string[]} Array of character slugs
+   * @returns {Promise<string[]>} Array of character slugs
    */
-  static getAvailableCharacters() {
+  static async getAvailableCharacters() {
     return Object.keys(this.characters);
   }
 
   /**
    * Check if a character exists
    * @param {string} slug - The character slug to check
-   * @returns {boolean} True if the character exists
+   * @returns {Promise<boolean>} True if the character exists
    */
-  static hasCharacter(slug) {
+  static async hasCharacter(slug) {
     return slug in this.characters;
   }
 }
