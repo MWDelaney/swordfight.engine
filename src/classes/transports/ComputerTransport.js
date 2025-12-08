@@ -9,7 +9,6 @@
 import { Moves } from '../Moves.js';
 import { BonusCalculator } from '../BonusCalculator.js';
 import { MultiplayerTransport } from './MultiplayerTransport.js';
-import { CharacterLoader } from '../CharacterLoader.js';
 
 export class ComputerTransport extends MultiplayerTransport {
   constructor(game, options = {}) {
