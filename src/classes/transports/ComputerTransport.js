@@ -17,7 +17,7 @@ export class ComputerTransport extends MultiplayerTransport {
     this.startDelay = options.startDelay || 3000;
     this.moveCallbacks = [];
     this.nameCallbacks = [];
-    
+
     // Select a random computer opponent character on construction
     // Filter out player-oriented characters
     const availableCharacters = CharacterLoader.getAvailableCharacters()
@@ -32,13 +32,8 @@ export class ComputerTransport extends MultiplayerTransport {
    */
   async connect(_roomId) {
     return new Promise((resolve) => {
-      // Simulate connection delay and send opponent name/character
       setTimeout(() => {
         this.started = true;
-
-        // Trigger name callbacks with computer opponent data
-        // This mimics DurableObjectTransport sending opponent data on connection
-        this._triggerNameCallbacks();
 
         if (typeof document !== 'undefined') {
           const startEvent = new CustomEvent('start', { detail: { game: this.game } });
@@ -46,6 +41,12 @@ export class ComputerTransport extends MultiplayerTransport {
         }
 
         resolve();
+
+        // Trigger name callbacks AFTER connect() resolves
+        // This allows Game.getOpponentsName() to register callbacks first
+        setTimeout(() => {
+          this._triggerNameCallbacks();
+        }, 0);
       }, this.startDelay);
     });
   }
