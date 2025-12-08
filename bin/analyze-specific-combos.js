@@ -47,22 +47,41 @@ examples.forEach((example, i) => {
   const humanResult = getResult(human, humanOutcomeId);
   const goblinResult = getResult(goblin, goblinOutcomeId);
 
-  const humanDamage = humanResult?.score || 0;
-  const goblinDamage = goblinResult?.score || 0;
+  const humanMove = human.moves.find(m => m.id === humanMoveId);
+  const goblinMove = goblin.moves.find(m => m.id === goblinMoveId);
+
+  // Calculate base damage that each character RECEIVES (takes as damage)
+  const humanBaseDamage = parseInt(humanResult?.score) || 0;
+  const goblinBaseDamage = parseInt(goblinResult?.score) || 0;
+
+  // Get move modifiers for the ATTACKERS
+  const humanModifier = parseInt(humanMove?.mod) || 0;
+  const goblinModifier = parseInt(goblinMove?.mod) || 0;
+
+  // Calculate total damage: damage dealt TO opponent = opponent's base damage + attacker's modifier
+  // human deals damage TO goblin, so we use goblin's base damage + human's modifier
+  const humanTotalDamageDealt = Math.max(0, goblinBaseDamage + humanModifier);
+  const goblinTotalDamageDealt = Math.max(0, humanBaseDamage + goblinModifier);
 
   console.log(`\n${i + 1}. ${desc}`);
-  console.log(`   Human uses: ${getMoveName(human, humanMoveId)} (ID: ${humanMoveId})`);
-  console.log(`   Goblin uses: ${getMoveName(goblin, goblinMoveId)} (ID: ${goblinMoveId})`);
+  console.log(`   Human uses: ${getMoveName(human, humanMoveId)} (ID: ${humanMoveId}, mod: ${humanModifier})`);
+  console.log(`   Goblin uses: ${getMoveName(goblin, goblinMoveId)} (ID: ${goblinMoveId}, mod: ${goblinModifier})`);
   console.log('   ───────────────────────────────────────────────────────');
-  console.log(`   Human's view: ${humanResult?.name || 'Unknown'} → Takes ${humanDamage} damage`);
-  console.log(`   Goblin's view: ${goblinResult?.name || 'Unknown'} → Takes ${goblinDamage} damage`);
+  console.log(`   Human's view: ${humanResult?.name || 'Unknown'} → Takes ${goblinTotalDamageDealt} damage (base: ${humanBaseDamage}, opponent mod: ${goblinModifier})`);
+  console.log(`   Goblin's view: ${goblinResult?.name || 'Unknown'} → Takes ${humanTotalDamageDealt} damage (base: ${goblinBaseDamage}, opponent mod: ${humanModifier})`);
 
-  if (humanDamage !== goblinDamage) {
-    const faster = humanDamage < goblinDamage ? 'HUMAN' : 'GOBLIN';
-    const diff = Math.abs(humanDamage - goblinDamage);
-    console.log(`   🏃 RESULT: ${faster} IS FASTER (${diff} damage differential)`);
+  // Speed advantage means hitting without being hit back
+  const humanHits = humanTotalDamageDealt > 0;
+  const goblinHits = goblinTotalDamageDealt > 0;
+
+  if (humanHits && !goblinHits) {
+    console.log(`   🏃 RESULT: HUMAN IS FASTER (hits for ${humanTotalDamageDealt}, goblin misses)`);
+  } else if (goblinHits && !humanHits) {
+    console.log(`   🏃 RESULT: GOBLIN IS FASTER (hits for ${goblinTotalDamageDealt}, human misses)`);
+  } else if (humanHits && goblinHits) {
+    console.log(`   ⚔️  RESULT: EQUAL SPEED - Both hit (human deals ${humanTotalDamageDealt}, goblin deals ${goblinTotalDamageDealt})`);
   } else {
-    console.log(`   ⚔️  RESULT: TIE - Both take ${humanDamage} damage`);
+    console.log(`   🛡️  RESULT: BOTH MISS - No damage dealt`);
   }
 });
 

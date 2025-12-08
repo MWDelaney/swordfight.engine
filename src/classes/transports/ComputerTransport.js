@@ -9,6 +9,7 @@
 import { Moves } from '../Moves.js';
 import { BonusCalculator } from '../BonusCalculator.js';
 import { MultiplayerTransport } from './MultiplayerTransport.js';
+import { CharacterLoader } from '../CharacterLoader.js';
 
 export class ComputerTransport extends MultiplayerTransport {
   constructor(game, options = {}) {
@@ -42,38 +43,41 @@ export class ComputerTransport extends MultiplayerTransport {
    * Get a random move for the opponent
    */
   getMove(callback) {
-    // Get the result from the previous round that determines opponent's available moves
-    // Due to the swap in storage, myRoundData.result contains the opponent's state after the swap
-    const previousRound = this.game.roundNumber > 0 ? this.game.rounds[this.game.roundNumber - 1] : null;
-    const result = previousRound?.myRoundData?.result || { range: this.game.opponentsCharacter.moves[0].range, restrict: [], allowOnly: null };
+    // Defer callback to next tick to match async behavior of multiplayer transports
+    setTimeout(() => {
+      // Get the result from the previous round that determines opponent's available moves
+      // Due to the swap in storage, myRoundData.result contains the opponent's state after the swap
+      const previousRound = this.game.roundNumber > 0 ? this.game.rounds[this.game.roundNumber - 1] : null;
+      const result = previousRound?.myRoundData?.result || { range: this.game.opponentsCharacter.moves[0].range, restrict: [], allowOnly: null };
 
-    const moves = new Moves(this.game.opponentsCharacter, result);
+      const moves = new Moves(this.game.opponentsCharacter, result);
 
-    // Get a random move from the opponent's moves
-    let move = moves.filteredMoves[Math.floor(Math.random() * moves.filteredMoves.length)];
+      // Get a random move from the opponent's moves
+      let move = moves.filteredMoves[Math.floor(Math.random() * moves.filteredMoves.length)];
 
-    // If the character does not have their weapon, the opponent has a 1 in 3 chance of retrieving their weapon
-    if (!this.game.opponentsCharacter.weapon && Math.random() > 0.75) {
-      const retrieveMove = moves.filteredMoves.find(move => move.name === 'Retrieve Weapon');
-      if (retrieveMove) {
-        move = retrieveMove;
+      // If the character does not have their weapon, the opponent has a 1 in 3 chance of retrieving their weapon
+      if (!this.game.opponentsCharacter.weapon && Math.random() > 0.75) {
+        const retrieveMove = moves.filteredMoves.find(move => move.name === 'Retrieve Weapon');
+        if (retrieveMove) {
+          move = retrieveMove;
+        }
       }
-    }
 
-    // If a move has a bonus from the previous round, there's a 50% chance the opponent will choose that move
-    const previousRoundData = this.game.roundNumber > 0 ? this.game.rounds[this.game.roundNumber - 1] : null;
-    const opponentPreviousBonus = previousRoundData?.opponentsRoundData?.nextRoundBonus || [];
-    const bonusMoves = moves.filteredMoves.filter(mv => {
-      const bonus = BonusCalculator.calculateBonus(mv, opponentPreviousBonus);
-      return bonus > 0;
-    });
+      // If a move has a bonus from the previous round, there's a 50% chance the opponent will choose that move
+      const previousRoundData = this.game.roundNumber > 0 ? this.game.rounds[this.game.roundNumber - 1] : null;
+      const opponentPreviousBonus = previousRoundData?.opponentsRoundData?.nextRoundBonus || [];
+      const bonusMoves = moves.filteredMoves.filter(mv => {
+        const bonus = BonusCalculator.calculateBonus(mv, opponentPreviousBonus);
+        return bonus > 0;
+      });
 
-    if (bonusMoves.length > 0 && Math.random() > 0.5) {
-      move = bonusMoves[Math.floor(Math.random() * bonusMoves.length)];
-    }
+      if (bonusMoves.length > 0 && Math.random() > 0.5) {
+        move = bonusMoves[Math.floor(Math.random() * bonusMoves.length)];
+      }
 
-    // Invoke the callback with the selected move
-    callback({ move: move });
+      // Invoke the callback with the selected move
+      callback({ move: move });
+    }, 0);
   }
 
   /**
@@ -81,15 +85,18 @@ export class ComputerTransport extends MultiplayerTransport {
    * Get the opponent's name and character
    */
   getName(callback) {
-    // For computer mode, we need to pick a random character if not set
-    // This maintains backward compatibility
-    const computerCharacters = ['evil-human-fighter', 'goblin-fighter', 'skeleton-warrior', 'mummy', 'lizard-man'];
-    const opponentSlug = this.game.opponentCharacterSlug || computerCharacters[Math.floor(Math.random() * computerCharacters.length)];
-    
-    callback({ 
-      name: this.game.opponentsCharacter?.name || 'Computer',
-      characterSlug: opponentSlug
-    });
+    // Defer callback to next tick to match async behavior of multiplayer transports
+    // This ensures getName completes before getMove is called
+    setTimeout(() => {
+      if (!this.game.opponentCharacterSlug) {
+        throw new Error('opponentCharacterSlug must be set before connecting');
+      }
+
+      callback({
+        name: this.game.opponentsCharacter.name,
+        characterSlug: this.game.opponentCharacterSlug
+      });
+    }, 0);
   }
 
   /**

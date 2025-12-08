@@ -167,13 +167,15 @@ function analyzeStrengthMatchup(char1, char2) {
       const char1Modifier = parseInt(char1Move.mod) || 0;
       const char2Modifier = parseInt(char2Move.mod) || 0;
 
+      // Calculate total damage: damage dealt TO opponent = opponent's base damage + attacker's modifier
       const char1TotalDamageDealt = Math.max(0, char2ActualDamageTaken + char1Modifier);
       const char2TotalDamageDealt = Math.max(0, char1ActualDamageTaken + char2Modifier);
 
       damageDealt.char1 += char1TotalDamageDealt;
       damageDealt.char2 += char2TotalDamageDealt;
-      damageReceived.char1 += char1TotalDamageDealt;
-      damageReceived.char2 += char2TotalDamageDealt;
+      // Fix: char1 receives char2's damage, char2 receives char1's damage
+      damageReceived.char1 += char2TotalDamageDealt;
+      damageReceived.char2 += char1TotalDamageDealt;
       totalEncounters++;
 
       // Track moves that would knock out opponent in one hit
@@ -232,7 +234,11 @@ function analyzeSpeedMatchup(char1, char2) {
   const char2MoveIds = char2.moves.map(m => m.id);
 
   for (const char1MoveId of char1MoveIds) {
+    const char1Move = char1.moves.find(m => m.id === char1MoveId);
+
     for (const char2MoveId of char2MoveIds) {
+      const char2Move = char2.moves.find(m => m.id === char2MoveId);
+
       const char1OutcomeId = getOutcome(char1, char1MoveId, char2MoveId);
       const char2OutcomeId = getOutcome(char2, char2MoveId, char1MoveId);
 
@@ -247,19 +253,45 @@ function analyzeSpeedMatchup(char1, char2) {
         continue;
       }
 
-      const char1Damage = parseInt(char1Result.score) || 0;
-      const char2Damage = parseInt(char2Result.score) || 0;
+      // Calculate base damage that each character RECEIVES (takes as damage)
+      const char1BaseDamage = parseInt(char1Result.score) || 0;
+      const char2BaseDamage = parseInt(char2Result.score) || 0;
 
-      if (char1Damage !== char2Damage) {
+      // Get move modifiers for the ATTACKERS
+      const char1Modifier = parseInt(char1Move.mod) || 0;
+      const char2Modifier = parseInt(char2Move.mod) || 0;
+
+      // Calculate total damage: damage dealt TO opponent = opponent's base damage + attacker's modifier
+      // char1 deals damage TO char2, so we use char2's base damage + char1's modifier
+      const char1TotalDamageDealt = Math.max(0, char2BaseDamage + char1Modifier);
+      const char2TotalDamageDealt = Math.max(0, char1BaseDamage + char2Modifier);
+
+      // Speed advantage means hitting without being hit back (one-sided)
+      const char1Hits = char1TotalDamageDealt > 0;
+      const char2Hits = char2TotalDamageDealt > 0;
+
+      if (char1Hits && !char2Hits) {
+        // char1 has speed advantage
         asymmetricOutcomes.push({
           char1Move: { id: char1MoveId, name: getMoveName(char1, char1MoveId) },
           char2Move: { id: char2MoveId, name: getMoveName(char2, char2MoveId) },
-          char1Outcome: { name: char1Result.name, damage: char1Damage },
-          char2Outcome: { name: char2Result.name, damage: char2Damage },
-          winner: char1Damage < char2Damage ? char1.slug : char2.slug,
-          differential: Math.abs(char1Damage - char2Damage)
+          char1Outcome: { name: char1Result.name, damage: char1TotalDamageDealt },
+          char2Outcome: { name: char2Result.name, damage: char2TotalDamageDealt },
+          winner: char1.slug,
+          differential: char1TotalDamageDealt
+        });
+      } else if (char2Hits && !char1Hits) {
+        // char2 has speed advantage
+        asymmetricOutcomes.push({
+          char1Move: { id: char1MoveId, name: getMoveName(char1, char1MoveId) },
+          char2Move: { id: char2MoveId, name: getMoveName(char2, char2MoveId) },
+          char1Outcome: { name: char1Result.name, damage: char1TotalDamageDealt },
+          char2Outcome: { name: char2Result.name, damage: char2TotalDamageDealt },
+          winner: char2.slug,
+          differential: char2TotalDamageDealt
         });
       }
+      // If both hit or both miss, no speed advantage - don't add to asymmetricOutcomes
     }
   }
 

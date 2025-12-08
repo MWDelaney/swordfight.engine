@@ -193,9 +193,24 @@ export class Game {
         // Create a new round object for each player
         // Pass the previous round's data so bonuses can be applied
         // Factory automatically chooses Round or RoundAPI based on character data
+        // Each Round needs to see previousRoundData from the attacker's perspective for bonus calculation
         const previousRoundData = this.roundNumber > 0 ? this.rounds[this.roundNumber - 1] : null;
-        this.myRoundData = RoundFactory.create(this, this.myMove, this.opponentsMove, this.myCharacter, this.opponentsCharacter, previousRoundData);
-        this.opponentsRoundData = RoundFactory.create(this, this.opponentsMove, this.myMove, this.opponentsCharacter, this.myCharacter, previousRoundData);
+
+        // For myRoundData (my attack), I need MY previous bonus
+        const myPreviousRoundData = previousRoundData ? {
+          myRoundData: previousRoundData.myRoundData,
+          opponentsRoundData: previousRoundData.opponentsRoundData
+        } : null;
+
+        // For opponentsRoundData (opponent's attack), they need THEIR previous bonus
+        // Swap the perspective so opponent's bonus is in myRoundData position
+        const opponentsPreviousRoundData = previousRoundData ? {
+          myRoundData: previousRoundData.opponentsRoundData,
+          opponentsRoundData: previousRoundData.myRoundData
+        } : null;
+
+        this.myRoundData = RoundFactory.create(this, this.myMove, this.opponentsMove, this.myCharacter, this.opponentsCharacter, myPreviousRoundData);
+        this.opponentsRoundData = RoundFactory.create(this, this.opponentsMove, this.myMove, this.opponentsCharacter, this.myCharacter, opponentsPreviousRoundData);
 
         // Initialize rounds (no-op for Round, API fetch for RoundAPI)
         await this.myRoundData.init();

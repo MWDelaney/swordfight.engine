@@ -88,7 +88,7 @@ export class WebSocketTransport extends MultiplayerTransport {
       // Send player name and character
       const playerName = this._getPlayerName();
       this.game.myCharacter.name = playerName;
-      this.sendName({ 
+      this.sendName({
         name: playerName,
         characterSlug: this.game.myCharacterSlug
       });

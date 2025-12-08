@@ -71,7 +71,7 @@ export class DurableObjectTransport extends MultiplayerTransport {
         // Send player name and character immediately on connection
         const playerName = this._getPlayerName();
         this.game.myCharacter.name = playerName;
-        this.sendName({ 
+        this.sendName({
           name: playerName,
           characterSlug: this.game.myCharacterSlug
         });

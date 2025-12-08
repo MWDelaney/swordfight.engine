@@ -69,7 +69,7 @@ All endpoints return JSON.
 
 ### Round Outcomes
 - `GET /rounds/{char1}/{char2}/{move1}/{move2}.json` - Get round outcome
-  - Example: `/rounds/human-fighter/goblin-fighter/24/10.json`
+  - Example: `/rounds/human-fighter/goblin/24/10.json`
   - Returns complete round data for both players including:
     - Outcome IDs
     - Damage calculations

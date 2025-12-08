@@ -231,7 +231,7 @@ export default {
                   type: "string",
                   enum: data.characters.slugs
                 },
-                example: "goblin-fighter"
+                example: 'goblin'
               },
               {
                 name: "move1",
