@@ -9,7 +9,6 @@
 import { Moves } from '../Moves.js';
 import { BonusCalculator } from '../BonusCalculator.js';
 import { MultiplayerTransport } from './MultiplayerTransport.js';
-import { CharacterLoader } from '../CharacterLoader.js';
 
 export class ComputerTransport extends MultiplayerTransport {
   constructor(game, options = {}) {
@@ -27,6 +26,8 @@ export class ComputerTransport extends MultiplayerTransport {
    */
   async connect(_roomId) {
     // Select a random computer opponent character
+    // Use the CharacterLoader from game options to support both full and lite versions
+    const CharacterLoader = this.game.options.characterLoader;
     const availableCharacters = await CharacterLoader.getAvailableCharacters();
     const computerCharacters = availableCharacters
       .filter(slug => !slug.includes('human-fighter') && slug !== 'human-monk');
