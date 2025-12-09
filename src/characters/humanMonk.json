@@ -2,6 +2,7 @@
   "name": "Human Monk",
   "slug": "human-monk",
   "description": "Human monk with quarterstaff",
+  "difficulty": 6.40,
   "health": "10",
   "firstMove": "62",
   "weapon": "Quarterstaff",

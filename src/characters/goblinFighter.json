@@ -2,6 +2,7 @@
   "name": "Goblin",
   "slug": "goblin",
   "description": "Goblin with mace and shield",
+  "difficulty": 3.67,
   "health": "13",
   "firstMove": "62",
   "weapon": "Mace",

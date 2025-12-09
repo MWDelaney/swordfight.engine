@@ -2,6 +2,7 @@
   "name": "Lizard Man",
   "slug": "lizard-man",
   "description": "Lizard-man with scimitar and buckler",
+  "difficulty": 4.25,
   "health": "16",
   "firstMove": "62",
   "weapon": "Scimitar",

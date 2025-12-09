@@ -2,6 +2,7 @@
   "name": "Skeleton",
   "slug": "skeleton",
   "description": "Animated skeleton with sword and shield",
+  "difficulty": 4.60,
   "health": "7",
   "firstMove": "62",
   "weapon": "Sword",

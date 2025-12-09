@@ -2,6 +2,7 @@
   "name": "Barbarian with Two-handed Sword",
   "slug": "barbarian-two-handed-sword",
   "description": "Barbarian with two-handed sword",
+  "difficulty": 5.67,
   "health": "12",
   "firstMove": "62",
   "weapon": "Two-handed Sword",

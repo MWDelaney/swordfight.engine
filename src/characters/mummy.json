@@ -2,6 +2,7 @@
   "name": "Mummy",
   "slug": "mummy",
   "description": "A cursed mummy with heavy mace",
+  "difficulty": 5.28,
   "health": "12",
   "firstMove": "62",
   "weapon": "Mace",

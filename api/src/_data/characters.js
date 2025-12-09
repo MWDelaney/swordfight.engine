@@ -36,13 +36,21 @@ export default function() {
     slugs.push(character.slug);
   });
 
+  // Sort slugs by difficulty (easiest to hardest)
+  const sortedSlugs = slugs.sort((a, b) => {
+    const diffA = characters[a].difficulty || 0;
+    const diffB = characters[b].difficulty || 0;
+    return diffA - diffB;
+  });
+
   return {
     all: characters,
-    slugs: slugs,
-    list: slugs.map(slug => ({
+    slugs: sortedSlugs,
+    list: sortedSlugs.map(slug => ({
       slug: slug,
       name: characters[slug].name,
       description: characters[slug].description,
+      difficulty: characters[slug].difficulty,
       health: characters[slug].health,
       weapon: characters[slug].weapon,
       shield: characters[slug].shield

@@ -48,11 +48,13 @@ export class CharacterLoader {
   }
 
   /**
-   * Get available character slugs
+   * Get available character slugs sorted by difficulty (easiest to hardest)
    * @returns {Promise<string[]>} Array of character slugs
    */
   static async getAvailableCharacters() {
-    return Object.keys(this.characters);
+    return Object.entries(this.characters)
+      .sort(([, a], [, b]) => (a.difficulty || 0) - (b.difficulty || 0))
+      .map(([slug]) => slug);
   }
 
   /**

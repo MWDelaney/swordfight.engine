@@ -253,9 +253,62 @@ See [API_CLIENT_GUIDE.md](API_CLIENT_GUIDE.md#calculating-bonuses) for detailed 
 - `MultiplayerTransport` - Base class for custom transport implementations
 - `WebSocketTransport` - WebSocket-based multiplayer transport
 
+## Analysis Tools
+
+The `bin/` directory contains analysis scripts for game design and balancing:
+
+### Character Difficulty Analyzer
+
+Analyzes the skill level required to play each character effectively:
+
+```bash
+# View all characters ranked by difficulty
+node bin/analyze-character-difficulty.js
+
+# Analyze a specific character
+node bin/analyze-character-difficulty.js --character human-monk
+
+# Sort by speed factor instead of overall difficulty
+node bin/analyze-character-difficulty.js --sort speed
+
+# Verbose output with all details
+node bin/analyze-character-difficulty.js --verbose
+```
+
+Characters are rated from 1-10 (Beginner to Expert). The analyzer considers these factors:
+
+- **Speed/Timing** (40% weight) - How often the character wins speed battles (faster = easier)
+- **Defense** (25% weight) - Availability of defensive options like shields and blocks
+- **Forgiveness** (20% weight) - Health pool and ability to recover from mistakes
+- **Move Complexity** (10% weight) - Number and variety of moves to master
+- **Risk/Reward** (5% weight) - Variance in attack damage and outcomes
+
+### Character Stats Analyzer
+
+Analyzes combat statistics and matchups:
+
+```bash
+# View all character statistics
+node bin/analyze-character-stats.js
+
+# Analyze a specific character
+node bin/analyze-character-stats.js --character human-fighter
+
+# Analyze head-to-head matchup
+node bin/analyze-character-stats.js --matchup human-fighter goblin
+```
+
+### Character Validator
+
+Validates character JSON files for correctness:
+
+```bash
+node bin/validate-characters.js
+```
+
 ## Building
 
-The project uses esbuild for bundling. 
+The project uses esbuild for bundling.
 
 ### Build the Engine
 
@@ -264,6 +317,7 @@ npm run build
 ```
 
 Creates:
+
 - `dist/swordfight-engine.js` - Full version (115KB)
 - `dist/swordfight-engine.min.js` - Full version minified
 - `dist/swordfight-engine.lite.js` - Lite version (17KB)
