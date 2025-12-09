@@ -24,8 +24,8 @@ export default function() {
   const characters = {};
   const slugs = [];
 
-  // Dynamically load all JSON files from the characters directory
-  const characterFiles = readdirSync(charactersDir).filter(file => file.endsWith('.json'));
+  // Dynamically load all JSON files from the characters directory (exclude index.json)
+  const characterFiles = readdirSync(charactersDir).filter(file => file.endsWith('.json') && file !== 'index.json');
 
   characterFiles.forEach(filename => {
     const filePath = join(charactersDir, filename);
