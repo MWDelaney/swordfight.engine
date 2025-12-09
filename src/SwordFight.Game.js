@@ -39,7 +39,6 @@ export class Game {
    * @param {string} gameId - The ID of the game.
    * @param {string} myCharacterSlug - Slug for player's character
    * @param {Object} options - Optional configuration
-   * @param {Object} options.characterLoader - Custom CharacterLoader (defaults to bundled loader)
    * @param {Object} options.computerOptions - Options for computer transport (if using computer mode)
    */
   constructor(gameId, myCharacterSlug, options = {}) {
@@ -51,7 +50,7 @@ export class Game {
     this.myCharacterSlug = myCharacterSlug;
     this.opponentCharacterSlug = null; // Set by transport during name/character exchange
     this.options = options;
-    this.CharacterLoader = options.characterLoader || CharacterLoader;
+    this.CharacterLoader = CharacterLoader;
     this.myCharacter = null;
     this.opponentsCharacter = null;
     this.myMove = null;
@@ -634,6 +633,23 @@ export class Game {
   incrementRound() {
     this.roundNumber++;
     this.opponentsRound++;
+  }
+
+  /**
+   * Get all available character slugs (static convenience method)
+   * @returns {Promise<string[]>} Array of character slugs
+   */
+  static async getAvailableCharacters() {
+    return CharacterLoader.getAvailableCharacters();
+  }
+
+  /**
+   * Get a character by slug (static convenience method)
+   * @param {string} slug - The character slug
+   * @returns {Promise<Object>} Character data
+   */
+  static async getCharacter(slug) {
+    return CharacterLoader.getCharacter(slug);
   }
 }
 

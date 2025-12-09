@@ -26,9 +26,8 @@ export class ComputerTransport extends MultiplayerTransport {
    */
   async connect(_roomId) {
     // Select a random computer opponent character
-    // Use the CharacterLoader from game options to support both full and lite versions
-    const CharacterLoader = this.game.options.characterLoader;
-    const availableCharacters = await CharacterLoader.getAvailableCharacters();
+    // Use the CharacterLoader from game instance (already resolved in Game constructor)
+    const availableCharacters = await this.game.CharacterLoader.getAvailableCharacters();
     const computerCharacters = availableCharacters
       .filter(slug => !slug.includes('human-fighter') && slug !== 'human-monk');
     this.selectedOpponentSlug = computerCharacters[Math.floor(Math.random() * computerCharacters.length)];

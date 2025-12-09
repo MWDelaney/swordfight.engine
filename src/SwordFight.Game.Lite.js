@@ -120,15 +120,30 @@ export class CharacterLoader {
 }
 
 /**
- * Game class wrapper that uses API-based CharacterLoader by default
+ * Game class wrapper that uses API-based CharacterLoader
  */
 export class Game extends BaseGame {
   constructor(gameId, myCharacterSlug, options = {}) {
-    // Use the lite CharacterLoader unless a custom one is provided
-    super(gameId, myCharacterSlug, {
-      ...options,
-      characterLoader: options.characterLoader || CharacterLoader
-    });
+    super(gameId, myCharacterSlug, options);
+    // Override with lite CharacterLoader
+    this.CharacterLoader = CharacterLoader;
+  }
+
+  /**
+   * Get all available character slugs (static convenience method)
+   * @returns {Promise<string[]>} Array of character slugs
+   */
+  static async getAvailableCharacters() {
+    return CharacterLoader.getAvailableCharacters();
+  }
+
+  /**
+   * Get a character by slug (static convenience method)
+   * @param {string} slug - The character slug
+   * @returns {Promise<Object>} Character data
+   */
+  static async getCharacter(slug) {
+    return CharacterLoader.getCharacter(slug);
   }
 }
 
