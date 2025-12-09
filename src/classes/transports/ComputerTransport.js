@@ -89,9 +89,10 @@ export class ComputerTransport extends MultiplayerTransport {
    */
   _generateOpponentMove() {
     // Get the result from the previous round that determines opponent's available moves
-    // Due to the swap in storage, myRoundData.result contains the opponent's state after the swap
+    // Due to the swap in storage, opponentsRoundData.result contains the player's result
+    // which determines what moves the opponent can make (the player's result restricts the opponent)
     const previousRound = this.game.roundNumber > 0 ? this.game.rounds[this.game.roundNumber - 1] : null;
-    const result = previousRound?.myRoundData?.result || { range: this.game.opponentsCharacter.moves[0].range, restrict: [], allowOnly: null };
+    const result = previousRound?.opponentsRoundData?.result || { range: this.game.opponentsCharacter.moves[0].range, restrict: [], allowOnly: null };
 
     const moves = new Moves(this.game.opponentsCharacter, result);
 

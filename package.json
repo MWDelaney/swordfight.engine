@@ -1,13 +1,14 @@
 {
   "name": "swordfight-engine",
-  "version": "1.5.7",
+  "version": "1.5.8",
   "description": "A multiplayer sword fighting game engine with character management, round-based combat, and real-time multiplayer support",
   "type": "module",
   "main": "dist/swordfight-engine.js",
   "exports": {
     ".": "./dist/swordfight-engine.js",
-    "./min": "./dist/swordfight-engine.min.js",
+    "./full": "./dist/swordfight-engine.js",
     "./lite": "./dist/swordfight-engine.lite.js",
+    "./min": "./dist/swordfight-engine.min.js",
     "./lite/min": "./dist/swordfight-engine.lite.min.js",
     "./transports": "./dist/transports.js",
     "./transports/*": "./dist/transports/*.js"

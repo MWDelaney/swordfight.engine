@@ -1,46 +1,71 @@
 /**
  * CharacterLoader Class
  *
- * Loads all character files and provides access by slug.
- * Automatically imports all JSON files from the characters directory.
+ * Loads all character files dynamically based on index.json.
+ * No hardcoded character file names - just maintain the index.json file.
  *
  * Usage:
  * ```javascript
  * import { CharacterLoader } from './classes/CharacterLoader.js';
  *
- * const character = CharacterLoader.getCharacter('human-fighter');
- * const slugs = CharacterLoader.getAvailableCharacters();
+ * const character = await CharacterLoader.getCharacter('human-fighter');
+ * const slugs = await CharacterLoader.getAvailableCharacters();
  * ```
  */
 
-import humanFighter from '../characters/humanFighter.json';
-import evilHumanFighter from '../characters/evilHumanFighter.json';
-import goblinFighter from '../characters/goblinFighter.json';
-import humanMonk from '../characters/humanMonk.json';
-import lizardMan from '../characters/lizardMan.json';
-import mummy from '../characters/mummy.json';
-import skeletonWarrior from '../characters/skeletonWarrior.json';
+import characterIndex from '../characters/index.json';
 
 export class CharacterLoader {
-  static characters = {
-    [humanFighter.slug]: humanFighter,
-    [evilHumanFighter.slug]: evilHumanFighter,
-    [goblinFighter.slug]: goblinFighter,
-    [humanMonk.slug]: humanMonk,
-    [lizardMan.slug]: lizardMan,
-    [mummy.slug]: mummy,
-    [skeletonWarrior.slug]: skeletonWarrior
-  };
+  static _characters = null;
+  static _initPromise = null;
+
+  /**
+   * Initialize characters by dynamically importing all files listed in index.json
+   * @private
+   */
+  static async _initialize() {
+    if (this._characters) {
+      return;
+    }
+
+    if (this._initPromise) {
+      return this._initPromise;
+    }
+
+    this._initPromise = (async() => {
+      this._characters = {};
+
+      // Dynamically import each character file listed in the index
+      await Promise.all(
+        characterIndex.characters.map(async(fileName) => {
+          try {
+            const module = await import(`../characters/${fileName}.json`);
+            const character = module.default || module;
+            if (character.slug) {
+              this._characters[character.slug] = character;
+            }
+          } catch (error) {
+            console.warn(`Failed to load character file: ${fileName}.json`, error);
+          }
+        })
+      );
+    })();
+
+    await this._initPromise;
+  }
 
   /**
    * Get a character by slug
    * @param {string} slug - The character slug (e.g., 'human-fighter')
-   * @returns {Object} A copy of the character data
+   * @returns {Promise<Object>} A copy of the character data
    */
   static async getCharacter(slug) {
-    const character = this.characters[slug];
+    await this._initialize();
+
+    const character = this._characters[slug];
     if (!character) {
-      throw new Error(`Character '${slug}' not found. Available: ${this.getAvailableCharacters().join(', ')}`);
+      const available = await this.getAvailableCharacters();
+      throw new Error(`Character '${slug}' not found. Available: ${available.join(', ')}`);
     }
 
     // Return a copy to prevent mutation
@@ -52,7 +77,9 @@ export class CharacterLoader {
    * @returns {Promise<string[]>} Array of character slugs
    */
   static async getAvailableCharacters() {
-    return Object.entries(this.characters)
+    await this._initialize();
+
+    return Object.entries(this._characters)
       .sort(([, a], [, b]) => (a.difficulty || 0) - (b.difficulty || 0))
       .map(([slug]) => slug);
   }
@@ -63,6 +90,7 @@ export class CharacterLoader {
    * @returns {Promise<boolean>} True if the character exists
    */
   static async hasCharacter(slug) {
-    return slug in this.characters;
+    await this._initialize();
+    return slug in this._characters;
   }
 }

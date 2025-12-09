@@ -46,7 +46,7 @@ const DIFFICULTY_LABELS = [
 
 // Load all characters from the characters directory
 function loadAllCharacters() {
-  const files = readdirSync(CHARACTERS_DIR).filter(f => f.endsWith('.json'));
+  const files = readdirSync(CHARACTERS_DIR).filter(f => f.endsWith('.json') && f !== 'index.json');
   const characters = {};
 
   files.forEach(file => {
@@ -435,25 +435,25 @@ function printDifficultyAnalysis(analysis) {
   console.log(`Shield: ${analysis.character.shield || 'None'}`);
 
   console.log('\n📊 DIFFICULTY FACTORS:');
-  
+
   console.log(`\n  ⚡ Speed/Timing (${analysis.factors.speed.speedScore.toFixed(1)}/10):`);
   console.log(`     ${analysis.factors.speed.description}`);
   console.log(`     Speed Win Rate: ${analysis.factors.speed.speedWinRate}%`);
-  
+
   console.log(`\n  🧩 Move Complexity (${analysis.factors.complexity.complexityScore.toFixed(1)}/10):`);
   console.log(`     ${analysis.factors.complexity.description}`);
   console.log(`     Total Moves: ${analysis.factors.complexity.totalMoves}`);
   console.log(`     Move Types: ${analysis.factors.complexity.moveTypes}, Move Tags: ${analysis.factors.complexity.moveTags}`);
-  
+
   console.log(`\n  🎲 Risk/Reward (${analysis.factors.riskReward.varianceScore.toFixed(1)}/10):`);
   console.log(`     ${analysis.factors.riskReward.description}`);
   console.log(`     Modifier Range: ${analysis.factors.riskReward.minMod} to ${analysis.factors.riskReward.maxMod}`);
-  
+
   console.log(`\n  🛡️  Defense (${analysis.factors.defense.defensiveScore.toFixed(1)}/10):`);
   console.log(`     ${analysis.factors.defense.description}`);
   console.log(`     Shield: ${analysis.factors.defense.hasShield ? 'Yes' : 'No'}`);
   console.log(`     Defensive Moves: ${analysis.factors.defense.totalDefensiveMoves}`);
-  
+
   console.log(`\n  ❤️  Forgiveness (${analysis.factors.forgiveness.forgivenessScore.toFixed(1)}/10):`);
   console.log(`     ${analysis.factors.forgiveness.description}`);
   console.log(`     Health: ${analysis.factors.forgiveness.health} HP`);
@@ -494,7 +494,7 @@ function printSummaryTable(analyses) {
       const risk = analysis.factors.riskReward.varianceScore.toFixed(1).padStart(4);
       const defense = analysis.factors.defense.defensiveScore.toFixed(1).padStart(7);
       const forgive = analysis.factors.forgiveness.forgivenessScore.toFixed(1).padStart(7);
-      
+
       console.log(`${rank} | ${name} | ${overall} | ${speed} | ${complex} | ${risk} | ${defense} | ${forgive} ${analysis.difficultyEmoji}`);
     });  console.log('\n');
   console.log('Difficulty Scale: 0 = Easiest, 10 = Hardest');

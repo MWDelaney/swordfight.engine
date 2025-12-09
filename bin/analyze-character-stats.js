@@ -34,7 +34,7 @@ const flags = {
 
 // Load all characters from the characters directory
 function loadAllCharacters() {
-  const files = readdirSync(CHARACTERS_DIR).filter(f => f.endsWith('.json'));
+  const files = readdirSync(CHARACTERS_DIR).filter(f => f.endsWith('.json') && f !== 'index.json');
   const characters = {};
 
   files.forEach(file => {

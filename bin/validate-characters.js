@@ -46,7 +46,8 @@ const VALID_MOVE_TAGS = [
 
 // Load all characters
 function loadAllCharacters() {
-  const files = readdirSync(CHARACTERS_DIR).filter(f => f.endsWith('.json'));
+  const files = readdirSync(CHARACTERS_DIR)
+    .filter(f => f.endsWith('.json') && f !== 'index.json'); // Exclude index.json
   const characters = {};
 
   files.forEach(file => {

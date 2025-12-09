@@ -25,9 +25,10 @@ import { RoundAPI } from './classes/RoundAPI.js';
  *
  * Loads character data from API instead of bundling JSON files.
  * Caches loaded characters in memory to avoid repeated requests.
+ * Uses API_BASE_URL environment variable or default CDN.
  */
 export class CharacterLoader {
-  static apiBase = 'https://api.swordfight.me';
+  static apiBase = process.env.API_BASE_URL || 'https://mwdelaney.github.io/swordfight.engine';
   static characterCache = new Map();
 
   /**
@@ -131,11 +132,7 @@ export class Game extends BaseGame {
   }
 }
 
-// Export core classes for independent use
-export { Round } from './classes/Round.js';
-export { RoundAPI } from './classes/RoundAPI.js';
-export { RoundFactory } from './classes/RoundFactory.js';
-export { Moves } from './classes/Moves.js';
+// Export only classes needed by consumers
 export { BonusCalculator } from './classes/BonusCalculator.js';
 
 // Note: Transport classes should be imported individually from their respective files:

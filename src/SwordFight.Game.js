@@ -637,13 +637,8 @@ export class Game {
   }
 }
 
-// Export CharacterLoader for independent use
+// Export only classes needed by consumers
 export { CharacterLoader };
-
-// Export Round class for API generation and external use
-export { Round } from './classes/Round.js';
-
-// Export BonusCalculator for client-side bonus calculations
 export { BonusCalculator } from './classes/BonusCalculator.js';
 
 // Note: Transport classes should be imported individually from their respective files:

@@ -1,7 +1,11 @@
 #!/usr/bin/env node
 
 import { build, context } from 'esbuild';
-import { readFileSync } from 'fs';
+import { readFileSync, readdirSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const isWatch = process.argv.includes('--watch');
 const isDev = isWatch || process.argv.includes('--dev');
@@ -27,7 +31,8 @@ const sharedOptions = {
   },
   define: {
     'process.env.NODE_ENV': JSON.stringify(isDev ? 'development' : 'production'),
-    'process.env.VERSION': JSON.stringify(packageJson.version)
+    'process.env.VERSION': JSON.stringify(packageJson.version),
+    'process.env.API_BASE_URL': JSON.stringify(process.env.API_BASE_URL || 'https://mwdelaney.github.io/swordfight.engine')
   },
   loader: {
     '.js': 'js',

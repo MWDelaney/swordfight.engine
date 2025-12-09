@@ -4,9 +4,10 @@ import { BonusCalculator } from './BonusCalculator.js';
  * @class RoundAPI
  * @description This class manages game rounds by fetching pre-computed data from an API.
  * Used with lightweight character data that doesn't include tables and results.
+ * Uses API_BASE_URL environment variable or default CDN.
  */
 export class RoundAPI {
-  static apiBase = 'https://api.swordfight.me';
+  static apiBase = process.env.API_BASE_URL || 'https://mwdelaney.github.io/swordfight.engine';
 
   /**
    * Set the API base URL for fetching round data
