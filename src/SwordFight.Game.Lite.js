@@ -18,6 +18,7 @@
  */
 
 import { Game as BaseGame } from './SwordFight.Game.js';
+import { RoundAPI } from './classes/RoundAPI.js';
 
 /**
  * CharacterLoader
@@ -36,9 +37,7 @@ export class CharacterLoader {
   static setApiBase(url) {
     this.apiBase = url.replace(/\/$/, '');
     // Also update RoundAPI class API base for consistency
-    import('./classes/RoundAPI.js').then(({ RoundAPI }) => {
-      RoundAPI.setApiBase(url);
-    });
+    RoundAPI.setApiBase(url);
   }
 
   /**
