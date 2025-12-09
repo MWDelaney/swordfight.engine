@@ -2,7 +2,7 @@
   "name": "Human Fighter",
   "slug": "human-fighter",
   "description": "Human fighter with sword and shield",
-  "difficulty": 4.10,
+  "difficulty": 4.1,
   "health": "12",
   "firstMove": "62",
   "weapon": "Broadsword",

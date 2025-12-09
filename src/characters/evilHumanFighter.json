@@ -2,7 +2,7 @@
   "name": "Evil Human Fighter",
   "slug": "evil-human-fighter",
   "description": "Evil human fighter with sword and shield",
-  "difficulty": 4.10,
+  "difficulty": 4.1,
   "health": "12",
   "firstMove": "62",
   "weapon": "Long sword",
