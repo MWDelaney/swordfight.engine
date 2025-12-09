@@ -415,11 +415,6 @@ export class Game {
           await this.setOpponentCharacter(data.characterSlug);
         }
 
-        // Assign the received name to the opponent's character
-        if (this.opponentsCharacter) {
-          this.opponentsCharacter.name = data.name;
-        }
-
         // Dispatch a custom event to notify that the opponent's name has been received
         const nameEvent = new CustomEvent('name', { detail: data });
         document.dispatchEvent(nameEvent);
