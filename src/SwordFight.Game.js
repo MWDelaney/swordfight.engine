@@ -32,6 +32,7 @@ import { RoundFactory } from './classes/RoundFactory.js';
 import { ComputerTransport } from './classes/transports/ComputerTransport.js';
 import { Moves } from './classes/Moves.js';
 import { CharacterLoader } from './classes/CharacterLoader.js';
+import { HintGenerator } from './classes/HintGenerator.js';
 
 export class Game {
   /**
@@ -90,14 +91,22 @@ export class Game {
 
     // Load my character
     this.myCharacter = await this.CharacterLoader.getCharacter(this.myCharacterSlug);
+    this.myCharacter = this.normalizeWeaponFormat(this.myCharacter);
     this.myMove = this.getInitialMove(this.myCharacter);
     this.myCharacter.startingHealth = this.myCharacter.health;
+    if (this.myCharacter.stamina !== null && this.myCharacter.stamina !== undefined) {
+      this.myCharacter.startingStamina = this.myCharacter.stamina;
+    }
 
     // Load opponent character if we have it
     if (this.opponentCharacterSlug) {
       this.opponentsCharacter = await this.CharacterLoader.getCharacter(this.opponentCharacterSlug);
+      this.opponentsCharacter = this.normalizeWeaponFormat(this.opponentsCharacter);
       this.opponentsMove = this.getInitialMove(this.opponentsCharacter);
       this.opponentsCharacter.startingHealth = this.opponentsCharacter.health;
+      if (this.opponentsCharacter.stamina !== null && this.opponentsCharacter.stamina !== undefined) {
+        this.opponentsCharacter.startingStamina = this.opponentsCharacter.stamina;
+      }
     }
 
     // Load saved game state if exists
@@ -216,8 +225,12 @@ export class Game {
         await this.opponentsRoundData.init();
 
         // Take damage
-        this.takeDamage(this.myCharacter, this.opponentsRoundData);
-        this.takeDamage(this.opponentsCharacter, this.myRoundData);
+        this.takeDamage(this.myCharacter, this.opponentsRoundData, this.myRoundData);
+        this.takeDamage(this.opponentsCharacter, this.myRoundData, this.opponentsRoundData);
+
+        // Apply stamina costs and effects
+        this.applyStamina(this.myCharacter, this.myRoundData, this.opponentsRoundData);
+        this.applyStamina(this.opponentsCharacter, this.opponentsRoundData, this.myRoundData);
 
         // Take self-damage
         this.takeSelfDamage(this.myCharacter, this.myRoundData);
@@ -262,6 +275,14 @@ export class Game {
           nextRoundBonus: this.opponentsRoundData.nextRoundBonus,
           result: this.myRoundData.result
         };
+
+        // Store hints if they were provided
+        if (this.rounds[this.roundNumber].myMoveHint) {
+          this.rounds[this.roundNumber].myRoundData.hint = this.rounds[this.roundNumber].myMoveHint;
+        }
+        if (this.rounds[this.roundNumber].opponentsMoveHint) {
+          this.rounds[this.roundNumber].opponentsRoundData.hint = this.rounds[this.roundNumber].opponentsMoveHint;
+        }
 
         // Increment the round number
         this.incrementRound();
@@ -380,8 +401,18 @@ export class Game {
         }
         this.rounds[this.roundNumber]['opponentsMove'] = data.move;
 
+        // Store hint if provided by opponent
+        if (data.hint) {
+          this.rounds[this.roundNumber]['opponentsMoveHint'] = data.hint;
+        }
+
         // Dispatch a custom event for the opponent's move for the front end
-        const opponentsMoveEvent = new CustomEvent('opponentsMove', { detail: data.move });
+        const opponentsMoveEvent = new CustomEvent('opponentsMove', {
+          detail: {
+            move: data.move,
+            hint: data.hint || null
+          }
+        });
         document.dispatchEvent(opponentsMoveEvent);
 
         // Set up the game state for the next step
@@ -428,7 +459,7 @@ export class Game {
   /**
    * takeDamage
    */
-  takeDamage(character, roundData) {
+  takeDamage(character, roundData, opponentRoundData = null) {
     // If we just loaded this game, don't take damage this round (we're just resetting the game)
     if (!this.loaded) {
       if (roundData.score !== '' && roundData.totalScore > 0) {
@@ -443,25 +474,124 @@ export class Game {
       }
     }
 
-    // Dislodged weapon (temporary - can be retrieved)
+    // Dislodged weapon - remove all weapons temporarily (can retrieve)
     if (roundData.result.weaponDislodged) {
+      character.droppedWeapons = [...(character.weapons || [])];
+      character.weapons = [];
+      // Legacy support
       character.weapon = false;
     }
 
-    // Retrieved weapon (only if not destroyed)
-    if (roundData.result.retrieveWeapon && !character.weaponDestroyed) {
+    // Opponent weapon dislodged (conditional on opponent scoring)
+    // Used for abilities like Shrieking that force opponent to drop weapon only if they dealt damage
+    if (roundData.result.opponentWeaponDislodged && opponentRoundData) {
+      const opponentScored = opponentRoundData.score !== '' && opponentRoundData.totalScore > 0;
+      if (opponentScored) {
+        character.droppedWeapons = [...(character.weapons || [])];
+        character.weapons = [];
+        // Legacy support
+        character.weapon = false;
+        if (window.logging) {
+          console.log(`${character.name}'s weapon was dislodged by opponent's ability (opponent scored)`);
+        }
+      }
+    }
+
+    // Retrieved weapon - restore dropped weapons
+    if (roundData.result.retrieveWeapon && character.droppedWeapons && !character.weaponDestroyed) {
+      character.weapons = character.droppedWeapons;
+      character.droppedWeapons = null;
+      // Legacy support
       character.weapon = true;
     }
 
-    // Destroyed weapon (permanent)
-    if (roundData.result.weaponDestroyed) {
-      character.weapon = false;
+    // Destroyed weapon - permanently remove specific weapon
+    if (roundData.result.weaponDestroyed && roundData.myMove.requiresWeapon) {
+      const weaponName = typeof roundData.myMove.requiresWeapon === 'string'
+        ? roundData.myMove.requiresWeapon
+        : (character.weapons && character.weapons[0]?.name);
+      if (weaponName) {
+        character.weapons = (character.weapons || []).filter(w => w.name !== weaponName);
+      }
       character.weaponDestroyed = true;
+      // Legacy support
+      character.weapon = false;
+    }
+
+    // Consume ammunition from the weapon used this round
+    if (roundData.myMove.requiresAmmo && typeof roundData.myMove.requiresWeapon === 'string') {
+      const weapon = (character.weapons || []).find(w => w.name === roundData.myMove.requiresWeapon);
+      if (weapon && weapon.ammo !== null) {
+        const ammoCost = roundData.myMove.ammoCost || 1;
+        weapon.ammo = Math.max(0, weapon.ammo - ammoCost);
+        if (window.logging) {
+          console.log(`Consumed ${ammoCost} ammo from ${weapon.name}. Remaining: ${weapon.ammo}`);
+        }
+      }
+    }
+
+    // Reload specific weapon with given amount (capped at maxAmmo)
+    if (roundData.result.reloadWeapon) {
+      const reloadData = roundData.result.reloadWeapon;
+      const weapon = (character.weapons || []).find(w => w.name === reloadData.name);
+      if (weapon && weapon.maxAmmo !== null && weapon.ammo !== null) {
+        const reloadAmount = reloadData.amount || 0;
+        const oldAmmo = weapon.ammo;
+        weapon.ammo = Math.min(weapon.ammo + reloadAmount, weapon.maxAmmo);
+        if (window.logging) {
+          console.log(`Reloaded ${weapon.name}: ${oldAmmo} -> ${weapon.ammo} (max: ${weapon.maxAmmo})`);
+        }
+      }
     }
 
     // Smashed shield (permanent)
     if (roundData.result.shieldDestroyed) {
       character.shield = false;
+    }
+  }
+
+  /**
+   * applyStamina
+   * Apply stamina costs from moves and stamina damage from results.
+   * Stamina counts down like health - characters lose when stamina reaches 0.
+   */
+  applyStamina(character, myRoundData, opponentRoundData) {
+    // Skip if game was just loaded or character doesn't use stamina system
+    if (this.loaded || character.stamina === null || character.stamina === undefined) {
+      return;
+    }
+
+    let staminaLost = 0;
+
+    // Stamina cost from the move used (positive = cost, negative = restoration)
+    const moveCost = myRoundData.myMove.staminaCost || 0;
+    staminaLost += moveCost;
+
+    // Stamina damage from opponent's result (if they hit)
+    if (opponentRoundData.score !== '' && opponentRoundData.totalScore > 0) {
+      const staminaDamage = opponentRoundData.result.staminaDamage || 0;
+      staminaLost += staminaDamage;
+    }
+
+    // Self-stamina cost if result has it and player scored
+    if (myRoundData.result.selfStamina && myRoundData.score !== '' && myRoundData.totalScore > 0) {
+      staminaLost += myRoundData.result.selfStamina;
+    }
+
+    // Apply stamina loss (negative cost = restoration)
+    character.stamina -= staminaLost;
+
+    // Cap at starting stamina (can't exceed max)
+    if (character.startingStamina) {
+      character.stamina = Math.min(character.stamina, character.startingStamina);
+    }
+
+    // Ensure stamina doesn't go below 0 for cleaner display (defeat check handles = 0)
+    character.stamina = Math.max(0, character.stamina);
+
+    if (window.logging && staminaLost !== 0) {
+      const action = staminaLost > 0 ? 'lost' : 'recovered';
+      console.log(`${character.name} ${action} ${Math.abs(staminaLost)} stamina. Remaining: ${character.stamina}/${character.startingStamina}`);
     }
   }
 
@@ -514,6 +644,9 @@ export class Game {
     // Log the character's details
     console.group(`%c${roundData.myCharacter.name}`, `font-weight: bold; color: blue;`);
     console.log(`%c❤️ Health: %c${roundData.myCharacter.health}`, `font-weight: bold`, `color: red;`);
+    if (roundData.myCharacter.stamina !== null && roundData.myCharacter.stamina !== undefined) {
+      console.log(`%c💪 Stamina: %c${roundData.myCharacter.stamina}/${roundData.myCharacter.startingStamina}`, `font-weight: bold`, `color: blue;`);
+    }
     console.log(`%c🗡️ Weapon: %c${roundData.myCharacter.weapon ? 'Yes' : 'No'}`, `font-weight: bold`, `color: black;`);
     console.log(`%c🛡️ Shield: %c${roundData.myCharacter.shield ? 'Yes' : 'No'}`, `font-weight: bold`, `color: black;`);
     console.log(`%c⚔️ Move: %c${roundData.myMove.tag} ${roundData.myMove.name}, %c(${roundData.myMove.id})`, `font-weight: bold`, `color: brown;`, `color: black;`);
@@ -564,17 +697,34 @@ export class Game {
     const victoryEvent = new CustomEvent('victory');
     const defeatEvent = new CustomEvent('defeat');
 
-    // If either character's health is less than or equal to 0, dispatch the appropriate event
-    if (this.myCharacter.health <= 0) {
+    // Check if character is defeated by health OR stamina depletion
+    const myDefeated = this.myCharacter.health <= 0 ||
+      (this.myCharacter.stamina !== null && this.myCharacter.stamina !== undefined && this.myCharacter.stamina <= 0);
+    const opponentDefeated = this.opponentsCharacter.health <= 0 ||
+      (this.opponentsCharacter.stamina !== null && this.opponentsCharacter.stamina !== undefined && this.opponentsCharacter.stamina <= 0);
+
+    // If both defeated simultaneously, player loses (could add tiebreaker logic)
+    if (myDefeated && opponentDefeated) {
       if (window.logging) {
-        console.log(`${this.myCharacter.name} (you) is defeated!`);
+        console.log('Both players defeated simultaneously!');
       }
       document.dispatchEvent(defeatEvent);
       return;
     }
-    if (this.opponentsCharacter.health <= 0) {
+
+    // If either character's health or stamina is depleted, dispatch the appropriate event
+    if (myDefeated) {
       if (window.logging) {
-        console.log(`${this.opponentsCharacter.name} (your opponent) is defeated!`);
+        const reason = this.myCharacter.health <= 0 ? 'health depleted' : 'exhausted';
+        console.log(`${this.myCharacter.name} (you) is defeated! (${reason})`);
+      }
+      document.dispatchEvent(defeatEvent);
+      return;
+    }
+    if (opponentDefeated) {
+      if (window.logging) {
+        const reason = this.opponentsCharacter.health <= 0 ? 'health depleted' : 'exhausted';
+        console.log(`${this.opponentsCharacter.name} (your opponent) is defeated! (${reason})`);
       }
       document.dispatchEvent(victoryEvent);
       return;
@@ -605,11 +755,37 @@ export class Game {
       // Assign the move to the current round
       this.rounds[this.roundNumber]['myMove'] = myMove;
 
-      // Send the move to the multiplayer service
-      this.Multiplayer.sendMove({ move: myMove, round: this.roundNumber });
+      // Check if we need to provide a hint based on opponent's previous round result
+      // If opponent got a result with provideHint: true, we must provide a hint this round
+      let hint = null;
+      if (this.roundNumber > 0) {
+        const previousRound = this.rounds[this.roundNumber - 1];
+        if (previousRound && previousRound.opponentsRoundData && previousRound.opponentsRoundData.result) {
+          if (HintGenerator.shouldProvideHint(previousRound.opponentsRoundData.result)) {
+            hint = HintGenerator.generateHint(myMove, this.myCharacter);
+          }
+        }
+      }
 
-      // Dispatch a custom event for the move
-      const myMoveEvent = new CustomEvent('myMove', { detail: myMove });
+      // Store hint if generated
+      if (hint) {
+        this.rounds[this.roundNumber]['myMoveHint'] = hint;
+      }
+
+      // Send the move to the multiplayer service with optional hint
+      this.Multiplayer.sendMove({
+        move: myMove,
+        round: this.roundNumber,
+        hint: hint
+      });
+
+      // Dispatch a custom event for the move (include hint if present)
+      const myMoveEvent = new CustomEvent('myMove', {
+        detail: {
+          move: myMove,
+          hint: hint
+        }
+      });
       document.dispatchEvent(myMoveEvent);
 
       // Set up the game state for the next step
@@ -628,6 +804,40 @@ export class Game {
   incrementRound() {
     this.roundNumber++;
     this.opponentsRound++;
+  }
+
+  /**
+   * Normalize weapon format for backward compatibility.
+   * Converts legacy weapon string or object to weapons array.
+   * @param {Object} character - The character to normalize
+   * @returns {Object} Character with normalized weapons array
+   */
+  normalizeWeaponFormat(character) {
+    // Handle legacy single weapon string
+    if (typeof character.weapon === 'string') {
+      character.weapons = [{ name: character.weapon, ammo: null, maxAmmo: null }];
+    }
+    // Handle single weapon object
+    else if (character.weapon && typeof character.weapon === 'object') {
+      character.weapons = [{
+        name: character.weapon.name,
+        ammo: character.weapon.ammo ?? null,
+        maxAmmo: character.weapon.maxAmmo ?? null
+      }];
+    }
+    // Ensure weapons array exists and has proper format
+    else if (!character.weapons) {
+      character.weapons = [];
+    } else {
+      // Normalize existing weapons array
+      character.weapons = character.weapons.map(w => ({
+        name: w.name,
+        ammo: w.ammo ?? null,
+        maxAmmo: w.maxAmmo ?? null
+      }));
+    }
+
+    return character;
   }
 
   /**

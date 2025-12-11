@@ -33,9 +33,32 @@ export class Moves {
         return false;
       }
 
-      // If the character does not have their weapon, restrict the moves to only those that are available without the weapon
-      if(!this.character.weapon && move.requiresWeapon) {
-        return false;
+      // Handle weapon requirements
+      if(move.requiresWeapon) {
+        // Get all available weapons (not dropped/destroyed)
+        const availableWeapons = this.character.weapons || [];
+
+        if (typeof move.requiresWeapon === 'string') {
+          // Move requires specific weapon
+          const requiredWeapon = availableWeapons.find(w => w.name === move.requiresWeapon);
+          if (!requiredWeapon) {
+            return false;
+          }
+
+          // Check ammo if required
+          if (move.requiresAmmo) {
+            const ammoCost = move.ammoCost || 1;
+            const hasAmmo = requiredWeapon.ammo === null || requiredWeapon.ammo >= ammoCost;
+            if (!hasAmmo) {
+              return false;
+            }
+          }
+        } else {
+          // Move requires any weapon (backward compatible with requiresWeapon: true)
+          if (availableWeapons.length === 0) {
+            return false;
+          }
+        }
       }
 
       // If the character does not have their shield, restrict the moves to only those that are available without the shield
@@ -44,9 +67,10 @@ export class Moves {
       }
 
       // If this is the retrieve weapon move, hide it if:
-      // 1) Character already has their weapon, or
+      // 1) Character has weapons available, or
       // 2) Weapon has been permanently destroyed
-      if(move.name === 'Retrieve Weapon' && (this.character.weapon || this.character.weaponDestroyed)) {
+      const hasWeapons = this.character.weapons && this.character.weapons.length > 0;
+      if(move.name === 'Retrieve Weapon' && (hasWeapons || this.character.weaponDestroyed)) {
         return false;
       }
 

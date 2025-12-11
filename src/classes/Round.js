@@ -1,4 +1,5 @@
 import { BonusCalculator } from './BonusCalculator.js';
+import { HintGenerator } from './HintGenerator.js';
 
 /**
  * @class Round
@@ -31,6 +32,7 @@ export class Round {
     this.bonus = this.getMyBonus();
     this.nextRoundBonus = this.getNextRoundBonus();
     this.totalScore = this.getTotalScore(this.score, this.moveModifier, this.bonus);
+    this.requiresHint = this.getRequiresHint();
   }
 
   /**
@@ -151,5 +153,21 @@ export class Round {
 
     // Use the stored nextRoundBonus from the previous round
     return BonusCalculator.calculateBonus(this.myMove, this.previousRoundData.myRoundData.nextRoundBonus);
+  }
+
+  /**
+   * getRequiresHint
+   * Check if this round requires providing a hint to the opponent
+   * Based on whether the OPPONENT's previous result has provideHint: true
+   * @returns {boolean} Whether a hint should be provided this round
+   */
+  getRequiresHint() {
+    // Check opponent's previous result - if they got a result with provideHint,
+    // then I must provide a hint this round
+    if (!this.previousRoundData || !this.previousRoundData.opponentsRoundData || !this.previousRoundData.opponentsRoundData.result) {
+      return false;
+    }
+
+    return HintGenerator.shouldProvideHint(this.previousRoundData.opponentsRoundData.result);
   }
 }

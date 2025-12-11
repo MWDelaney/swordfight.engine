@@ -106,7 +106,7 @@ export class ComputerTransport extends MultiplayerTransport {
       }
     }
 
-    // If a move has a bonus from the previous round, there's a 50% chance the opponent will choose that move
+    // If a move has a bonus from the previous round, there's a 1 in 3 chance the opponent will choose that move
     const previousRoundData = this.game.roundNumber > 0 ? this.game.rounds[this.game.roundNumber - 1] : null;
     const opponentPreviousBonus = previousRoundData?.opponentsRoundData?.nextRoundBonus || [];
     const bonusMoves = moves.filteredMoves.filter(mv => {
@@ -114,7 +114,7 @@ export class ComputerTransport extends MultiplayerTransport {
       return bonus > 0;
     });
 
-    if (bonusMoves.length > 0 && Math.random() > 0.5) {
+    if (bonusMoves.length > 0 && Math.random() < 0.333) {
       move = bonusMoves[Math.floor(Math.random() * bonusMoves.length)];
     }
 

@@ -444,6 +444,7 @@ class CharacterValidator {
     this.character.results.forEach(result => {
       const specialFlags = [
         result.weaponDislodged,
+        result.opponentWeaponDislodged,
         result.retrieveWeapon,
         result.shieldDestroyed
       ].filter(Boolean);
@@ -462,6 +463,13 @@ class CharacterValidator {
             resultId: result.id
           });
         }
+      }
+
+      // If opponent weapon can be dislodged, opponent should have retrieve option
+      // Note: This is checked against opponent's character, not this character
+      if (result.opponentWeaponDislodged) {
+        // This is informational - the check would need to be done during gameplay
+        // since we don't know which opponent character will be used
       }
     });
   }

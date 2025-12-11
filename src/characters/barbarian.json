@@ -154,7 +154,7 @@
     },
     {
       "tag": "Jump",
-      "name": "Down",
+      "name": "Duck",
       "range": "close",
       "type": "defense",
       "id": "20",

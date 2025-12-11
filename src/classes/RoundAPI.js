@@ -1,4 +1,5 @@
 import { BonusCalculator } from './BonusCalculator.js';
+import { HintGenerator } from './HintGenerator.js';
 
 /**
  * @class RoundAPI
@@ -44,6 +45,7 @@ export class RoundAPI {
     this.bonus = null;
     this.nextRoundBonus = null;
     this.totalScore = null;
+    this.requiresHint = null;
   }
 
   /**
@@ -76,6 +78,9 @@ export class RoundAPI {
 
       // Recalculate total score with our bonus
       this.totalScore = this.getTotalScore(this.score, this.moveModifier, this.bonus);
+
+      // Check if hint is required based on previous round
+      this.requiresHint = this.getRequiresHint();
     } catch (error) {
       console.error('Failed to initialize round from API:', error);
       throw error;
@@ -111,5 +116,21 @@ export class RoundAPI {
    */
   calculateBonus(move, previousRoundBonus) {
     return BonusCalculator.calculateBonus(move, previousRoundBonus);
+  }
+
+  /**
+   * getRequiresHint
+   * Check if this round requires providing a hint to the opponent
+   * Based on whether the OPPONENT's previous result has provideHint: true
+   * @returns {boolean} Whether a hint should be provided this round
+   */
+  getRequiresHint() {
+    // Check opponent's previous result - if they got a result with provideHint,
+    // then I must provide a hint this round
+    if (!this.previousRoundData || !this.previousRoundData.opponentsRoundData || !this.previousRoundData.opponentsRoundData.result) {
+      return false;
+    }
+
+    return HintGenerator.shouldProvideHint(this.previousRoundData.opponentsRoundData.result);
   }
 }
