@@ -20,41 +20,21 @@
 import { Game as BaseGame } from './SwordFight.Game.js';
 import { RoundAPI } from './classes/RoundAPI.js';
 
-/**
- * Shared API configuration for lite engine
- * This is set by CharacterLoader.setApiBase() and used by both CharacterLoader and RoundAPI
- */
+// Shared API URL configuration
 export const API_CONFIG = {
   baseUrl: process.env.API_BASE_URL || 'https://api.swordfight.me'
 };
 
-// Initialize RoundAPI with our config
 RoundAPI.setConfig(API_CONFIG);
 
 /**
- * CharacterLoader
- *
- * Loads character data from API instead of bundling JSON files.
- * Caches loaded characters in memory to avoid repeated requests.
- * Requires API_BASE_URL environment variable or call to setApiBase().
+ * CharacterLoader - Loads character data from API
  */
 export class CharacterLoader {
   static characterCache = new Map();
 
-  /**
-   * Set the API base URL
-   * @param {string} url - Base URL for the API (trailing slash optional)
-   */
   static setApiBase(url) {
     API_CONFIG.baseUrl = url.replace(/\/$/, '');
-  }
-  
-  /**
-   * Get the current API base URL
-   * @returns {string} The current API base URL
-   */
-  static getApiBase() {
-    return API_CONFIG.baseUrl;
   }
 
   /**

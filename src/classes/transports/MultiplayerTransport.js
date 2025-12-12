@@ -4,7 +4,7 @@
  * Abstract base class for multiplayer communication.
  * Transports extend this class and implement the full multiplayer interface directly.
  *
- * This eliminates wrapper layers and allows P2P transports (like Trystero)
+ * This eliminates wrapper layers and allows custom P2P transport implementations
  * to expose their methods directly without breaking the method chain.
  *
  * Required methods:
