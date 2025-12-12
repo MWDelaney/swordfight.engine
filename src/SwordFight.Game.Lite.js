@@ -28,7 +28,7 @@ import { RoundAPI } from './classes/RoundAPI.js';
  * Uses API_BASE_URL environment variable or default CDN.
  */
 export class CharacterLoader {
-  static apiBase = process.env.API_BASE_URL || 'https://mwdelaney.github.io/swordfight.engine';
+  static apiBase = process.env.API_BASE_URL || 'https://api.swordfight.me';
   static characterCache = new Map();
 
   /**
