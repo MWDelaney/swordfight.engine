@@ -21,14 +21,24 @@ import { Game as BaseGame } from './SwordFight.Game.js';
 import { RoundAPI } from './classes/RoundAPI.js';
 
 /**
+ * Shared API configuration for lite engine
+ * This is set by CharacterLoader.setApiBase() and used by both CharacterLoader and RoundAPI
+ */
+export const API_CONFIG = {
+  baseUrl: process.env.API_BASE_URL || 'https://api.swordfight.me'
+};
+
+// Initialize RoundAPI with our config
+RoundAPI.setConfig(API_CONFIG);
+
+/**
  * CharacterLoader
  *
  * Loads character data from API instead of bundling JSON files.
  * Caches loaded characters in memory to avoid repeated requests.
- * Uses API_BASE_URL environment variable or default CDN.
+ * Requires API_BASE_URL environment variable or call to setApiBase().
  */
 export class CharacterLoader {
-  static apiBase = process.env.API_BASE_URL || 'https://api.swordfight.me';
   static characterCache = new Map();
 
   /**
@@ -36,9 +46,15 @@ export class CharacterLoader {
    * @param {string} url - Base URL for the API (trailing slash optional)
    */
   static setApiBase(url) {
-    this.apiBase = url.replace(/\/$/, '');
-    // Also update RoundAPI class API base for consistency
-    RoundAPI.setApiBase(url);
+    API_CONFIG.baseUrl = url.replace(/\/$/, '');
+  }
+  
+  /**
+   * Get the current API base URL
+   * @returns {string} The current API base URL
+   */
+  static getApiBase() {
+    return API_CONFIG.baseUrl;
   }
 
   /**
@@ -54,7 +70,7 @@ export class CharacterLoader {
 
     // Fetch from API
     try {
-      const response = await fetch(`${this.apiBase}/characters/${slug}.json`);
+      const response = await fetch(`${API_CONFIG.baseUrl}/characters/${slug}.json`);
       if (!response.ok) {
         throw new Error(`Character '${slug}' not found`);
       }
@@ -77,7 +93,7 @@ export class CharacterLoader {
    */
   static async getAvailableCharacters() {
     try {
-      const response = await fetch(`${this.apiBase}/characters/index.json`);
+      const response = await fetch(`${API_CONFIG.baseUrl}/characters/index.json`);
       if (!response.ok) {
         throw new Error('Failed to fetch character list');
       }

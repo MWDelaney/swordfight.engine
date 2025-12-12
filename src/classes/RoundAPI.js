@@ -1,21 +1,18 @@
 import { BonusCalculator } from './BonusCalculator.js';
 import { HintGenerator } from './HintGenerator.js';
 
+// API_CONFIG will be imported dynamically to avoid circular dependencies
+let API_CONFIG = null;
+
 /**
  * @class RoundAPI
  * @description This class manages game rounds by fetching pre-computed data from an API.
  * Used with lightweight character data that doesn't include tables and results.
- * Uses API_BASE_URL environment variable or default CDN.
+ * API base URL is configured via CharacterLoader.setApiBase().
  */
 export class RoundAPI {
-  static apiBase = process.env.API_BASE_URL || 'https://mwdelaney.github.io/swordfight.engine';
-
-  /**
-   * Set the API base URL for fetching round data
-   * @param {string} url - Base URL for the API
-   */
-  static setApiBase(url) {
-    RoundAPI.apiBase = url.replace(/\/$/, '');
+  static setConfig(config) {
+    API_CONFIG = config;
   }
 
   /**
@@ -54,7 +51,10 @@ export class RoundAPI {
    */
   async init() {
     try {
-      const url = `${RoundAPI.apiBase}/rounds/${this.myCharacter.slug}/${this.opponentsCharacter.slug}/${this.myMove.id}/${this.opponentsMove.id}.json`;
+      if (!API_CONFIG) {
+        throw new Error('API configuration not set. Call CharacterLoader.setApiBase() first.');
+      }
+      const url = `${API_CONFIG.baseUrl}/rounds/${this.myCharacter.slug}/${this.opponentsCharacter.slug}/${this.myMove.id}/${this.opponentsMove.id}.json`;
       const response = await fetch(url);
 
       if (!response.ok) {

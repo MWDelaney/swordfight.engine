@@ -51,7 +51,7 @@ npm run build
 
 The API is automatically deployed to GitHub Pages when changes are pushed to the main branch.
 
-**Live API**: https://mwdelaney.github.io/swordfight.engine/
+**Live API**: https://api.swordfight.me
 
 For deployment setup and custom domain configuration, see [DEPLOYMENT.md](DEPLOYMENT.md).
 

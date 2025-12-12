@@ -23,13 +23,6 @@ After deployment, the API will be available at:
 https://mwdelaney.github.io/swordfight.engine/
 ```
 
-### Endpoints
-
-- `https://mwdelaney.github.io/swordfight.engine/index.json`
-- `https://mwdelaney.github.io/swordfight.engine/characters/index.json`
-- `https://mwdelaney.github.io/swordfight.engine/characters/{slug}.json`
-- `https://mwdelaney.github.io/swordfight.engine/rounds/{char1}/{char2}/{move1}/{move2}.json`
-
 ## Custom Domain
 
 To use a custom domain (e.g., `api.swordfight.me`):

@@ -32,7 +32,6 @@ const sharedOptions = {
   define: {
     'process.env.NODE_ENV': JSON.stringify(isDev ? 'development' : 'production'),
     'process.env.VERSION': JSON.stringify(packageJson.version),
-    'process.env.API_BASE_URL': JSON.stringify(process.env.API_BASE_URL || 'https://mwdelaney.github.io/swordfight.engine')
   },
   loader: {
     '.js': 'js',
@@ -86,8 +85,6 @@ const liteMinifiedOptions = {
   outfile: 'dist/swordfight-engine.lite.min.js',
   minify: true,
   sourcemap: false
-};
-
 // Transport builds (individual files for tree-shaking)
 const transportBuildOptions = {
   bundle: true,
@@ -106,6 +103,8 @@ const transportBuildOptions = {
  */`
   },
   external: [],
+  logLevel: 'info'
+};external: [],
   logLevel: 'info'
 };
 
