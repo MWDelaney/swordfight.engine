@@ -11,6 +11,9 @@ const baseConfig = {
   format: 'esm',
   target: 'es2020',
   platform: 'browser',
+  define: {
+    'process.env.API_BASE_URL': JSON.stringify(process.env.API_BASE_URL || 'https://api.swordfight.me')
+  },
   banner: {
     js: `/**
  * ${packageJson.name} v${packageJson.version}
