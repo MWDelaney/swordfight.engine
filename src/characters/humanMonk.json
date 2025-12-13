@@ -1448,10 +1448,7 @@
       "mod": "0",
       "range": "far",
       "score": "",
-      "restrict": [],
-      "allowOnly": [
-        "Extended Range"
-      ]
+      "restrict": []
     },
     {
       "id": "59",

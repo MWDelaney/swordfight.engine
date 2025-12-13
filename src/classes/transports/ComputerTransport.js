@@ -142,10 +142,12 @@ export class ComputerTransport extends MultiplayerTransport {
    * @param {Object} _data - Move data { move: Object, round: number }
    */
   sendMove(_data) {
-    // Defer opponent move generation to simulate network delay
+    // Defer opponent move generation to simulate thinking time
+    // Random delay between 1-4 seconds to make it feel more natural
+    const thinkingDelay = 1000 + Math.floor(Math.random() * 3000);
     setTimeout(() => {
       this._generateOpponentMove();
-    }, 100);
+    }, thinkingDelay);
   }
 
   /**
