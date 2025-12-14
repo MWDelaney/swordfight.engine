@@ -21,26 +21,24 @@ function stripGameMechanics(character) {
 
 export default function() {
   const charactersDir = join(__dirname, '../../../src/characters');
-  const characters = {};
-
+  
   // Load the index.json to get the list of active characters
   const indexPath = join(charactersDir, 'index.json');
   const index = JSON.parse(readFileSync(indexPath, 'utf-8'));
   const slugs = index.characters;
 
   // Load only the characters listed in index.json
+  const characters = {};
   slugs.forEach(slug => {
-    // Convert slug to filename (e.g., "humanFighter" -> "humanFighter.json")
     const filename = `${slug}.json`;
     const filePath = join(charactersDir, filename);
     const rawCharacter = JSON.parse(readFileSync(filePath, 'utf-8'));
     const character = stripGameMechanics(rawCharacter);
-
-    characters[character.slug] = character;
+    characters[slug] = character;
   });
 
   // Sort slugs by difficulty (easiest to hardest)
-  const sortedSlugs = slugs.sort((a, b) => {
+  const sortedSlugs = [...slugs].sort((a, b) => {
     const diffA = characters[a].difficulty || 0;
     const diffB = characters[b].difficulty || 0;
     return diffA - diffB;
