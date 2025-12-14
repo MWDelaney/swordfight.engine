@@ -8,7 +8,7 @@
  * ```javascript
  * import { CharacterLoader } from './classes/CharacterLoader.js';
  *
- * const character = await CharacterLoader.getCharacter('human-fighter');
+ * const character = await CharacterLoader.getCharacter('fighter');
  * const slugs = await CharacterLoader.getAvailableCharacters();
  * ```
  */
@@ -56,7 +56,7 @@ export class CharacterLoader {
 
   /**
    * Get a character by slug
-   * @param {string} slug - The character slug (e.g., 'human-fighter')
+   * @param {string} slug - The character slug (e.g., 'fighter')
    * @returns {Promise<Object>} A copy of the character data
    */
   static async getCharacter(slug) {

@@ -30,7 +30,7 @@ npm install swordfight-engine
 import { Game } from 'swordfight-engine';
 
 // Create and initialize game
-const game = new Game('computer', 'human-fighter');
+const game = new Game('computer', 'fighter');
 await game.initialize();
 await game.connect();
 
@@ -57,7 +57,7 @@ import { DurableObjectTransport } from 'swordfight-engine/transports';
 CharacterLoader.setApiBase('https://api.swordfight.me');
 
 // Create and initialize game
-const game = new Game('room-123', 'human-fighter');
+const game = new Game('room-123', 'fighter');
 await game.initialize();
 
 // Connect with transport

@@ -4,7 +4,7 @@
 
 import { readFileSync } from 'fs';
 
-const human = JSON.parse(readFileSync('./src/characters/humanFighter.json', 'utf8'));
+const human = JSON.parse(readFileSync('./src/characters/fighter.json', 'utf8'));
 const goblin = JSON.parse(readFileSync('./src/characters/goblinFighter.json', 'utf8'));
 
 function getOutcome(character, myMoveId, opponentMoveId) {

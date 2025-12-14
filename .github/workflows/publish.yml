@@ -96,13 +96,13 @@ jobs:
             ```javascript
             // Computer opponent (single-player)
             import { Game } from 'swordfight-engine';
-            const game = new Game('computer', 'human-fighter', 'goblin');
+            const game = new Game('computer', 'fighter', 'goblin');
 
             // Multiplayer with CloudFlare
             import { Game } from 'swordfight-engine';
             import { DurableObjectTransport } from 'swordfight-engine/transports';
 
-            const game = new Game('room-id', 'human-fighter', 'goblin', {
+            const game = new Game('room-id', 'fighter', 'goblin', {
               transport: new DurableObjectTransport(game, {
                 serverUrl: 'wss://swordfight.your-username.workers.dev'
               })

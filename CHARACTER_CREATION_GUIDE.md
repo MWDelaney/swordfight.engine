@@ -100,7 +100,7 @@ Based on your concept, set targets:
 ### 1. Copy Template File
 
 ```bash
-cp src/characters/humanFighter.json src/characters/yourCharacter.json
+cp src/characters/fighter.json src/characters/yourCharacter.json
 ```
 
 ### 2. Update Metadata
@@ -318,7 +318,7 @@ Add your character to `src/characters/index.json`:
   "characters": [
     "barbarian",
     "goblin",
-    "humanFighter",
+    "fighter",
     "humanMonk",
     "knight",
     "lizardMan",
@@ -420,7 +420,7 @@ Target difficulty ranges:
 ### 4. Test Matchups
 
 ```bash
-node bin/analyze-character-stats.js --matchup your-character-slug human-fighter
+node bin/analyze-character-stats.js --matchup your-character-slug fighter
 ```
 
 Check:

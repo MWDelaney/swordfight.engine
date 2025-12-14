@@ -29,7 +29,7 @@ export class ComputerTransport extends MultiplayerTransport {
     // Use the CharacterLoader from game instance (already resolved in Game constructor)
     const availableCharacters = await this.game.CharacterLoader.getAvailableCharacters();
     const computerCharacters = availableCharacters
-      .filter(slug => !slug.includes('human-fighter') && slug !== 'human-monk');
+      .filter(slug => !slug.includes('fighter') && slug !== 'human-monk');
     this.selectedOpponentSlug = computerCharacters[Math.floor(Math.random() * computerCharacters.length)];
 
     return new Promise((resolve) => {

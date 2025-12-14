@@ -80,7 +80,7 @@ Use the `DurableObjectTransport` in your game client:
 import { Game } from 'swordfight-engine';
 import { DurableObjectTransport } from 'swordfight-engine/transports';
 
-const game = new Game('room-123', 'human-fighter', 'goblin', {
+const game = new Game('room-123', 'fighter', 'goblin', {
   transport: new DurableObjectTransport(game, {
     serverUrl: 'wss://swordfight-multiplayer.your-username.workers.dev'
   })
@@ -106,7 +106,7 @@ This starts a local server at `ws://localhost:8787`
 Connect your client to the local server:
 
 ```javascript
-const game = new Game('test-room', 'human-fighter', 'goblin', {
+const game = new Game('test-room', 'fighter', 'goblin', {
   transport: new DurableObjectTransport(game, {
     serverUrl: 'ws://localhost:8787'
   })

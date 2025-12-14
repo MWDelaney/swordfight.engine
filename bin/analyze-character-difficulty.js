@@ -15,7 +15,7 @@
  *
  * Usage:
  *   node analyze-character-difficulty.js
- *   node analyze-character-difficulty.js --character human-fighter
+ *   node analyze-character-difficulty.js --character fighter
  *   node analyze-character-difficulty.js --sort difficulty
  *   node analyze-character-difficulty.js --verbose
  */

@@ -71,7 +71,7 @@ export default {
                       },
                       characters: [
                         {
-                          slug: "human-fighter",
+                          slug: "fighter",
                           name: "Human Fighter",
                           description: "Human fighter with sword and shield",
                           health: "12",
@@ -118,7 +118,7 @@ export default {
                     example: {
                       characters: [
                         {
-                          slug: "human-fighter",
+                          slug: "fighter",
                           name: "Human Fighter",
                           description: "Human fighter with sword and shield",
                           health: "12",
@@ -156,7 +156,7 @@ export default {
                   type: "string",
                   enum: data.characters.slugs
                 },
-                example: "human-fighter"
+                example: "fighter"
               }
             ],
             responses: {
@@ -169,7 +169,7 @@ export default {
                     },
                     example: {
                       name: "Human Fighter",
-                      slug: "human-fighter",
+                      slug: "fighter",
                       description: "Human fighter with sword and shield",
                       health: "12",
                       firstMove: "62",
@@ -220,7 +220,7 @@ export default {
                   type: "string",
                   enum: data.characters.slugs
                 },
-                example: "human-fighter"
+                example: "fighter"
               },
               {
                 name: "char2",
@@ -267,7 +267,7 @@ export default {
                     example: {
                       player1: {
                         character: {
-                          slug: "human-fighter",
+                          slug: "fighter",
                           name: "Human Fighter"
                         },
                         move: {
@@ -358,7 +358,7 @@ export default {
               slug: {
                 type: "string",
                 description: "URL-friendly character identifier",
-                example: "human-fighter"
+                example: "fighter"
               },
               name: {
                 type: "string",

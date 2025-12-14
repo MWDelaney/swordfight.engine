@@ -138,7 +138,7 @@ console.log('-'.repeat(100));
 // Compare outcome tables for the same move across characters
 console.log(`\nComparing outcome tables for Move ID ${testMoveId}:`);
 
-const humanFighterTable = characters['human-fighter'].tables.find(t => t.id === testMoveId)?.outcomes[0];
+const humanFighterTable = characters['fighter'].tables.find(t => t.id === testMoveId)?.outcomes[0];
 const goblinTable = characters['goblin'].tables.find(t => t.id === testMoveId)?.outcomes[0];
 
 if (humanFighterTable && goblinTable) {

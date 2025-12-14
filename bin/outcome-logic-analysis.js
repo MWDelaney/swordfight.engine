@@ -13,7 +13,7 @@ function loadCharacter(slug) {
   return JSON.parse(readFileSync(join(CHARACTERS_DIR, file), 'utf8'));
 }
 
-const humanFighter = loadCharacter('humanFighter');
+const humanFighter = loadCharacter('fighter');
 const goblin = loadCharacter('goblin');
 
 console.log('='.repeat(100));

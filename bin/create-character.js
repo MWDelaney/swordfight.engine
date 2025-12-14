@@ -10,7 +10,7 @@
  *
  * Usage:
  *   node bin/create-character.js
- *   node bin/create-character.js --template human-fighter --name "Rogue" --slug rogue
+ *   node bin/create-character.js --template fighter --name "Rogue" --slug rogue
  */
 
 import { readFileSync, writeFileSync, existsSync } from 'fs';
@@ -29,7 +29,7 @@ const flags = {
 };
 
 const templates = {
-  'human-fighter': 'Balanced fighter with sword and shield (RECOMMENDED)',
+  'fighter': 'Balanced fighter with sword and shield (RECOMMENDED)',
   'goblin': 'Faster fighter with mace and shield',
   'barbarian': 'Slow heavy hitter with two-handed sword',
   'human-monk': 'Fast glass cannon with quarterstaff',

@@ -39,7 +39,7 @@ export class CharacterLoader {
 
   /**
    * Get a character by slug
-   * @param {string} slug - The character slug (e.g., 'human-fighter')
+   * @param {string} slug - The character slug (e.g., 'fighter')
    * @returns {Object} A copy of the character data
    */
   static async getCharacter(slug) {
