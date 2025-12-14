@@ -1,6 +1,6 @@
 {
-  "name": "Human Fighter",
-  "slug": "human-fighter",
+  "name": "Fighter",
+  "slug": "fighter",
   "description": "Human fighter with sword and shield",
   "difficulty": 4.1,
   "health": "12",

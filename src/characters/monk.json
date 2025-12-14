@@ -1,6 +1,6 @@
 {
-  "name": "Human Monk",
-  "slug": "human-monk",
+  "name": "Monk",
+  "slug": "monk",
   "description": "Human monk with quarterstaff",
   "difficulty": 6.4,
   "health": "10",
