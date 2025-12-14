@@ -8,147 +8,52 @@ permalink: /index.html
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SwordFight API - Static Game Outcome API</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 2rem 1rem;
         }
-
-        header {
-            text-align: center;
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4rem 0;
             margin-bottom: 3rem;
-            padding-bottom: 2rem;
-            border-bottom: 2px solid #eee;
         }
-
-        h1 {
+        .hero h1 {
             font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            color: #2c3e50;
+            font-weight: 700;
         }
-
-        .tagline {
-            font-size: 1.2rem;
-            color: #666;
+        .hero .lead {
+            font-size: 1.25rem;
+            opacity: 0.9;
         }
-
-        h2 {
-            font-size: 1.8rem;
-            margin: 2rem 0 1rem;
-            color: #2c3e50;
-        }
-
-        p {
-            margin-bottom: 1rem;
-        }
-
-        code {
-            background: #f4f4f4;
-            padding: 0.2rem 0.4rem;
-            border-radius: 3px;
-            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-            font-size: 0.9em;
-        }
-
         pre {
-            background: #f4f4f4;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
             padding: 1rem;
-            border-radius: 5px;
-            overflow-x: auto;
-            margin-bottom: 1rem;
         }
-
+        code {
+            color: #e83e8c;
+        }
         pre code {
-            background: none;
-            padding: 0;
-        }
-
-        .endpoints {
-            background: #f9f9f9;
-            padding: 1.5rem;
-            border-radius: 5px;
-            margin: 1rem 0;
-        }
-
-        .endpoint {
-            margin-bottom: 0.5rem;
-        }
-
-        .endpoint code {
-            display: inline-block;
-            margin-left: 1rem;
-        }
-
-        ul {
-            margin: 1rem 0 1rem 2rem;
-        }
-
-        li {
-            margin-bottom: 0.5rem;
-        }
-
-        a {
-            color: #0366d6;
-            text-decoration: none;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin: 2rem 0;
-        }
-
-        .stat {
-            background: #f9f9f9;
-            padding: 1rem;
-            border-radius: 5px;
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #0366d6;
-        }
-
-        .stat-label {
-            color: #666;
-            font-size: 0.9rem;
-        }
-
-        footer {
-            margin-top: 3rem;
-            padding-top: 2rem;
-            border-top: 2px solid #eee;
-            text-align: center;
-            color: #666;
+            color: inherit;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>⚔️ SwordFight API</h1>
-        <p class="tagline">A static, pre-computed API for turn-based sword fighting games</p>
+    <header class="hero">
+        <div class="container">
+            <div class="text-center">
+                <h1 class="display-4">⚔️ SwordFight API</h1>
+                <p class="lead">A static, pre-computed API for turn-based sword fighting games</p>
+            </div>
+        </div>
     </header>
 
-    <main>
-        <section>
-            <h2>What is this?</h2>
+    <main class="container pb-5">
+        <section class="mb-5">
+            <h2 class="mb-3">What is this?</h2>
             <p>The SwordFight API provides pre-calculated outcomes for every possible move combination in the SwordFight game engine. All outcomes are deterministic and pre-generated as static JSON files.</p>
 
             <p>This API is:</p>
@@ -159,8 +64,8 @@ permalink: /index.html
             </ul>
         </section>
 
-        <section>
-            <h2>Quick Start</h2>
+        <section class="mb-5">
+            <h2 class="mb-3">Quick Start</h2>
 
             <p><strong>Get all characters:</strong></p>
             <pre><code>fetch('https://api.swordfight.me/characters/index.json')
@@ -178,35 +83,39 @@ permalink: /index.html
   .then(outcome => console.log(outcome));</code></pre>
         </section>
 
-        <section>
-            <h2>API Endpoints</h2>
+        <section class="mb-5">
+            <h2 class="mb-3">API Endpoints</h2>
 
-            <div class="endpoints">
-                <div class="endpoint">
-                    <strong>Character List:</strong>
-                    <code>GET /characters/index.json</code>
-                </div>
-                <div class="endpoint">
-                    <strong>Character Details:</strong>
-                    <code>GET /characters/{slug}.json</code>
-                </div>
-                <div class="endpoint">
-                    <strong>Round Outcome:</strong>
-                    <code>GET /rounds/{char1}/{char2}/{move1}/{move2}.json</code>
+            <div class="card">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Character List:</strong>
+                        <code class="ms-2">GET /characters/index.json</code>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Character Details:</strong>
+                        <code class="ms-2">GET /characters/{slug}.json</code>
+                    </div>
+                    <div>
+                        <strong>Round Outcome:</strong>
+                        <code class="ms-2">GET /rounds/{char1}/{char2}/{move1}/{move2}.json</code>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <section>
-            <h2>Documentation</h2>
-            <div class="endpoints">
-                <p><strong><a href="./docs.html">📚 Interactive API Documentation</a></strong> - Explore the complete API with Swagger UI</p>
-                <p><strong><a href="./openapi.json">📄 OpenAPI Specification</a></strong> - Download the formal API spec</p>
+        <section class="mb-5">
+            <h2 class="mb-3">Documentation</h2>
+            <div class="card">
+                <div class="card-body">
+                    <p class="mb-2"><strong><a href="./docs.html">📚 Interactive API Documentation</a></strong> - Explore the complete API with Swagger UI</p>
+                    <p class="mb-0"><strong><a href="./openapi.json">📄 OpenAPI Specification</a></strong> - Download the formal API spec</p>
+                </div>
             </div>
         </section>
 
-        <section>
-            <h2>Resources</h2>
+        <section class="mb-5">
+            <h2 class="mb-3">Resources</h2>
             <ul>
                 <li><a href="https://github.com/MWDelaney/swordfight.engine">GitHub Repository</a> - Engine source code and documentation</li>
                 <li><a href="https://github.com/MWDelaney/swordfight.engine/blob/main/API_CLIENT_GUIDE.md">API Client Guide</a> - How to use this API</li>
@@ -216,9 +125,13 @@ permalink: /index.html
         </section>
     </main>
 
-    <footer>
-        <p>SwordFight API is part of the <a href="https://github.com/MWDelaney/swordfight.engine">SwordFight Engine</a> project.</p>
-        <p>All outcomes are pre-computed using the engine's deterministic combat system.</p>
+    <footer class="bg-light py-4 mt-5">
+        <div class="container text-center text-muted">
+            <p class="mb-1">SwordFight API is part of the <a href="https://github.com/MWDelaney/swordfight.engine">SwordFight Engine</a> project.</p>
+            <p class="mb-0">All outcomes are pre-computed using the engine's deterministic combat system.</p>
+        </div>
     </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
