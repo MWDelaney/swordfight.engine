@@ -17,6 +17,14 @@ export class ComputerTransport extends MultiplayerTransport {
     this.moveCallbacks = [];
     this.nameCallbacks = [];
     this.selectedOpponentSlug = null;
+    this.pendingMove = null;
+    this.pendingMoveTimeout = null;
+    
+    // Listen for round completions to schedule the next move
+    if (typeof document !== 'undefined') {
+      this.roundListener = () => this._scheduleOpponentMove();
+      document.addEventListener('round', this.roundListener);
+    }
   }
 
   /**
@@ -47,6 +55,8 @@ export class ComputerTransport extends MultiplayerTransport {
         // This allows Game.getOpponentsName() to register callbacks first
         setTimeout(() => {
           this._triggerNameCallbacks();
+          // Schedule the computer's first move (for round 0)
+          this._scheduleOpponentMove();
         }, 0);
       }, this.startDelay);
     });
@@ -81,12 +91,46 @@ export class ComputerTransport extends MultiplayerTransport {
     this.moveCallbacks.push(callback);
   }
 
+
+
   /**
-   * Generate and send opponent's move
-   * Called internally when player makes a move
+   * Register callback for receiving opponent's name
+   * @param {Function} callback - Callback function to handle received name
+   */
+  getName(callback) {
+    this.nameCallbacks.push(callback);
+  }
+
+  /**
+   * Pre-generate the computer's move with a delay
+   * This should be called when the player starts choosing their move
    * @private
    */
-  _generateOpponentMove() {
+  _scheduleOpponentMove() {
+    // Clear any pending move timeout
+    if (this.pendingMoveTimeout) {
+      clearTimeout(this.pendingMoveTimeout);
+    }
+
+    // Generate the move immediately
+    const move = this._selectMove();
+    
+    // Random delay between 1-4 seconds to make it feel more natural
+    const thinkingDelay = 1000 + Math.floor(Math.random() * 3000);
+    
+    // Store the move and schedule its delivery
+    this.pendingMove = move;
+    this.pendingMoveTimeout = setTimeout(() => {
+      this._deliverOpponentMove();
+    }, thinkingDelay);
+  }
+
+  /**
+   * Select a move for the computer opponent
+   * @private
+   * @returns {Object} The selected move
+   */
+  _selectMove() {
     // Get the result from the previous round that determines opponent's available moves
     // Due to the swap in storage, opponentsRoundData.result contains the player's result
     // which determines what moves the opponent can make (the player's result restricts the opponent)
@@ -100,7 +144,7 @@ export class ComputerTransport extends MultiplayerTransport {
 
     // If the character does not have their weapon, the opponent has a 1 in 3 chance of retrieving their weapon
     if (!this.game.opponentsCharacter.weapon && Math.random() > 0.75) {
-      const retrieveMove = moves.filteredMoves.find(move => move.name === 'Retrieve Weapon');
+      const retrieveMove = moves.filteredMoves.find(mv => mv.name === 'Retrieve Weapon');
       if (retrieveMove) {
         move = retrieveMove;
       }
@@ -118,8 +162,18 @@ export class ComputerTransport extends MultiplayerTransport {
       move = bonusMoves[Math.floor(Math.random() * bonusMoves.length)];
     }
 
+    return move;
+  }
+
+  /**
+   * Deliver the pre-generated opponent move
+   * @private
+   */
+  _deliverOpponentMove() {
+    if (!this.pendingMove) return;
+
     // Trigger all move callbacks with the generated move
-    const data = { move: move };
+    const data = { move: this.pendingMove };
     this.moveCallbacks.forEach(callback => {
       try {
         callback(data);
@@ -127,14 +181,9 @@ export class ComputerTransport extends MultiplayerTransport {
         console.error('Error in move callback:', error);
       }
     });
-  }
 
-  /**
-   * Register callback for receiving opponent's name
-   * @param {Function} callback - Callback function to handle received name
-   */
-  getName(callback) {
-    this.nameCallbacks.push(callback);
+    this.pendingMove = null;
+    this.pendingMoveTimeout = null;
   }
 
   /**
@@ -142,12 +191,22 @@ export class ComputerTransport extends MultiplayerTransport {
    * @param {Object} _data - Move data { move: Object, round: number }
    */
   sendMove(_data) {
-    // Defer opponent move generation to simulate thinking time
-    // Random delay between 1-4 seconds to make it feel more natural
-    const thinkingDelay = 1000 + Math.floor(Math.random() * 3000);
-    setTimeout(() => {
-      this._generateOpponentMove();
-    }, thinkingDelay);
+    // If we already have a pending move scheduled, deliver it immediately
+    // (player finished choosing before computer's delay expired)
+    if (this.pendingMove) {
+      if (this.pendingMoveTimeout) {
+        clearTimeout(this.pendingMoveTimeout);
+      }
+      this._deliverOpponentMove();
+    } else {
+      // Fallback: if for some reason we don't have a pending move, generate one immediately
+      this._scheduleOpponentMove();
+      // Deliver it right away since the player has already chosen
+      if (this.pendingMoveTimeout) {
+        clearTimeout(this.pendingMoveTimeout);
+      }
+      this._deliverOpponentMove();
+    }
   }
 
   /**
@@ -189,5 +248,16 @@ export class ComputerTransport extends MultiplayerTransport {
     this.started = false;
     this.moveCallbacks = [];
     this.nameCallbacks = [];
+    
+    // Clean up event listener
+    if (typeof document !== 'undefined' && this.roundListener) {
+      document.removeEventListener('round', this.roundListener);
+    }
+    
+    // Clear any pending timeouts
+    if (this.pendingMoveTimeout) {
+      clearTimeout(this.pendingMoveTimeout);
+      this.pendingMoveTimeout = null;
+    }
   }
 }
