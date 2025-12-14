@@ -184,7 +184,7 @@
       "name": "Duck",
       "range": "close",
       "type": "defense",
-      "id": "22",
+      "id": "20",
       "mod": "-5",
       "requiresWeapon": false
     },

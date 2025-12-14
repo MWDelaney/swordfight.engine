@@ -21,7 +21,7 @@ function stripGameMechanics(character) {
 
 export default function() {
   const charactersDir = join(__dirname, '../../../src/characters');
-  
+
   // Load the index.json to get the list of active characters
   const indexPath = join(charactersDir, 'index.json');
   const index = JSON.parse(readFileSync(indexPath, 'utf-8'));

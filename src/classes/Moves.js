@@ -47,8 +47,7 @@ export class Moves {
 
           // Check ammo if required
           if (move.requiresAmmo) {
-            const ammoCost = move.ammoCost || 1;
-            const hasAmmo = requiredWeapon.ammo === null || requiredWeapon.ammo >= ammoCost;
+            const hasAmmo = requiredWeapon.ammo === null || requiredWeapon.ammo > 0;
             if (!hasAmmo) {
               return false;
             }

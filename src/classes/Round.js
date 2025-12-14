@@ -50,19 +50,32 @@ export class Round {
   getOutcome(tables, move, opponentsMove) {
     const table = tables.find(table => table.id === move.id)?.outcomes[0];
     if (!table) {
-      console.error('Outcome table not found');
+      console.error(`Outcome table not found for move ${move.id} (${move.name})`);
       return;
     }
-    return table[opponentsMove.id];
+    const outcome = table[opponentsMove.id];
+    if (!outcome) {
+      console.error(`No outcome found for move ${move.id} vs opponent move ${opponentsMove.id}`);
+      return;
+    }
+    if (outcome === '00') {
+      console.error(`Impossible matchup: move ${move.id} (${move.name}, range: ${move.range}) vs opponent move ${opponentsMove.id} (${opponentsMove.name}, range: ${opponentsMove.range}). This should not be reachable - check move filtering.`);
+      return;
+    }
+    return outcome;
   }
 
   /**
    * getResult
    */
   getResult(outcome, character) {
+    if (!outcome) {
+      console.error('No outcome provided to getResult');
+      return;
+    }
     const result = character.results.find(result => result.id === outcome);
     if (!result) {
-      console.error('Result not found');
+      console.error(`Result not found for outcome ID ${outcome} in character ${character.name}`);
       return;
     }
     return result;

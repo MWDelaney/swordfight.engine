@@ -237,8 +237,9 @@ export class Game {
         this.takeSelfDamage(this.opponentsCharacter, this.opponentsRoundData);
 
         // Heal health (if applicable and not scored on)
-        this.healHealth(this.myCharacter, this.myRoundData, this.opponentsRoundData);
-        this.healHealth(this.opponentsCharacter, this.opponentsRoundData, this.myRoundData);
+        // Healing follows the swapped pattern: opponent's result heals you
+        this.healHealth(this.myCharacter, this.opponentsRoundData, this.myRoundData);
+        this.healHealth(this.opponentsCharacter, this.myRoundData, this.opponentsRoundData);
 
         // Initialize the moves object for the next round for the front-end
         this.Moves = new Moves(this.myCharacter, this.opponentsRoundData.result);
@@ -519,10 +520,10 @@ export class Game {
     }
 
     // Consume ammunition from the weapon used this round
-    if (roundData.myMove.requiresAmmo && typeof roundData.myMove.requiresWeapon === 'string') {
+    if (roundData.myMove.ammoCost && typeof roundData.myMove.requiresWeapon === 'string') {
       const weapon = (character.weapons || []).find(w => w.name === roundData.myMove.requiresWeapon);
       if (weapon && weapon.ammo !== null) {
-        const ammoCost = roundData.myMove.ammoCost || 1;
+        const ammoCost = roundData.myMove.ammoCost;
         weapon.ammo = Math.max(0, weapon.ammo - ammoCost);
         if (window.logging) {
           console.log(`Consumed ${ammoCost} ammo from ${weapon.name}. Remaining: ${weapon.ammo}`);
@@ -603,7 +604,7 @@ export class Game {
     if (!this.loaded) {
       // Only heal if the result has a heal property and opponent didn't score
       if (roundData.result.heal && (opponentsRoundData.score === '' || opponentsRoundData.totalScore <= 0)) {
-        const healAmount = roundData.result.heal;
+        const healAmount = parseInt(roundData.result.heal);
         const maxHealth = parseInt(character.startingHealth);
         const currentHealth = parseInt(character.health);
 

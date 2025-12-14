@@ -253,6 +253,36 @@ class CharacterValidator {
         this.error(`Move ${moveId} has no outcome table`, { moveId });
       }
     });
+
+    // Validate that "00" outcomes are only used for impossible matchups (different ranges)
+    this.character.tables.forEach(table => {
+      if (!table.outcomes || !table.outcomes[0]) return;
+
+      const myMove = this.character.moves.find(m => m.id === table.id);
+      if (!myMove) return;
+
+      const outcomeMap = table.outcomes[0];
+      Object.entries(outcomeMap).forEach(([opponentMoveId, resultId]) => {
+        if (resultId === '00') {
+          // Check if this character has a move with this ID
+          const opponentMove = this.character.moves.find(m => m.id === opponentMoveId);
+
+          if (opponentMove) {
+            // Both moves exist in this character - they should have a valid outcome, not "00"
+            // "00" should only be used for moves that don't exist in the opponent's character
+            if (myMove.range === opponentMove.range) {
+              this.error(`Table ${table.id} has "00" outcome for move ${opponentMoveId}, but both moves exist in same character with same range`, {
+                tableId: table.id,
+                myMoveId: myMove.id,
+                myMoveRange: myMove.range,
+                opponentMoveId: opponentMoveId,
+                opponentMoveRange: opponentMove.range
+              });
+            }
+          }
+        }
+      });
+    });
   }
 
   validateResults() {
