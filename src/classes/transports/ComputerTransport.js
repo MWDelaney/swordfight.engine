@@ -17,36 +17,6 @@ export class ComputerTransport extends MultiplayerTransport {
     this.moveCallbacks = [];
     this.nameCallbacks = [];
     this.selectedOpponentSlug = null;
-    this.pendingMove = null;
-    this.pendingMoveTimeout = null;
-    this.setupListener = null;
-    
-    // Listen for round completions to schedule the next move
-    if (typeof document !== 'undefined') {
-      this.roundListener = () => this._scheduleOpponentMove();
-      document.addEventListener('round', this.roundListener);
-    }
-  }
-
-  /**
-   * Wait for the first move to be ready for scheduling
-   * This ensures opponent character is loaded before trying to select a move
-   * @private
-   */
-  _waitForFirstMoveScheduling() {
-    if (typeof document !== 'undefined') {
-      this.setupListener = () => {
-        // Setup event fires after characters are loaded but before first round
-        // Check if opponent character is ready and we haven't already scheduled
-        if (this.game.opponentsCharacter && this.game.opponentsCharacter.moves && !this.pendingMove) {
-          this._scheduleOpponentMove();
-          // Clean up this one-time listener
-          document.removeEventListener('setup', this.setupListener);
-          this.setupListener = null;
-        }
-      };
-      document.addEventListener('setup', this.setupListener);
-    }
   }
 
   /**
@@ -77,10 +47,6 @@ export class ComputerTransport extends MultiplayerTransport {
         // This allows Game.getOpponentsName() to register callbacks first
         setTimeout(() => {
           this._triggerNameCallbacks();
-          // Don't schedule the first move here - wait for opponent character to load
-          // The 'round' event listener will handle subsequent moves
-          // For the first move, we need to wait for the 'setup' event which fires after characters load
-          this._waitForFirstMoveScheduling();
         }, 0);
       }, this.startDelay);
     });
@@ -108,7 +74,6 @@ export class ComputerTransport extends MultiplayerTransport {
 
   /**
    * Register callback for receiving opponent's move
-   * This stores the callback and triggers it when the player makes a move
    * @param {Function} callback - Callback function to handle opponent's move
    */
   getMove(callback) {
@@ -126,36 +91,11 @@ export class ComputerTransport extends MultiplayerTransport {
   }
 
   /**
-   * Pre-generate the computer's move with a delay
-   * This should be called when the player starts choosing their move
+   * Generate and send opponent's move
+   * Called internally when player makes a move
    * @private
    */
-  _scheduleOpponentMove() {
-    // Don't schedule if we already have a pending move
-    // This prevents race conditions from multiple event triggers
-    if (this.pendingMove || this.pendingMoveTimeout) {
-      return;
-    }
-
-    // Generate the move immediately
-    const move = this._selectMove();
-    
-    // Random delay between 1-4 seconds to make it feel more natural
-    const thinkingDelay = 1000 + Math.floor(Math.random() * 3000);
-    
-    // Store the move and schedule its delivery
-    this.pendingMove = move;
-    this.pendingMoveTimeout = setTimeout(() => {
-      this._deliverOpponentMove();
-    }, thinkingDelay);
-  }
-
-  /**
-   * Select a move for the computer opponent
-   * @private
-   * @returns {Object} The selected move
-   */
-  _selectMove() {
+  _generateOpponentMove() {
     // Get the result from the previous round that determines opponent's available moves
     // Due to the swap in storage, opponentsRoundData.result contains the player's result
     // which determines what moves the opponent can make (the player's result restricts the opponent)
@@ -187,20 +127,8 @@ export class ComputerTransport extends MultiplayerTransport {
       move = bonusMoves[Math.floor(Math.random() * bonusMoves.length)];
     }
 
-    return move;
-  }
-
-  /**
-   * Deliver the pre-generated opponent move
-   * @private
-   */
-  _deliverOpponentMove() {
-    if (!this.pendingMove) {
-      return;
-    }
-
     // Trigger all move callbacks with the generated move
-    const data = { move: this.pendingMove };
+    const data = { move: move };
     this.moveCallbacks.forEach(callback => {
       try {
         callback(data);
@@ -208,9 +136,6 @@ export class ComputerTransport extends MultiplayerTransport {
         console.error('Error in move callback:', error);
       }
     });
-
-    this.pendingMove = null;
-    this.pendingMoveTimeout = null;
   }
 
   /**
@@ -218,21 +143,12 @@ export class ComputerTransport extends MultiplayerTransport {
    * @param {Object} _data - Move data { move: Object, round: number }
    */
   sendMove(_data) {
-    // If we already have a pending move scheduled, deliver it immediately
-    // (player finished choosing before computer's delay expired)
-    if (this.pendingMove) {
-      if (this.pendingMoveTimeout) {
-        clearTimeout(this.pendingMoveTimeout);
-        this.pendingMoveTimeout = null;
-      }
-      this._deliverOpponentMove();
-    } else {
-      // Fallback: if for some reason we don't have a pending move, generate and deliver immediately
-      // This can happen if the player chose very quickly before the computer scheduled its move
-      const move = this._selectMove();
-      this.pendingMove = move;
-      this._deliverOpponentMove();
-    }
+    // Defer opponent move generation to simulate thinking time
+    // Random delay between 1-4 seconds to make it feel more natural
+    const thinkingDelay = 1000 + Math.floor(Math.random() * 3000);
+    setTimeout(() => {
+      this._generateOpponentMove();
+    }, thinkingDelay);
   }
 
   /**
@@ -274,21 +190,5 @@ export class ComputerTransport extends MultiplayerTransport {
     this.started = false;
     this.moveCallbacks = [];
     this.nameCallbacks = [];
-    
-    // Clean up event listeners
-    if (typeof document !== 'undefined') {
-      if (this.roundListener) {
-        document.removeEventListener('round', this.roundListener);
-      }
-      if (this.setupListener) {
-        document.removeEventListener('setup', this.setupListener);
-      }
-    }
-    
-    // Clear any pending timeouts
-    if (this.pendingMoveTimeout) {
-      clearTimeout(this.pendingMoveTimeout);
-      this.pendingMoveTimeout = null;
-    }
   }
 }
