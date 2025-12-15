@@ -170,7 +170,9 @@ export class ComputerTransport extends MultiplayerTransport {
    * @private
    */
   _deliverOpponentMove() {
-    if (!this.pendingMove) return;
+    if (!this.pendingMove) {
+      return;
+    }
 
     // Trigger all move callbacks with the generated move
     const data = { move: this.pendingMove };
