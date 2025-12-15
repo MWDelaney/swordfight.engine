@@ -19,11 +19,33 @@ export class ComputerTransport extends MultiplayerTransport {
     this.selectedOpponentSlug = null;
     this.pendingMove = null;
     this.pendingMoveTimeout = null;
+    this.setupListener = null;
     
     // Listen for round completions to schedule the next move
     if (typeof document !== 'undefined') {
       this.roundListener = () => this._scheduleOpponentMove();
       document.addEventListener('round', this.roundListener);
+    }
+  }
+
+  /**
+   * Wait for the first move to be ready for scheduling
+   * This ensures opponent character is loaded before trying to select a move
+   * @private
+   */
+  _waitForFirstMoveScheduling() {
+    if (typeof document !== 'undefined') {
+      this.setupListener = () => {
+        // Setup event fires after characters are loaded but before first round
+        // Check if opponent character is ready and we haven't already scheduled
+        if (this.game.opponentsCharacter && this.game.opponentsCharacter.moves && !this.pendingMove) {
+          this._scheduleOpponentMove();
+          // Clean up this one-time listener
+          document.removeEventListener('setup', this.setupListener);
+          this.setupListener = null;
+        }
+      };
+      document.addEventListener('setup', this.setupListener);
     }
   }
 
@@ -55,8 +77,10 @@ export class ComputerTransport extends MultiplayerTransport {
         // This allows Game.getOpponentsName() to register callbacks first
         setTimeout(() => {
           this._triggerNameCallbacks();
-          // Schedule the computer's first move (for round 0)
-          this._scheduleOpponentMove();
+          // Don't schedule the first move here - wait for opponent character to load
+          // The 'round' event listener will handle subsequent moves
+          // For the first move, we need to wait for the 'setup' event which fires after characters load
+          this._waitForFirstMoveScheduling();
         }, 0);
       }, this.startDelay);
     });
@@ -107,9 +131,10 @@ export class ComputerTransport extends MultiplayerTransport {
    * @private
    */
   _scheduleOpponentMove() {
-    // Clear any pending move timeout
-    if (this.pendingMoveTimeout) {
-      clearTimeout(this.pendingMoveTimeout);
+    // Don't schedule if we already have a pending move
+    // This prevents race conditions from multiple event triggers
+    if (this.pendingMove || this.pendingMoveTimeout) {
+      return;
     }
 
     // Generate the move immediately
@@ -198,15 +223,14 @@ export class ComputerTransport extends MultiplayerTransport {
     if (this.pendingMove) {
       if (this.pendingMoveTimeout) {
         clearTimeout(this.pendingMoveTimeout);
+        this.pendingMoveTimeout = null;
       }
       this._deliverOpponentMove();
     } else {
-      // Fallback: if for some reason we don't have a pending move, generate one immediately
-      this._scheduleOpponentMove();
-      // Deliver it right away since the player has already chosen
-      if (this.pendingMoveTimeout) {
-        clearTimeout(this.pendingMoveTimeout);
-      }
+      // Fallback: if for some reason we don't have a pending move, generate and deliver immediately
+      // This can happen if the player chose very quickly before the computer scheduled its move
+      const move = this._selectMove();
+      this.pendingMove = move;
       this._deliverOpponentMove();
     }
   }
@@ -251,9 +275,14 @@ export class ComputerTransport extends MultiplayerTransport {
     this.moveCallbacks = [];
     this.nameCallbacks = [];
     
-    // Clean up event listener
-    if (typeof document !== 'undefined' && this.roundListener) {
-      document.removeEventListener('round', this.roundListener);
+    // Clean up event listeners
+    if (typeof document !== 'undefined') {
+      if (this.roundListener) {
+        document.removeEventListener('round', this.roundListener);
+      }
+      if (this.setupListener) {
+        document.removeEventListener('setup', this.setupListener);
+      }
     }
     
     // Clear any pending timeouts
