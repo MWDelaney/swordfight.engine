@@ -17,8 +17,6 @@ export class ComputerTransport extends MultiplayerTransport {
     this.moveCallbacks = [];
     this.nameCallbacks = [];
     this.selectedOpponentSlug = null;
-    this.preparedMove = null;
-    this.preparedMoveTimestamp = null;
   }
 
   /**
@@ -52,7 +50,7 @@ export class ComputerTransport extends MultiplayerTransport {
           // Prepare the first move after opponent character loads
           setTimeout(() => {
             if (this.game.opponentsCharacter && this.game.opponentsCharacter.moves) {
-              this._prepareNextMove();
+              this._prepareMove();
             }
           }, 100);
         }, 0);
@@ -99,93 +97,71 @@ export class ComputerTransport extends MultiplayerTransport {
   }
 
   /**
-   * Prepare the computer's next move in advance
-   * This simulates the computer "thinking" and then delivering its move
+   * Prepare and deliver computer's move after thinking delay
+   * Called automatically when a new round starts
    * @private
    */
-  _prepareNextMove() {
-    // Get the result from the previous round that determines opponent's available moves
-    const previousRound = this.game.roundNumber > 0 ? this.game.rounds[this.game.roundNumber - 1] : null;
-    const result = previousRound?.opponentsRoundData?.result || { range: this.game.opponentsCharacter.moves[0].range, restrict: [], allowOnly: null };
+  _prepareMove() {
+    // Simulate computer "thinking" time
+    const thinkingTime = 2000 + Math.floor(Math.random() * 3000); // 2-5 seconds
 
-    const moves = new Moves(this.game.opponentsCharacter, result);
-
-    // Get a random move from the opponent's moves
-    let move = moves.filteredMoves[Math.floor(Math.random() * moves.filteredMoves.length)];
-
-    // If the character does not have their weapon, the opponent has a 1 in 3 chance of retrieving their weapon
-    if (!this.game.opponentsCharacter.weapon && Math.random() > 0.75) {
-      const retrieveMove = moves.filteredMoves.find(mv => mv.name === 'Retrieve Weapon');
-      if (retrieveMove) {
-        move = retrieveMove;
-      }
-    }
-
-    // If a move has a bonus from the previous round, there's a 1 in 3 chance the opponent will choose that move
-    const previousRoundData = this.game.roundNumber > 0 ? this.game.rounds[this.game.roundNumber - 1] : null;
-    const opponentPreviousBonus = previousRoundData?.opponentsRoundData?.nextRoundBonus || [];
-    const bonusMoves = moves.filteredMoves.filter(mv => {
-      const bonus = BonusCalculator.calculateBonus(mv, opponentPreviousBonus);
-      return bonus > 0;
-    });
-
-    if (bonusMoves.length > 0 && Math.random() < 0.333) {
-      move = bonusMoves[Math.floor(Math.random() * bonusMoves.length)];
-    }
-
-    // Store the prepared move with timestamp
-    this.preparedMove = move;
-    this.preparedMoveTimestamp = Date.now();
-
-    // After thinking time, deliver the move automatically
-    // This simulates the computer "moving first" like in multiplayer
-    const thinkingTime = 1000 + Math.floor(Math.random() * 3000);
     setTimeout(() => {
-      this._deliverPreparedMove();
+      // Get the result from the previous round that determines opponent's available moves
+      const previousRound = this.game.roundNumber > 0 ? this.game.rounds[this.game.roundNumber - 1] : null;
+      const result = previousRound?.opponentsRoundData?.result || { range: this.game.opponentsCharacter.moves[0].range, restrict: [], allowOnly: null };
+
+      const moves = new Moves(this.game.opponentsCharacter, result);
+
+      // Get a random move from the opponent's moves
+      let move = moves.filteredMoves[Math.floor(Math.random() * moves.filteredMoves.length)];
+
+      // If the character does not have their weapon, the opponent has a 1 in 3 chance of retrieving their weapon
+      if (!this.game.opponentsCharacter.weapon && Math.random() > 0.75) {
+        const retrieveMove = moves.filteredMoves.find(mv => mv.name === 'Retrieve Weapon');
+        if (retrieveMove) {
+          move = retrieveMove;
+        }
+      }
+
+      // If a move has a bonus from the previous round, there's a 1 in 3 chance the opponent will choose that move
+      const previousRoundData = this.game.roundNumber > 0 ? this.game.rounds[this.game.roundNumber - 1] : null;
+      const opponentPreviousBonus = previousRoundData?.opponentsRoundData?.nextRoundBonus || [];
+      const bonusMoves = moves.filteredMoves.filter(mv => {
+        const bonus = BonusCalculator.calculateBonus(mv, opponentPreviousBonus);
+        return bonus > 0;
+      });
+
+      if (bonusMoves.length > 0 && Math.random() < 0.333) {
+        move = bonusMoves[Math.floor(Math.random() * bonusMoves.length)];
+      }
+
+      // Call all registered move callbacks with the selected move
+      const data = { move };
+      this.moveCallbacks.forEach(callback => {
+        try {
+          callback(data);
+        } catch (error) {
+          console.error('Error in move callback:', error);
+        }
+      });
+
+      // Prepare the next move for the next round
+      setTimeout(() => {
+        if (this.game.opponentsCharacter && this.game.opponentsCharacter.moves) {
+          this._prepareMove();
+        }
+      }, 0);
     }, thinkingTime);
   }
 
   /**
-   * Deliver the computer's prepared move
-   * This is called automatically after the computer finishes "thinking"
-   * @private
-   */
-  _deliverPreparedMove() {
-    if (!this.preparedMove) {
-      return;
-    }
-
-    // Deliver the prepared move
-    const data = { move: this.preparedMove };
-    this.moveCallbacks.forEach(callback => {
-      try {
-        callback(data);
-      } catch (error) {
-        console.error('Error in move callback:', error);
-      }
-    });
-
-    // Clear the prepared move
-    this.preparedMove = null;
-    this.preparedMoveTimestamp = null;
-  }
-
-  /**
-   * Send player's move (computer has likely already moved)
+   * Send player's move (computer is already thinking independently)
    * @param {Object} _data - Move data { move: Object, round: number }
    */
   sendMove(_data) {
-    // In multiplayer, moves can arrive in any order
-    // The computer should act the same way - it delivers its move when ready
-    // If the computer hasn't delivered yet, this does nothing
-    // The round will process once both moves are received
-    
-    // Immediately prepare the next move (computer starts thinking for next round)
-    setTimeout(() => {
-      if (this.game.opponentsCharacter && this.game.opponentsCharacter.moves) {
-        this._prepareNextMove();
-      }
-    }, 0);
+    // Computer's move is already being prepared independently
+    // This method is called when the player submits their move
+    // but the computer doesn't need to wait for this
   }
 
   /**
