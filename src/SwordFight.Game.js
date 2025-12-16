@@ -232,9 +232,9 @@ export class Game {
         this.applyStamina(this.myCharacter, this.myRoundData, this.opponentsRoundData);
         this.applyStamina(this.opponentsCharacter, this.opponentsRoundData, this.myRoundData);
 
-        // Take self-damage
-        this.takeSelfDamage(this.myCharacter, this.myRoundData);
-        this.takeSelfDamage(this.opponentsCharacter, this.opponentsRoundData);
+        // Take self-damage (occurs when you use a risky move AND opponent scores)
+        this.takeSelfDamage(this.myCharacter, this.myRoundData, this.opponentsRoundData);
+        this.takeSelfDamage(this.opponentsCharacter, this.opponentsRoundData, this.myRoundData);
 
         // Heal health (if applicable and not scored on)
         // Healing follows the swapped pattern: opponent's result heals you
@@ -460,7 +460,7 @@ export class Game {
   /**
    * takeDamage
    */
-  takeDamage(character, roundData, opponentRoundData = null) {
+  takeDamage(character, roundData, _opponentRoundData = null) {
     // If we just loaded this game, don't take damage this round (we're just resetting the game)
     if (!this.loaded) {
       if (roundData.score !== '' && roundData.totalScore > 0) {
@@ -483,18 +483,15 @@ export class Game {
       character.weapon = false;
     }
 
-    // Opponent weapon dislodged (conditional on opponent scoring)
-    // Used for abilities like Shrieking that force opponent to drop weapon only if they dealt damage
-    if (roundData.result.opponentWeaponDislodged && opponentRoundData) {
-      const opponentScored = opponentRoundData.score !== '' && opponentRoundData.totalScore > 0;
-      if (opponentScored) {
-        character.droppedWeapons = [...(character.weapons || [])];
-        character.weapons = [];
-        // Legacy support
-        character.weapon = false;
-        if (window.logging) {
-          console.log(`${character.name}'s weapon was dislodged by opponent's ability (opponent scored)`);
-        }
+    // Opponent weapon dislodged - the attacker's result causes defender to drop weapon
+    // The attacker's result (roundData) has opponentWeaponDislodged, so the defender (character) drops their weapon
+    if (roundData.result.opponentWeaponDislodged) {
+      character.droppedWeapons = [...(character.weapons || [])];
+      character.weapons = [];
+      // Legacy support
+      character.weapon = false;
+      if (window.logging) {
+        console.log(`${character.name}'s weapon was dislodged by opponent's ability`);
       }
     }
 
@@ -599,11 +596,12 @@ export class Game {
   /**
    * healHealth
    */
-  healHealth(character, roundData, opponentsRoundData) {
+  healHealth(character, roundData, _opponentsRoundData) {
     // If we just loaded this game, don't heal this round (we're just resetting the game)
     if (!this.loaded) {
-      // Only heal if the result has a heal property and opponent didn't score
-      if (roundData.result.heal && (opponentsRoundData.score === '' || opponentsRoundData.totalScore <= 0)) {
+      // Healing follows the book swap pattern: opponent's result heals you
+      // Healing happens unconditionally (regardless of scores)
+      if (roundData.result.heal) {
         const healAmount = parseInt(roundData.result.heal);
         const maxHealth = parseInt(character.startingHealth);
         const currentHealth = parseInt(character.health);
@@ -625,14 +623,15 @@ export class Game {
   /**
    * takeSelfDamage
    */
-  takeSelfDamage(character, roundData) {
+  takeSelfDamage(character, roundData, opponentRoundData) {
     // If we just loaded this game, don't take damage this round (we're just resetting the game)
     if (!this.loaded) {
-      // Self-damage occurs when the character scores (hits opponent)
-      if (roundData.result.selfDamage && roundData.score !== '' && roundData.totalScore > 0) {
+      // Self-damage occurs when you use a risky move AND the opponent's result has a score
+      // It's a penalty for getting hit while using a dangerous move
+      if (roundData.result.selfDamage && opponentRoundData.score !== '' && opponentRoundData.totalScore > 0) {
         character.health -= roundData.result.selfDamage;
         if (window.logging) {
-          console.log(`Applied ${roundData.result.selfDamage} self-damage to ${character.name}. New health: ${character.health}`);
+          console.log(`Applied ${roundData.result.selfDamage} self-damage to ${character.name} (opponent scored). New health: ${character.health}`);
         }
       }
     }
