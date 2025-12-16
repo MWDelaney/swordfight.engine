@@ -22,7 +22,7 @@
       "name": "Strong",
       "range": "close",
       "type": "strong",
-      "id": "28",
+      "id": "36",
       "mod": "2",
       "requiresWeapon": true
     },
@@ -81,24 +81,6 @@
       "requiresWeapon": true
     },
     {
-      "tag": "Fake",
-      "name": "Side Slam",
-      "range": "close",
-      "type": "low",
-      "id": "22",
-      "mod": "-1",
-      "requiresWeapon": true
-    },
-    {
-      "tag": "Fake",
-      "name": "Thrust",
-      "range": "close",
-      "type": "high",
-      "id": "38",
-      "mod": "0",
-      "requiresWeapon": true
-    },
-    {
       "tag": "Hand to Hand",
       "name": "Grab and Shake",
       "range": "close",
@@ -144,7 +126,7 @@
       "requiresWeapon": false
     },
     {
-      "tag": "Hand to Hand",
+      "tag": "Special",
       "name": "Kick",
       "range": "close",
       "type": "low",
@@ -166,7 +148,7 @@
       "name": "Retrieve Weapon",
       "range": "close",
       "type": "defense",
-      "id": "36",
+      "id": "46",
       "mod": "-6",
       "requiresWeapon": false
     },
@@ -1087,6 +1069,21 @@
           "60": "13",
           "62": "57",
           "64": "57"
+        }
+      ]
+    },
+    {
+      "id": "60",
+      "outcomes": [
+        {
+          "50": "13",
+          "52": "33",
+          "54": "13",
+          "56": "57",
+          "58": "3",
+          "60": "11",
+          "62": "57",
+          "64": "47"
         }
       ]
     },
