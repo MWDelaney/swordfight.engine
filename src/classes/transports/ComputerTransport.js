@@ -33,6 +33,9 @@ export class ComputerTransport extends MultiplayerTransport {
 
       // Prepare next move when round completes (event-driven)
       document.addEventListener('setup', () => {
+        if (window.logging) {
+          console.log(`Computer received setup event, game round: ${this.game.roundNumber}`);
+        }
         if (!this.gameEnded && this.game.opponentsCharacter && this.game.opponentsCharacter.moves) {
           this._prepareMove();
         }
@@ -68,12 +71,7 @@ export class ComputerTransport extends MultiplayerTransport {
         // This allows Game.getOpponentsName() to register callbacks first
         setTimeout(() => {
           this._triggerNameCallbacks();
-          // Prepare the first move after opponent character loads
-          setTimeout(() => {
-            if (this.game.opponentsCharacter && this.game.opponentsCharacter.moves) {
-              this._prepareMove();
-            }
-          }, 100);
+          // Don't prepare first move here - wait for setup event (event-driven)
         }, 0);
       }, this.startDelay);
     });
@@ -139,8 +137,12 @@ export class ComputerTransport extends MultiplayerTransport {
     // Round has advanced - we can now prepare for the new round
     this.preparingForRound = currentRound;
 
+    if (window.logging) {
+      console.log(`Computer preparing move for round ${currentRound}`);
+    }
+
     // Simulate computer "thinking" time (1-4 seconds)
-    const thinkingTime = 3000 + Math.floor(Math.random() * 6000);
+    const thinkingTime = 1000 + Math.floor(Math.random() * 3000);
 
     this.pendingMoveTimeout = setTimeout(() => {
       this.pendingMoveTimeout = null;

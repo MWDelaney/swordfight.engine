@@ -497,9 +497,10 @@ export class Game {
       character.weapon = false;
     }
 
-    // Opponent weapon dislodged - the attacker's result causes defender to drop weapon
-    // The attacker's result (roundData) has opponentWeaponDislodged, so the defender (character) drops their weapon
-    if (roundData.result.opponentWeaponDislodged) {
+    // Opponent weapon dislodged - the DEFENDER's result causes THEIR OWN weapon to drop
+    // This follows book swap: _opponentRoundData is what the OTHER character did
+    // If the other character's result has opponentWeaponDislodged, THIS character drops weapon
+    if (_opponentRoundData && _opponentRoundData.result.opponentWeaponDislodged) {
       character.droppedWeapons = [...(character.weapons || [])];
       character.weapons = [];
       // Legacy support
