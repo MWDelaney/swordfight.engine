@@ -19,14 +19,23 @@ export class ComputerTransport extends MultiplayerTransport {
     this.selectedOpponentSlug = null;
     this.gameEnded = false;
     this.pendingMoveTimeout = null;
+    this.preparingForRound = null; // Track which round we're currently preparing for
 
-    // Listen for victory/defeat events to stop preparing moves
+    // Listen for game events
     if (typeof document !== 'undefined') {
+      // Stop preparing on game end
       document.addEventListener('victory', () => {
         this._stopPreparing();
       });
       document.addEventListener('defeat', () => {
         this._stopPreparing();
+      });
+
+      // Prepare next move when round completes (event-driven)
+      document.addEventListener('setup', () => {
+        if (!this.gameEnded && this.game.opponentsCharacter && this.game.opponentsCharacter.moves) {
+          this._prepareMove();
+        }
       });
     }
   }
@@ -95,7 +104,10 @@ export class ComputerTransport extends MultiplayerTransport {
    * @param {Function} callback - Callback function to handle opponent's move
    */
   getMove(callback) {
-    this.moveCallbacks.push(callback);
+    // Only register if not already registered (prevent duplicates)
+    if (!this.moveCallbacks.includes(callback)) {
+      this.moveCallbacks.push(callback);
+    }
   }
 
 
@@ -105,7 +117,10 @@ export class ComputerTransport extends MultiplayerTransport {
    * @param {Function} callback - Callback function to handle received name
    */
   getName(callback) {
-    this.nameCallbacks.push(callback);
+    // Only register if not already registered (prevent duplicates)
+    if (!this.nameCallbacks.includes(callback)) {
+      this.nameCallbacks.push(callback);
+    }
   }
 
   /**
@@ -114,11 +129,22 @@ export class ComputerTransport extends MultiplayerTransport {
    * @private
    */
   _prepareMove() {
-    // Simulate computer "thinking" time
-    const thinkingTime = 2000 + Math.floor(Math.random() * 3000); // 2-5 seconds
+    const currentRound = this.game.roundNumber;
+
+    // If already prepared for this round, don't prepare again
+    if (this.preparingForRound === currentRound) {
+      return;
+    }
+
+    // Round has advanced - we can now prepare for the new round
+    this.preparingForRound = currentRound;
+
+    // Simulate computer "thinking" time (1-4 seconds)
+    const thinkingTime = 3000 + Math.floor(Math.random() * 6000);
 
     this.pendingMoveTimeout = setTimeout(() => {
       this.pendingMoveTimeout = null;
+
       // Get the result from the previous round that determines opponent's available moves
       const previousRound = this.game.roundNumber > 0 ? this.game.rounds[this.game.roundNumber - 1] : null;
       const result = previousRound?.opponentsRoundData?.result || { range: this.game.opponentsCharacter.moves[0].range, restrict: [], allowOnly: null };
@@ -163,12 +189,7 @@ export class ComputerTransport extends MultiplayerTransport {
         }
       });
 
-      // Prepare the next move for the next round (unless game has ended)
-      setTimeout(() => {
-        if (!this.gameEnded && this.game.opponentsCharacter && this.game.opponentsCharacter.moves) {
-          this._prepareMove();
-        }
-      }, 0);
+      // Don't schedule next move here - wait for 'setup' event (event-driven)
     }, thinkingTime);
   }
 

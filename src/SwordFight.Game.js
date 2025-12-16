@@ -268,6 +268,10 @@ export class Game {
         // Store only the data needed for next round (avoid circular references)
         // RESULT is swapped: myRoundData.result affects opponent's restrictions (and vice versa)
         // BONUS is NOT swapped: each character's bonus comes from their own result
+        // Ensure round object exists (safety check)
+        if (!this.rounds[this.roundNumber]) {
+          this.rounds[this.roundNumber] = {};
+        }
         this.rounds[this.roundNumber].myRoundData = {
           nextRoundBonus: this.myRoundData.nextRoundBonus,
           result: this.opponentsRoundData.result
@@ -396,10 +400,20 @@ export class Game {
     try {
       // Request the opponent's move from the multiplayer service
       this.Multiplayer.getMove((data) => {
-        // Store the move in the rounds array
+        // Ensure we have a round object
         if (!this.rounds[this.roundNumber]) {
           this.rounds[this.roundNumber] = {};
         }
+
+        // Only process if we don't already have an opponent's move for this round
+        if (this.rounds[this.roundNumber]['opponentsMove']) {
+          if (window.logging) {
+            console.log('Opponent move already received for this round, ignoring duplicate');
+          }
+          return;
+        }
+
+        // Store the move in the rounds array
         this.rounds[this.roundNumber]['opponentsMove'] = data.move;
 
         // Store hint if provided by opponent
@@ -495,12 +509,12 @@ export class Game {
       }
     }
 
-    // Retrieved weapon - restore dropped weapons
-    if (roundData.result.retrieveWeapon && character.droppedWeapons && !character.weaponDestroyed) {
+    // Retrieved weapon - restore dropped weapons (if any remain)
+    if (roundData.result.retrieveWeapon && character.droppedWeapons && character.droppedWeapons.length > 0) {
       character.weapons = character.droppedWeapons;
       character.droppedWeapons = null;
-      // Legacy support
-      character.weapon = true;
+      // Legacy support - set to first weapon object/name
+      character.weapon = character.weapons.length > 0 ? character.weapons[0] : false;
     }
 
     // Destroyed weapon - permanently remove specific weapon
@@ -509,11 +523,15 @@ export class Game {
         ? roundData.myMove.requiresWeapon
         : (character.weapons && character.weapons[0]?.name);
       if (weaponName) {
+        // Remove from current weapons
         character.weapons = (character.weapons || []).filter(w => w.name !== weaponName);
+        // Also remove from dropped weapons if present (can't retrieve a destroyed weapon)
+        if (character.droppedWeapons) {
+          character.droppedWeapons = character.droppedWeapons.filter(w => w.name !== weaponName);
+        }
       }
-      character.weaponDestroyed = true;
-      // Legacy support
-      character.weapon = false;
+      // Set legacy support based on remaining weapons
+      character.weapon = character.weapons.length > 0 ? character.weapons[0] : false;
     }
 
     // Consume ammunition from the weapon used this round

@@ -1425,7 +1425,7 @@
       "id": "61",
       "name": "Extended range dodging",
       "mod": "0",
-      "range": "far",
+      "range": "close",
       "score": "",
       "restrict": []
     },
