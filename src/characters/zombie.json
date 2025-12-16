@@ -2,7 +2,7 @@
   "name": "Zombie",
   "slug": "zombie",
   "description": "An undead warrior with heavy mace",
-  "difficulty": 5.3,
+  "difficulty": 5.7,
   "health": "12",
   "firstMove": "62",
   "weapon": "Mace",
@@ -100,10 +100,10 @@
     },
     {
       "tag": "Hand to Hand",
-      "name": "Grab",
+      "name": "Grab and Shake",
       "range": "close",
       "type": "low",
-      "id": "40",
+      "id": "22",
       "mod": "3",
       "requiresWeapon": false
     },
@@ -112,7 +112,7 @@
       "name": "Punch",
       "range": "close",
       "type": "low",
-      "id": "44",
+      "id": "6",
       "mod": "2",
       "requiresWeapon": false
     },
@@ -121,7 +121,7 @@
       "name": "Head Butt",
       "range": "close",
       "type": "risky",
-      "id": "6",
+      "id": "44",
       "mod": "1",
       "requiresWeapon": false
     },
@@ -130,8 +130,8 @@
       "name": "Knee Slam",
       "range": "close",
       "type": "low",
-      "id": "46",
-      "mod": "3",
+      "id": "38",
+      "mod": "1",
       "requiresWeapon": false
     },
     {
@@ -140,7 +140,7 @@
       "range": "close",
       "type": "low",
       "id": "48",
-      "mod": "3",
+      "mod": "2",
       "requiresWeapon": false
     },
     {
@@ -241,6 +241,15 @@
       "id": "54",
       "mod": "-5",
       "requiresWeapon": true
+    },
+    {
+      "tag": "Extended Range",
+      "name": "Groan",
+      "range": "far",
+      "type": "extended",
+      "id": "60",
+      "mod": "0",
+      "requiresWeapon": false
     },
     {
       "tag": "Extended Range",
@@ -1174,7 +1183,7 @@
     },
     {
       "id": "11",
-      "name": "Shrieking",
+      "name": "Groaning",
       "mod": "0",
       "range": "close",
       "score": "",
@@ -1209,8 +1218,11 @@
       "range": "close",
       "score": "",
       "restrict": [
-        "Hand to Hand",
-        "risky"
+        "Down Swing",
+        "Side Swing",
+        "Thrust",
+        "Fake",
+        "Special"
       ]
     },
     {
@@ -1392,8 +1404,11 @@
       "range": "close",
       "score": "",
       "restrict": [
-        "Hand to Hand",
-        "risky"
+        "Down Swing",
+        "Side Swing",
+        "Thrust",
+        "Fake",
+        "Special"
       ]
     },
     {
@@ -1451,8 +1466,11 @@
       "range": "close",
       "score": "",
       "restrict": [
-        "Hand to Hand",
-        "risky"
+        "Down Swing",
+        "Side Swing",
+        "Thrust",
+        "Fake",
+        "Special"
       ]
     },
     {
