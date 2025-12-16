@@ -18,14 +18,15 @@ export class ComputerTransport extends MultiplayerTransport {
     this.nameCallbacks = [];
     this.selectedOpponentSlug = null;
     this.gameEnded = false;
+    this.pendingMoveTimeout = null;
 
     // Listen for victory/defeat events to stop preparing moves
     if (typeof document !== 'undefined') {
       document.addEventListener('victory', () => {
-        this.gameEnded = true;
+        this._stopPreparing();
       });
       document.addEventListener('defeat', () => {
-        this.gameEnded = true;
+        this._stopPreparing();
       });
     }
   }
@@ -116,7 +117,8 @@ export class ComputerTransport extends MultiplayerTransport {
     // Simulate computer "thinking" time
     const thinkingTime = 2000 + Math.floor(Math.random() * 3000); // 2-5 seconds
 
-    setTimeout(() => {
+    this.pendingMoveTimeout = setTimeout(() => {
+      this.pendingMoveTimeout = null;
       // Get the result from the previous round that determines opponent's available moves
       const previousRound = this.game.roundNumber > 0 ? this.game.rounds[this.game.roundNumber - 1] : null;
       const result = previousRound?.opponentsRoundData?.result || { range: this.game.opponentsCharacter.moves[0].range, restrict: [], allowOnly: null };
@@ -144,6 +146,11 @@ export class ComputerTransport extends MultiplayerTransport {
 
       if (bonusMoves.length > 0 && Math.random() < 0.333) {
         move = bonusMoves[Math.floor(Math.random() * bonusMoves.length)];
+      }
+
+      // Don't deliver move if game has ended
+      if (this.gameEnded) {
+        return;
       }
 
       // Call all registered move callbacks with the selected move
@@ -208,11 +215,23 @@ export class ComputerTransport extends MultiplayerTransport {
   }
 
   /**
+   * Stop preparing moves and cancel any pending timeouts
+   * @private
+   */
+  _stopPreparing() {
+    this.gameEnded = true;
+    if (this.pendingMoveTimeout) {
+      clearTimeout(this.pendingMoveTimeout);
+      this.pendingMoveTimeout = null;
+    }
+  }
+
+  /**
    * Disconnect from the computer opponent session
    */
   disconnect() {
     this.started = false;
-    this.gameEnded = true;
+    this._stopPreparing();
     this.moveCallbacks = [];
     this.nameCallbacks = [];
   }
