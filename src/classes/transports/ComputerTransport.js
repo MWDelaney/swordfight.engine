@@ -17,6 +17,17 @@ export class ComputerTransport extends MultiplayerTransport {
     this.moveCallbacks = [];
     this.nameCallbacks = [];
     this.selectedOpponentSlug = null;
+    this.gameEnded = false;
+
+    // Listen for victory/defeat events to stop preparing moves
+    if (typeof document !== 'undefined') {
+      document.addEventListener('victory', () => {
+        this.gameEnded = true;
+      });
+      document.addEventListener('defeat', () => {
+        this.gameEnded = true;
+      });
+    }
   }
 
   /**
@@ -145,9 +156,9 @@ export class ComputerTransport extends MultiplayerTransport {
         }
       });
 
-      // Prepare the next move for the next round
+      // Prepare the next move for the next round (unless game has ended)
       setTimeout(() => {
-        if (this.game.opponentsCharacter && this.game.opponentsCharacter.moves) {
+        if (!this.gameEnded && this.game.opponentsCharacter && this.game.opponentsCharacter.moves) {
           this._prepareMove();
         }
       }, 0);
@@ -201,6 +212,7 @@ export class ComputerTransport extends MultiplayerTransport {
    */
   disconnect() {
     this.started = false;
+    this.gameEnded = true;
     this.moveCallbacks = [];
     this.nameCallbacks = [];
   }
