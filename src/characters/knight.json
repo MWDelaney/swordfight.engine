@@ -1,12 +1,14 @@
 {
   "name": "Knight",
   "slug": "knight",
+  "icon": "🛡️",
   "description": "Human knight in shining plate armor",
   "difficulty": 5.0,
   "health": "12",
   "firstMove": "62",
   "weapon": "Sword",
   "shield": "Shield",
+  "color": "#C0C0C0",
   "moves": [
     {
       "tag": "Shoulder Slam",

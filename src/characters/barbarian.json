@@ -1,12 +1,14 @@
 {
   "name": "Barbarian",
   "slug": "barbarian",
-  "description": "Huge Barbarian with two-handed sword",
+  "icon": "🪓",
+  "description": "Huge Barbarian with a two-handed axe",
   "difficulty": 5.7,
   "health": "12",
   "firstMove": "62",
-  "weapon": "Two-handed Sword",
+  "weapon": "Two-handed Axe",
   "shield": null,
+  "color": "#B22222",
   "moves": [
     {
       "tag": "Down",

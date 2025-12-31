@@ -1,12 +1,14 @@
 {
   "name": "Zombie",
   "slug": "zombie",
+  "icon": "🧟",
   "description": "An undead warrior with heavy mace",
   "difficulty": 5.7,
   "health": "12",
   "firstMove": "62",
   "weapon": "Mace",
   "shield": false,
+  "color": "#556B2F",
   "moves": [
     {
       "tag": "Down Swing",

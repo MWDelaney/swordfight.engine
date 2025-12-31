@@ -1,12 +1,14 @@
 {
   "name": "Goblin",
   "slug": "goblin",
+  "icon": "🧌",
   "description": "Goblin with mace and shield",
   "difficulty": 3.7,
   "health": "13",
   "firstMove": "62",
   "weapon": "Mace",
   "shield": "Wooden Shield",
+  "color": "#228B22",
   "moves": [
     {
       "tag": "Down Swing",

@@ -1,12 +1,14 @@
 {
   "name": "Lizard Man",
   "slug": "lizard-man",
+  "icon": "🦎",
   "description": "Lizard-man with scimitar and buckler",
   "difficulty": 4.3,
   "health": "16",
   "firstMove": "62",
   "weapon": "Scimitar",
   "shield": "Buckler",
+  "color": "#32CD32",
   "moves": [
     {
       "tag": "Jump",

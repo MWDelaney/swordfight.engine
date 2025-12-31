@@ -1,12 +1,14 @@
 {
   "name": "Monk",
   "slug": "monk",
+  "icon": "🥋",
   "description": "Human monk with quarterstaff",
   "difficulty": 6.4,
   "health": "10",
   "firstMove": "62",
   "weapon": "Quarterstaff",
   "shield": false,
+  "color": "#FFD700",
   "moves": [
     {
       "tag": "Jump",

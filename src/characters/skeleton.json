@@ -1,12 +1,14 @@
 {
   "name": "Skeleton",
   "slug": "skeleton",
+  "icon": "💀",
   "description": "Animated skeleton with sword and shield",
   "difficulty": 4.6,
   "health": "7",
   "firstMove": "62",
   "weapon": "Sword",
   "shield": "Shield",
+  "color": "#F5F5F5",
   "moves": [
     {
       "tag": "Down Swing",
