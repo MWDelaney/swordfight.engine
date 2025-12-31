@@ -85,10 +85,8 @@ export class BonusCalculator {
    * // Returns: 0
    */
   static getNextRoundBonus(result) {
-    if (!result || typeof result !== 'object') {
-      return 0;
-    }
-    return result.bonus || 0;
+    if (!result || !result.bonus) return [];
+    return Array.isArray(result.bonus) ? result.bonus : [result.bonus];
   }
 
   /**
