@@ -311,6 +311,39 @@ class CharacterValidator {
 
       // Validate score (can be empty string, but if present should be numeric or empty)
       if (result.score !== undefined && result.score !== '' && isNaN(parseInt(result.score))) {
+
+        // --- NEW: Check for incompatible range combos ---
+        // Get my move and opponent move
+        const myMove = this.character.moves.find(m => m.id === table.id);
+        const opponentMove = this.character.moves.find(m => m.id === opponentMoveId);
+        const result = this.character.results.find(r => r.id === resultId);
+
+        if (myMove && opponentMove && result) {
+          // If the result has a range, check if it is compatible with the move ranges
+          // For example, if both moves are 'close' but the result is 'far', this may be an error
+          // (or vice versa, depending on game logic)
+          // We'll flag if the result range is not equal to either move's range
+          if (
+            result.range &&
+            myMove.range &&
+            opponentMove.range &&
+            result.range !== myMove.range &&
+            result.range !== opponentMove.range
+          ) {
+            this.error(
+              `Incompatible range in table ${table.id}: my move (${myMove.id}, ${myMove.range}), opponent move (${opponentMove.id}, ${opponentMove.range}), result (${result.id}, ${result.range})`,
+              {
+                tableId: table.id,
+                myMoveId: myMove.id,
+                myMoveRange: myMove.range,
+                opponentMoveId: opponentMove.id,
+                opponentMoveRange: opponentMove.range,
+                resultId: result.id,
+                resultRange: result.range
+              }
+            );
+          }
+        }
         this.error(`Result ${result.id} has invalid score: ${result.score}`, {
           resultId: result.id,
           score: result.score
@@ -619,4 +652,119 @@ function main() {
 }
 
 // Run the validator
-main();
+
+// Cross-character simulation: check every move combination between all characters
+function crossCharacterValidation(characters) {
+  let crossErrors = [];
+  const charList = Object.values(characters);
+  for (let i = 0; i < charList.length; i++) {
+    const charA = charList[i];
+    for (let j = 0; j < charList.length; j++) {
+      const charB = charList[j];
+      // For every move in charA
+      charA.moves.forEach(moveA => {
+        // Find the table for this move
+        const tableA = (charA.tables || []).find(t => t.id === moveA.id);
+        if (!tableA || !tableA.outcomes || !tableA.outcomes[0]) {
+          crossErrors.push({
+            message: `Character ${charA.slug} missing table for move ${moveA.id}`,
+            charA: charA.slug,
+            moveA: moveA.id
+          });
+          return;
+        }
+        // For every move in charB, only check if ranges match
+        charB.moves.forEach(moveB => {
+          if (!moveA.range || !moveB.range || moveA.range !== moveB.range) {
+            return; // Skip mismatched ranges
+          }
+          const outcome = tableA.outcomes[0][moveB.id];
+          if (outcome === undefined) {
+            crossErrors.push({
+              message: `No outcome for ${charA.slug} move ${moveA.id} vs ${charB.slug} move ${moveB.id}`,
+              charA: charA.slug,
+              moveA: moveA.id,
+              charB: charB.slug,
+              moveB: moveB.id
+            });
+          } else if (outcome === '00') {
+            // '00' is a valid marker for impossible matchups; do not flag as error
+            return;
+          } else {
+            // Check that the result exists in charA's results
+            if (!charA.results.find(r => r.id === outcome)) {
+              crossErrors.push({
+                message: `Outcome ${outcome} for ${charA.slug} move ${moveA.id} vs ${charB.slug} move ${moveB.id} does not exist in results`,
+                charA: charA.slug,
+                moveA: moveA.id,
+                charB: charB.slug,
+                moveB: moveB.id,
+                outcome
+              });
+            }
+          }
+        });
+      });
+    }
+  }
+  return crossErrors;
+}
+
+function printCrossErrors(errors) {
+  if (errors.length === 0) {
+    console.log('\n✅ No cross-character move table errors found!');
+    return;
+  }
+  console.log(`\n❌ CROSS-CHARACTER ERRORS (${errors.length}):`);
+  errors.forEach((err, i) => {
+    console.log(`\n${i + 1}. ${err.message}`);
+    if (Object.keys(err).length > 1) {
+      const context = { ...err };
+      delete context.message;
+      console.log('   Context:', context);
+    }
+  });
+}
+
+function mainWithCrossValidation() {
+  console.log('🔍 Character Validation Tool');
+  console.log('═'.repeat(80));
+
+  const characters = loadAllCharacters();
+  const reports = [];
+
+  if (flags.character) {
+    // Validate single character
+    const char = characters[flags.character];
+    if (!char) {
+      console.error(`❌ Character "${flags.character}" not found`);
+      console.log('Available characters:', Object.keys(characters).join(', '));
+      process.exit(1);
+    }
+
+    const validator = new CharacterValidator(char);
+    const report = validator.validate();
+    printValidationReport(report);
+
+    process.exit(report.valid ? 0 : 1);
+  } else {
+    // Validate all characters
+    Object.values(characters).forEach(char => {
+      const validator = new CharacterValidator(char);
+      const report = validator.validate();
+      reports.push(report);
+      printValidationReport(report);
+    });
+
+    generateSummary(reports);
+
+    // --- Cross-character simulation ---
+    const crossErrors = crossCharacterValidation(characters);
+    printCrossErrors(crossErrors);
+
+    const allValid = reports.every(r => r.valid) && crossErrors.length === 0;
+    process.exit(allValid ? 0 : 1);
+  }
+}
+
+mainWithCrossValidation();
