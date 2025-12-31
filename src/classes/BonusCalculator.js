@@ -74,7 +74,8 @@ export class BonusCalculator {
    * @param {array} [result.bonus] - Optional bonus array to apply next round
    * @returns {array|number} The bonus array for next round, or 0 if none
    *
-   * @example
+                  bonus += bonusValue;
+                }
    * const result = { bonus: [{ strong: 2 }] };
    * const nextBonus = BonusCalculator.getNextRoundBonus(result);
    * // Returns: [{ strong: 2 }]
@@ -85,7 +86,9 @@ export class BonusCalculator {
    * // Returns: 0
    */
   static getNextRoundBonus(result) {
-    if (!result || !result.bonus) return [];
+    if (!result || !result.bonus) {
+      return [];
+    }
     return Array.isArray(result.bonus) ? result.bonus : [result.bonus];
   }
 
