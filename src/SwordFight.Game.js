@@ -531,6 +531,8 @@ export class Game {
         if (character.droppedWeapons) {
           character.droppedWeapons = character.droppedWeapons.filter(w => w.name !== weaponName);
         }
+        // Mark that a weapon has been permanently destroyed (prevents retrieval later)
+        character.weaponDestroyed = true;
       }
       // Set legacy support based on remaining weapons
       character.weapon = character.weapons.length > 0 ? character.weapons[0] : false;

@@ -144,7 +144,8 @@ export class ComputerTransport extends MultiplayerTransport {
     }
 
     // Simulate computer "thinking" time (1-4 seconds)
-    const thinkingTime = 3000 + Math.floor(Math.random() * 6000);
+    // Skip thinking delay for round 0 (automatic round)
+    const thinkingTime = currentRound === 0 ? 0 : 3000 + Math.floor(Math.random() * 6000);
 
     this.pendingMoveTimeout = setTimeout(() => {
       this.pendingMoveTimeout = null;
@@ -158,8 +159,8 @@ export class ComputerTransport extends MultiplayerTransport {
       // Get a random move from the opponent's moves
       let move = moves.filteredMoves[Math.floor(Math.random() * moves.filteredMoves.length)];
 
-      // If the character does not have their weapon, the opponent has a 1 in 3 chance of retrieving their weapon
-      if (!this.game.opponentsCharacter.weapon && Math.random() > 0.75) {
+      // If the character has dropped weapons to retrieve, the opponent has a 1 in 3 chance of retrieving their weapon
+      if (this.game.opponentsCharacter.droppedWeapons && this.game.opponentsCharacter.droppedWeapons.length > 0 && Math.random() < 0.333) {
         const retrieveMove = moves.filteredMoves.find(mv => mv.name === 'Retrieve Weapon');
         if (retrieveMove) {
           move = retrieveMove;

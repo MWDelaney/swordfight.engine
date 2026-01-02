@@ -66,10 +66,12 @@ export class Moves {
       }
 
       // If this is the retrieve weapon move, hide it if:
-      // 1) Character has weapons available, or
-      // 2) Weapon has been permanently destroyed
+      // 1) Character has weapons available (not dropped)
+      // 2) Character has no dropped weapons to retrieve
+      // 3) Weapon has been permanently destroyed
       const hasWeapons = this.character.weapons && this.character.weapons.length > 0;
-      if(move.name === 'Retrieve Weapon' && (hasWeapons || this.character.weaponDestroyed)) {
+      const hasDroppedWeapons = this.character.droppedWeapons && this.character.droppedWeapons.length > 0;
+      if(move.name === 'Retrieve Weapon' && (hasWeapons || !hasDroppedWeapons || this.character.weaponDestroyed)) {
         return false;
       }
 
