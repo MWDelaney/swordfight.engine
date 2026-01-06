@@ -1148,7 +1148,10 @@
       "restrict": [],
       "bonus": [
         {
-          "strong": "2"
+          "high": "2",
+          "low": "2",
+          "strong": "2",
+          "risky": "2"
         }
       ]
     },
@@ -1284,11 +1287,7 @@
       "mod": "0",
       "range": "close",
       "score": "",
-      "restrict": [
-        "Kick",
-        "risky",
-        "low"
-      ],
+      "restrict": [],
       "weaponDislodged": true
     },
     {
@@ -1299,11 +1298,6 @@
       "score": "",
       "restrict": [
         "strong"
-      ],
-      "bonus": [
-        {
-          "low": "2"
-        }
       ]
     },
     {
@@ -1471,7 +1465,10 @@
       "restrict": [],
       "bonus": [
         {
-          "extended": "2"
+          "Charge": "2",
+          "Swing High": "2",
+          "Swing Low": "2",
+          "Side Swing": "2"
         }
       ]
     },
@@ -1481,14 +1478,6 @@
       "mod": "0",
       "range": "close",
       "score": "",
-      "restrict": [
-        "Thrust"
-      ],
-      "bonus": [
-        {
-          "strong": "-2"
-        }
-      ],
       "weaponDestroyed": true
     }
   ]

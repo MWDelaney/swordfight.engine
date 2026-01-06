@@ -648,12 +648,12 @@ export class Game {
   takeSelfDamage(character, roundData, opponentRoundData) {
     // If we just loaded this game, don't take damage this round (we're just resetting the game)
     if (!this.loaded) {
-      // Self-damage occurs when you use a risky move AND the opponent's result has a score
-      // It's a penalty for getting hit while using a dangerous move
-      if (roundData.result.selfDamage && opponentRoundData.score !== '' && opponentRoundData.totalScore > 0) {
+      // Self-damage occurs when your result has the selfDamage property
+      // This is typically for risky moves like head butting that hurt you regardless of outcome
+      if (roundData.result.selfDamage) {
         character.health -= roundData.result.selfDamage;
         if (window.logging) {
-          console.log(`Applied ${roundData.result.selfDamage} self-damage to ${character.name} (opponent scored). New health: ${character.health}`);
+          console.log(`Applied ${roundData.result.selfDamage} self-damage to ${character.name}. New health: ${character.health}`);
         }
       }
     }

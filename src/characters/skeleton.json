@@ -360,7 +360,7 @@
           "10": "3",
           "12": "3",
           "14": "49",
-          "16": "57",
+          "16": "19",
           "18": "37",
           "20": "29",
           "22": "11",
@@ -670,7 +670,7 @@
           "10": "3",
           "12": "59",
           "14": "11",
-          "16": "15",
+          "16": "57",
           "18": "59",
           "20": "29",
           "22": "11",
@@ -1176,7 +1176,6 @@
       "range": "close",
       "score": "",
       "restrict": [
-        "Thrust",
         "high"
       ]
     },
@@ -1187,7 +1186,6 @@
       "range": "close",
       "score": "",
       "restrict": [
-        "Thrust",
         "low"
       ]
     },
@@ -1200,8 +1198,7 @@
       "restrict": [
         "strong",
         "high",
-        "low",
-        "risky"
+        "low"
       ]
     },
     {
@@ -1209,10 +1206,7 @@
       "name": "Thrusting high",
       "mod": "0",
       "range": "close",
-      "score": "",
-      "restrict": [
-        "Side Swing"
-      ]
+      "score": ""
     },
     {
       "id": "11",
@@ -1221,7 +1215,6 @@
       "range": "close",
       "score": "",
       "restrict": [
-        "Side Swing",
         "high"
       ]
     },
@@ -1232,8 +1225,7 @@
       "range": "close",
       "score": "4",
       "restrict": [
-        "strong",
-        "high"
+        "strong"
       ]
     },
     {
@@ -1275,7 +1267,7 @@
       "range": "close",
       "score": "0",
       "restrict": [
-        "low"
+        "risky"
       ]
     },
     {
@@ -1315,11 +1307,6 @@
       "restrict": [
         "strong"
       ],
-      "bonus": [
-        {
-          "low": "1"
-        }
-      ],
       "heal": "2"
     },
     {
@@ -1329,8 +1316,7 @@
       "range": "close",
       "score": "3",
       "restrict": [
-        "strong",
-        "high"
+        "strong"
       ]
     },
     {
@@ -1377,7 +1363,6 @@
       "range": "close",
       "score": "",
       "restrict": [
-        "defense",
         "risky"
       ]
     },
@@ -1387,9 +1372,10 @@
       "mod": "0",
       "range": "close",
       "score": "0",
-      "restrict": [],
-      "allowOnly": [
-        "Jump"
+      "restrict": [
+        "high",
+        "low",
+        "strong"
       ]
     },
     {
@@ -1447,8 +1433,7 @@
       "score": "5",
       "restrict": [
         "strong",
-        "high",
-        "low"
+        "high"
       ]
     },
     {
@@ -1497,14 +1482,6 @@
       "restrict": [
         "strong"
       ]
-    },
-    {
-      "id": "67",
-      "name": "Extended range jump back",
-      "mod": "0",
-      "range": "far",
-      "score": "",
-      "restrict": []
     }
   ]
 }

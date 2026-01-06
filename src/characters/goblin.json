@@ -1148,10 +1148,10 @@
       "restrict": [],
       "bonus": [
         {
-          "strong": "2",
-          "high": "2",
-          "low": "2",
-          "risky": "2"
+          "strong": "1",
+          "high": "1",
+          "low": "1",
+          "risky": "1"
         }
       ]
     },
@@ -1298,9 +1298,7 @@
     {
       "id": "29",
       "name": "Ducking",
-      "mod": {
-        "low": "+1"
-      },
+      "mod": "0",
       "range": "close",
       "score": "",
       "restrict": [
@@ -1308,7 +1306,7 @@
       ],
       "bonus": [
         {
-          "low": "2"
+          "low": "1"
         }
       ]
     },
@@ -1326,10 +1324,7 @@
     {
       "id": "33",
       "name": "Dodging",
-      "mod": {
-        "Down Swing": "+2",
-        "Side Swing": "+2"
-      },
+      "mod": "",
       "range": "close",
       "score": "",
       "restrict": [],
@@ -1353,9 +1348,7 @@
     {
       "id": "37",
       "name": "Jumping up",
-      "mod": {
-        "strong": "+3"
-      },
+      "mod": "0",
       "range": "close",
       "score": "",
       "restrict": [
@@ -1363,7 +1356,7 @@
       ],
       "bonus": [
         {
-          "strong": "2"
+          "strong": "3"
         }
       ]
     },
@@ -1462,7 +1455,7 @@
     },
     {
       "id": "57",
-      "name": "Extended range blocking",
+      "name": "Extended range blocking and attacking",
       "mod": "0",
       "range": "far",
       "score": "",

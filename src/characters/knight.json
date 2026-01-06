@@ -303,7 +303,7 @@
           "2": "49",
           "4": "17",
           "6": "13",
-          "8": "23",
+          "8": "13",
           "10": "13",
           "12": "13",
           "14": "49",
@@ -321,7 +321,7 @@
           "38": "13",
           "40": "49",
           "42": "49",
-          "44": "13",
+          "44": "15",
           "46": "27",
           "48": "13"
         }
@@ -379,9 +379,9 @@
           "30": "5",
           "32": "45",
           "34": "00",
-          "36": "19",
+          "36": "53",
           "38": "19",
-          "40": "19",
+          "40": "31",
           "42": "19",
           "44": "45",
           "46": "19",
@@ -468,7 +468,7 @@
           "22": "11",
           "24": "45",
           "26": "17",
-          "28": "45",
+          "28": "31",
           "30": "3",
           "32": "45",
           "34": "00",
@@ -621,7 +621,7 @@
           "18": "37",
           "20": "53",
           "22": "19",
-          "24": "13",
+          "24": "15",
           "26": "17",
           "28": "3",
           "30": "5",
@@ -755,8 +755,8 @@
           "38": "27",
           "40": "5",
           "42": "27",
-          "44": "27",
-          "46": "3",
+          "44": "15",
+          "46": "27",
           "48": "3"
         }
       ]
@@ -817,7 +817,7 @@
           "38": "3",
           "40": "41",
           "42": "5",
-          "44": "1",
+          "44": "15",
           "46": "27",
           "48": "19"
         }
@@ -847,8 +847,8 @@
           "36": "25",
           "38": "3",
           "40": "63",
-          "42": "55",
-          "44": "1",
+          "42": "5",
+          "44": "55",
           "46": "7",
           "48": "55"
         }
@@ -860,7 +860,7 @@
         {
           "2": "31",
           "4": "53",
-          "6": "17",
+          "6": "19",
           "8": "19",
           "10": "45",
           "12": "45",
@@ -871,7 +871,7 @@
           "22": "9",
           "24": "45",
           "26": "17",
-          "28": "3",
+          "28": "5",
           "30": "5",
           "32": "45",
           "34": "00",
@@ -942,7 +942,7 @@
           "40": "49",
           "42": "49",
           "44": "15",
-          "46": "49",
+          "46": "27",
           "48": "49"
         }
       ]
@@ -962,7 +962,7 @@
           "18": "7",
           "20": "53",
           "22": "19",
-          "24": "45",
+          "24": "15",
           "26": "17",
           "28": "31",
           "30": "19",
@@ -973,7 +973,7 @@
           "40": "31",
           "42": "5",
           "44": "45",
-          "46": "45",
+          "46": "27",
           "48": "45"
         }
       ]
@@ -1206,7 +1206,10 @@
       "range": "close",
       "score": "4",
       "restrict": [
-        "defense"
+        "high",
+        "low",
+        "strong",
+        "risky"
       ]
     },
     {
@@ -1254,13 +1257,13 @@
     },
     {
       "id": "17",
-      "name": "Kicked off balance",
+      "name": "Blocking",
       "mod": "0",
       "range": "close",
-      "score": "0",
+      "score": "-5",
       "restrict": [
-        "defense",
-        "risky"
+        "high",
+        "strong"
       ]
     },
     {
@@ -1268,10 +1271,11 @@
       "name": "Struck off balance",
       "mod": "0",
       "range": "close",
-      "score": "0",
+      "score": "-1",
       "restrict": [
-        "defense",
-        "risky"
+        "high",
+        "low",
+        "strong"
       ]
     },
     {
@@ -1279,7 +1283,7 @@
       "name": "Turned around",
       "mod": "0",
       "range": "close",
-      "score": "0",
+      "score": "-1",
       "restrict": [
         "strong",
         "high",
@@ -1297,7 +1301,7 @@
     },
     {
       "id": "25",
-      "name": "Kicking",
+      "name": "Slamming",
       "mod": "0",
       "range": "close",
       "score": "",
@@ -1311,7 +1315,7 @@
       "name": "Weapon Dislodged",
       "mod": "0",
       "range": "close",
-      "score": "",
+      "score": "-5",
       "restrict": [],
       "weaponDislodged": true
     },
@@ -1321,6 +1325,7 @@
       "range": "close",
       "score": "",
       "restrict": [
+        "high",
         "strong"
       ],
       "bonus": [
@@ -1334,10 +1339,11 @@
       "name": "Arm wound",
       "mod": "0",
       "range": "close",
-      "score": "4",
+      "score": "0",
       "restrict": [
-        "strong",
-        "high"
+        "high",
+        "low",
+        "strong"
       ]
     },
     {
@@ -1348,7 +1354,8 @@
       "restrict": [],
       "bonus": [
         {
-          "Down Swing": "1"
+          "Down Swing": "2",
+          "Side Swing": "2"
         }
       ]
     },
@@ -1357,7 +1364,7 @@
       "name": "Extended range body wound",
       "mod": "0",
       "range": "far",
-      "score": "6",
+      "score": "2",
       "restrict": [
         "extended"
       ]
@@ -1387,7 +1394,7 @@
       "name": "Knocked down",
       "mod": "0",
       "range": "close",
-      "score": "1",
+      "score": "0",
       "restrict": [],
       "allowOnly": [
         "Jump"
@@ -1430,12 +1437,13 @@
     },
     {
       "id": "51",
-      "name": "Extended range swinging",
+      "name": "Knocked to knees",
       "mod": "0",
-      "range": "far",
+      "range": "close",
       "score": "",
       "restrict": [
-        "extended"
+        "high",
+        "strong"
       ]
     },
     {
@@ -1443,7 +1451,7 @@
       "name": "Body wound",
       "mod": "0",
       "range": "close",
-      "score": "6",
+      "score": "2",
       "restrict": [
         "defense",
         "risky"
@@ -1451,17 +1459,15 @@
     },
     {
       "id": "55",
-      "name": "Extended range thrusting",
+      "name": "Shield smashed",
       "mod": "0",
-      "range": "far",
-      "score": "",
-      "restrict": [
-        "extended"
-      ]
+      "range": "close",
+      "score": "0",
+      "shieldDestroyed": true
     },
     {
       "id": "57",
-      "name": "Extended range blocking",
+      "name": "Extended range blocking and attacking",
       "mod": "0",
       "range": "far",
       "score": "",
@@ -1469,12 +1475,14 @@
     },
     {
       "id": "59",
-      "name": "Extended range arm wound",
+      "name": "Pushed off balance",
       "mod": "0",
-      "range": "far",
-      "score": "4",
+      "range": "close",
+      "score": "-1",
       "restrict": [
-        "extended"
+        "high",
+        "low",
+        "strong"
       ]
     },
     {
@@ -1487,11 +1495,13 @@
     },
     {
       "id": "63",
-      "name": "Block & strike",
+      "name": "Partially Dazed",
       "mod": "0",
-      "range": "far",
-      "score": "",
+      "range": "close",
+      "score": "2",
       "restrict": [
+        "high",
+        "low",
         "strong"
       ]
     }

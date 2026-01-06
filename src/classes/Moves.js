@@ -81,17 +81,17 @@ export class Moves {
       }
 
       // If the move's type is in the result's restrict array, filter it out
-      if(this.result.restrict.includes(move.type)) {
+      if(this.result.restrict && this.result.restrict.includes(move.type)) {
         return false;
       }
 
       // If the move's tag is in the result's restrict array, filter it out
-      if(this.result.restrict.includes(move.tag)) {
+      if(this.result.restrict && this.result.restrict.includes(move.tag)) {
         return false;
       }
 
       // If the move's name is in the result's restrict array, filter it out
-      if(this.result.restrict.includes(move.name)) {
+      if(this.result.restrict && this.result.restrict.includes(move.name)) {
         return false;
       }
 

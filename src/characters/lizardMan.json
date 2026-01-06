@@ -1167,7 +1167,10 @@
       "restrict": [],
       "bonus": [
         {
-          "strong": "2"
+          "high": "2",
+          "low": "2",
+          "strong": "2",
+          "risky": "2"
         }
       ]
     },
@@ -1179,7 +1182,7 @@
       "score": "",
       "restrict": [
         "Thrust",
-        "strong"
+        "high"
       ]
     },
     {
@@ -1200,7 +1203,10 @@
       "range": "close",
       "score": "6",
       "restrict": [
-        "strong"
+        "high",
+        "low",
+        "strong",
+        "risky"
       ]
     },
     {
@@ -1210,8 +1216,7 @@
       "range": "close",
       "score": "",
       "restrict": [
-        "Side Swing",
-        "strong"
+        "Side Swing"
       ]
     },
     {
@@ -1232,9 +1237,9 @@
       "range": "close",
       "score": "3",
       "restrict": [
-        "strong",
-        "Tail Whip",
-        "risky"
+        "high",
+        "low",
+        "strong"
       ]
     },
     {
@@ -1265,9 +1270,9 @@
       "range": "close",
       "score": "0",
       "restrict": [
-        "strong",
-        "Tail Whip",
-        "risky"
+        "high",
+        "low",
+        "strong"
       ]
     },
     {
@@ -1277,8 +1282,10 @@
       "range": "close",
       "score": "0",
       "restrict": [
-        "risky",
-        "Tail Whip"
+        "high",
+        "low",
+        "strong",
+        "defense"
       ]
     },
     {
@@ -1307,11 +1314,7 @@
       "mod": "0",
       "range": "close",
       "score": "-6",
-      "restrict": [
-        "Kick",
-        "risky",
-        "low"
-      ],
+      "restrict": [],
       "weaponDislodged": true
     },
     {
@@ -1336,8 +1339,9 @@
       "range": "close",
       "score": "2",
       "restrict": [
-        "strong",
-        "risky"
+        "high",
+        "low",
+        "strong"
       ]
     },
     {
@@ -1445,8 +1449,9 @@
       "range": "close",
       "score": "0",
       "restrict": [
-        "strong",
-        "risky"
+        "high",
+        "low",
+        "strong"
       ]
     },
     {
@@ -1456,8 +1461,9 @@
       "range": "close",
       "score": "4",
       "restrict": [
-        "strong",
-        "risky"
+        "high",
+        "low",
+        "strong"
       ]
     },
     {
@@ -1484,8 +1490,9 @@
       "range": "close",
       "score": "0",
       "restrict": [
-        "strong",
-        "risky"
+        "high",
+        "low",
+        "strong"
       ]
     },
     {
@@ -1494,10 +1501,7 @@
       "mod": "0",
       "range": "far",
       "score": "",
-      "restrict": [],
-      "allowOnly": [
-        "Extended Range"
-      ]
+      "restrict": []
     },
     {
       "id": "63",
