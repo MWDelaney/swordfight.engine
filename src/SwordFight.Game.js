@@ -645,7 +645,7 @@ export class Game {
   /**
    * takeSelfDamage
    */
-  takeSelfDamage(character, roundData, opponentRoundData) {
+  takeSelfDamage(character, roundData, _opponentRoundData) {
     // If we just loaded this game, don't take damage this round (we're just resetting the game)
     if (!this.loaded) {
       // Self-damage occurs when your result has the selfDamage property
