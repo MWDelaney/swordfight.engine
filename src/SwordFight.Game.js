@@ -513,7 +513,7 @@ export class Game {
 
     // Retrieved weapon - restore dropped weapons (if any remain)
     if (roundData.result.retrieveWeapon && character.droppedWeapons && character.droppedWeapons.length > 0) {
-      character.weapons = character.droppedWeapons;
+      character.weapons = [...character.droppedWeapons];
       character.droppedWeapons = null;
       // Legacy support - set to first weapon object/name
       character.weapon = character.weapons.length > 0 ? character.weapons[0] : false;
