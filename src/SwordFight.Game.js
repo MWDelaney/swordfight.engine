@@ -232,9 +232,9 @@ export class Game {
         this.applyStamina(this.myCharacter, this.myRoundData, this.opponentsRoundData);
         this.applyStamina(this.opponentsCharacter, this.opponentsRoundData, this.myRoundData);
 
-        // Take self-damage (occurs when you use a risky move AND opponent scores)
-        this.takeSelfDamage(this.myCharacter, this.myRoundData, this.opponentsRoundData);
-        this.takeSelfDamage(this.opponentsCharacter, this.opponentsRoundData, this.myRoundData);
+        // Take self-damage (follows book swap pattern: opponent's result affects you)
+        this.takeSelfDamage(this.myCharacter, this.opponentsRoundData, this.myRoundData);
+        this.takeSelfDamage(this.opponentsCharacter, this.myRoundData, this.opponentsRoundData);
 
         // Heal health (if applicable and not scored on)
         // Healing follows the swapped pattern: opponent's result heals you
@@ -644,12 +644,14 @@ export class Game {
 
   /**
    * takeSelfDamage
+   * Applies self-damage from a result to the character.
+   * Follows the book swap pattern: roundData describes what happens to this character.
    */
   takeSelfDamage(character, roundData, _opponentRoundData) {
     // If we just loaded this game, don't take damage this round (we're just resetting the game)
     if (!this.loaded) {
-      // Self-damage occurs when your result has the selfDamage property
-      // This is typically for risky moves like head butting that hurt you regardless of outcome
+      // Self-damage occurs when the result (from opponent's character file) has the selfDamage property
+      // This is typically for risky moves like head butting that hurt the defender regardless of outcome
       if (roundData.result.selfDamage) {
         character.health -= roundData.result.selfDamage;
         if (window.logging) {
